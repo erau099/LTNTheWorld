@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+.main_page{
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: #f9f6f1;
+  min-height: 100vh;
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  background: #f0ece6;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.nav.scrolled {
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+
+.header_title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a3a1f;
+  letter-spacing: 0.01em;
+}
+
+.header_links{
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
