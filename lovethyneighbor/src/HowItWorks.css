@@ -1,0 +1,108 @@
+.how_banner_bg {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Make banner a positioning container */
+.how_banner {
+  position: relative;
+}
+
+/* Center content perfectly */
+.how_banner_center {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* Optional: improve readability */
+.how_banner_center .banner_title {
+    font-size: 4rem;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* ROW instead of band */
+.how_steps_row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.how_top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.how_row_column {
+  min-height: 340px;
+  padding: 54px 60px 40px 60px;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.how_heading_line {
+  width: 95px;
+  height: 4px;
+  background: #2d7a3a;
+  margin: 12px 0 26px;
+}
+
+.how_step_text {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+  letter-spacing: normal;
+  word-spacing: normal;
+}
+
+
+.how_col_light {
+  background: #e4e2e2;
+  color: #111;
+}
+
+.how_col_green {
+  background: #005613;
+  color: white;
+}
+
+.how_col_dark {
+  background: #252525;
+  color: white;
+}
+
+.how_step_label {
+  font-size: 1.4rem;
+  margin-bottom: 14px;
+}
+
+.how_step_heading {
+  font-size: 2rem;
+  margin: 0;
+}
+
+
+.how_col_green .how_heading_line,
+.how_col_dark .how_heading_line {
+  background: white;
+}
+
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .how_steps_row {
+    grid-template-columns: 1fr;
+  }
+}

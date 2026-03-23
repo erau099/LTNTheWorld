@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import "./LightenTheWorld.css";
+import HowItWorks from "./HowItWorks";
+
 
 const NAV_LINKS = ["How It Works", "About Us"];
 
@@ -43,12 +45,19 @@ function App() {
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(false);
 
+  {/* To switch from Home Page to other Pages */}
+  const [currentPage, setCurrentPage] = useState("home");
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
     setTimeout(() => setVisible(true), 100);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  if (currentPage === "how") {
+    return <HowItWorks onGoHome={() => setCurrentPage("home")} />;
+  }
 
 
   return (
@@ -59,9 +68,23 @@ function App() {
         <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <span className='header_title'>Lighten The World</span>
         <div className='header_links'>
+
+          {/* To Navigate to the How It Works Page */}
           {NAV_LINKS.map((l) => (
-            <button key={l} className='headerbtn'>{l}</button>
+            <button
+              key={l}
+              className='headerbtn'
+              onClick={() => {
+                if (l === "How It Works") {
+                  setCurrentPage("how");
+                }
+              }}
+            >
+              {l}
+            </button>
           ))}
+
+          
           <button className='loginbtn'>Login</button>
           <button className='signupbtn'>Sign Up</button>
         </div>
