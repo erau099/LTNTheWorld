@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import "./LightenTheWorld.css";
 import HowItWorks from "./HowItWorks";
-
+import Login from "./Login.jsx";
 
 const NAV_LINKS = ["How It Works", "About Us"];
 
@@ -59,6 +59,14 @@ function App() {
     return <HowItWorks onGoHome={() => setCurrentPage("home")} />;
   }
 
+  if(currentPage === "login") {
+    return <Login onGoHome={() => setCurrentPage("home")} />;
+  }
+
+  if(currentPage === "signup") {
+    return <Signup onGoHome={() => setCurrentPage("home")} />;
+  }
+
 
   return (
     <>
@@ -85,8 +93,8 @@ function App() {
           ))}
 
           
-          <button className='loginbtn'>Login</button>
-          <button className='signupbtn'>Sign Up</button>
+          <button className='loginbtn' onClick={() => setCurrentPage("login")}>Login</button>
+          <button className='signupbtn' onClick={() => setCurrentPage("signup")}>Sign Up</button>
         </div>
         </nav>
 
