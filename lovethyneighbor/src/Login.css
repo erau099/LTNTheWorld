@@ -128,10 +128,3 @@
 .cancel_btn:active {
     transform: translateY(1px);
 }
-
-/* Responsive */
-@media (max-width: 768px) {
-    .cancel_btn {
-        font-size: 16px;
-    }
-}
