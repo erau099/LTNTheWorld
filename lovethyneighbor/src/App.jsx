@@ -3,6 +3,7 @@ import './App.css'
 import "./LightenTheWorld.css";
 import HowItWorks from "./HowItWorks";
 import Login from "./Login.jsx";
+import Signup from "./Signup.jsx";
 
 const NAV_LINKS = ["How It Works", "About Us"];
 

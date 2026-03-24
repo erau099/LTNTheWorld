@@ -9,7 +9,7 @@ function Login({}) {
                 <span className="header_title">Lighten The World</span>
 
                 <div className="header_links">
-                    <button className='signupbtn' onClick={() => setCurrentPage("signup")}>Sign Up</button>
+                    <button className="signupbtn" onClick={() => setCurrentPage("signup")}>Sign Up</button>
                 </div>
             </nav>
 
