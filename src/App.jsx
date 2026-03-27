@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import "./LightenTheWorld.css";
+import "./index.css";
 import HowItWorks from "./HowItWorks";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
