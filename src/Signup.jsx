@@ -122,16 +122,7 @@ function Signup({ setCurrentPage }) {
                                 required in order to continue using the signup process.
                             </p>
 
-                            <p>
-                                This additional text is here to make sure the waiver box
-                                is long enough to require scrolling before the Accept
-                                button can be used.
-                            </p>
 
-                            <p>
-                                Please continue scrolling until you reach the bottom of
-                                the waiver text.
-                            </p>
                         </div>
 
                         <button

@@ -221,3 +221,16 @@
     background-color: #9ec9eb;
     transform: none;
 }
+
+/* Continue button disabled state */
+.submit_btn:disabled {
+    background-color: #9ec9eb;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Prevent hover effect when disabled */
+.submit_btn:disabled:hover {
+    background-color: #9ec9eb;
+    transform: none;
+}
