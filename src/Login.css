@@ -157,3 +157,67 @@
     background: #cfcfcf;
     transform: translateY(-2px);
 }
+
+/* Waiver checkbox section above continue button */
+.waiver_checkbox {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Clickable "liability waiver" link */
+.waiver_link {
+    color: #2196F3;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Dark overlay behind waiver popup */
+.waiver_modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Popup container for waiver content */
+.waiver_content {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Scrollable waiver text box */
+.waiver_box {
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 15px 0;
+    padding: 12px;
+    background: #f3f3f3;
+    border-radius: 8px;
+    color: #4f4f4f;
+    line-height: 1.6;
+}
+
+/* Disabled accept button styling */
+.disabled_btn {
+    background-color: #9ec9eb;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Prevent hover animation when disabled */
+.disabled_btn:hover {
+    background-color: #9ec9eb;
+    transform: none;
+}
