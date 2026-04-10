@@ -1,4 +1,6 @@
 import "./Login.css";
+import { useState, useEffect } from 'react'
+import { Link } from "react-router-dom";
 
 function Signup({}) {
     return(
@@ -9,7 +11,7 @@ function Signup({}) {
                 <span className="header_title">Lighten The World</span>
 
                 <div className="header_links">
-                    <button className="signupbtn"onClick={() => setCurrentPage("signup")}>Sign Up</button>
+                    <Link to="/Login"><button className="signupbtn">Login</button></Link>
                 </div>
             </nav>
 
