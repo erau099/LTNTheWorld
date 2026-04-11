@@ -1,8 +1,6 @@
-import "./LightenTheWorld.css";
 import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
 import './App.css'
-import "./LightenTheWorld.css";
 
 const steps = [
   {

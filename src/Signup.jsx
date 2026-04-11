@@ -1,6 +1,5 @@
 import { useState } from "react";
 import "./Login.css";
-import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
 
 function Signup({ setCurrentPage }) {
@@ -83,7 +82,7 @@ function Signup({ setCurrentPage }) {
                     </div>
 
                     <div className="center_cancel_btn">
-                        <button className="cancel_btn">Cancel</button>
+                        <Link to="/"><button className="cancel_btn">Cancel</button></Link>
                     </div>
                 </section>
             </div>

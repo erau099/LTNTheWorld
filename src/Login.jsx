@@ -27,7 +27,7 @@ function Login({}) {
                 </form>
                 <p className="not_registered">Not Registered?</p>
                 <div className="center_cancel_btn">
-                    <button className="cancel_btn">Cancel</button>
+                    <Link to="/"><button className="cancel_btn">Cancel</button></Link>
                 </div>
             </section>
             </div>
