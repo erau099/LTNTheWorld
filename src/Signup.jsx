@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Login.css";
+import { Link } from "react-router-dom";
 
 function Signup({ setCurrentPage }) {
     const [showWaiver, setShowWaiver] = useState(false);
@@ -25,12 +26,7 @@ function Signup({ setCurrentPage }) {
                 <span className="header_title">Love Thy Neighbor</span>
 
                 <div className="header_links">
-                    <button
-                        className="signupbtn"
-                        onClick={() => setCurrentPage && setCurrentPage("signup")}
-                    >
-                        Sign Up
-                    </button>
+                    <Link to="/Login"><button className="signupbtn">Login</button></Link>
                 </div>
             </nav>
 
@@ -86,7 +82,7 @@ function Signup({ setCurrentPage }) {
                     </div>
 
                     <div className="center_cancel_btn">
-                        <button className="cancel_btn">Cancel</button>
+                        <Link to="/"><button className="cancel_btn">Cancel</button></Link>
                     </div>
                 </section>
             </div>
