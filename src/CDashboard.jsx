@@ -31,7 +31,7 @@ function CDashboard() {
                     <button key={l} className='headerbtn'>{l}</button>
                     ))}
 
-                    {/* Gear Button & Dropdown Menu */}
+                    {/* Gear Button and Dropdown Menu */}
                     <div className='gear_wrap' ref={dropdownRef}>
                         <button className='gear_btn' onClick={() => setDropdownOpen(!dropdownOpen)}>
                             ⚙

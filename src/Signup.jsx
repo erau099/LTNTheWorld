@@ -22,7 +22,7 @@ function Signup({ setCurrentPage }) {
         <div className="login_page">
 
             <nav className="nav">
-                <span className="header_title">Lighten The World</span>
+                <span className="header_title">Love Thy Neighbor</span>
 
                 <div className="header_links">
                     <button

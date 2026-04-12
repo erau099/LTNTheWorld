@@ -75,7 +75,7 @@ function App() {
 
         {/* Header */}
         <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className='header_title'>Lighten The World</span>
+        <span className='header_title'>Love Thy Neighbor</span>
         <div className='header_links'>
 
           {/* To Navigate to the How It Works Page */}
