@@ -1,4 +1,6 @@
 import "./Login.css";
+import { useState, useEffect } from 'react'
+import { Link } from "react-router-dom";
 
 function Login({}) {
     return(
@@ -9,7 +11,7 @@ function Login({}) {
                 <span className="header_title">Lighten The World</span>
 
                 <div className="header_links">
-                    <button className="signupbtn" onClick={() => setCurrentPage("signup")}>Sign Up</button>
+                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
                 </div>
             </nav>
 
@@ -25,7 +27,7 @@ function Login({}) {
                 </form>
                 <p className="not_registered">Not Registered?</p>
                 <div className="center_cancel_btn">
-                    <button className="cancel_btn">Cancel</button>
+                    <Link to="/"><button className="cancel_btn">Cancel</button></Link>
                 </div>
             </section>
             </div>
@@ -33,4 +35,4 @@ function Login({}) {
     );
 }
 
-export default Login;
+export default Login
