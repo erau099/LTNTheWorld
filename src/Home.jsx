@@ -58,6 +58,8 @@ function Home() {
         <div className='header_links'>
             <Link to="/HowItWorks"><button className="headerbtn">How It Works</button></Link>
             <Link to="/AboutUs"><button className="headerbtn">About Us</button></Link>
+            <Link to="/donor-profile"><button className="headerbtn">Donor Profile</button></Link>
+            <Link to="/receiver-profile"><button className="headerbtn">Receiver Profile</button></Link>
             <Link to="/Login"><button className='loginbtn'>Login</button></Link>
             <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
         </div>
