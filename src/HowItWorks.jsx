@@ -13,14 +13,21 @@ function HowItWorks({ onGoHome }) {
         <span className="header_title">Love Thy Neighbor</span>
 
         <div className="header_links">
-          <button className="headerbtn" onClick={onGoHome}>
-            Home
-          </button>
+          <Link to="/">
+            <button className="headerbtn">Home</button>
+          </Link>
 
-          <button className="headerbtn">About Us</button>
+          <Link to="/AboutUs">
+            <button className="headerbtn">About Us</button>
+          </Link>
 
-          <button className="loginbtn">Login</button>
-          <button className="signupbtn">Sign Up</button>
+          <Link to="/Login">
+            <button className="loginbtn">Login</button>
+          </Link>
+
+          <Link to="/Signup">
+            <button className="signupbtn">Sign Up</button>
+          </Link>
         </div>
       </nav>
 
