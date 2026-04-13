@@ -20,7 +20,7 @@
 
 /* Optional: improve readability */
 .how_banner_center .banner_title {
-    font-size: 4rem;
+  font-size: 4rem;
   color: white;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
