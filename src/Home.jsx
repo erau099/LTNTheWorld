@@ -54,7 +54,7 @@ function Home() {
 
         {/* Header */}
         <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className='header_title'>Lighten The World</span>
+        <span className='header_title'>Love Thy Neighbor</span>
         <div className='header_links'>
             <Link to="/HowItWorks"><button className="headerbtn">How It Works</button></Link>
             <Link to="/AboutUs"><button className="headerbtn">About Us</button></Link>

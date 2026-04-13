@@ -10,7 +10,7 @@ function HowItWorks({ onGoHome }) {
       
       {/* HEADER (same as App.jsx, just changed button) */}
       <nav className="nav">
-        <span className="header_title">Lighten The World</span>
+        <span className="header_title">Love Thy Neighbor</span>
 
         <div className="header_links">
           <Link to="/">
