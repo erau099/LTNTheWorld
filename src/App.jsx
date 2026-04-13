@@ -1,77 +1,24 @@
 import './App.css'
-import { HashRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom' // Imported to fix broken navigation
 import HowItWorks from "./HowItWorks"
 import Login from "./Login.jsx"
 import Signup from "./Signup.jsx"
 import UploadFoodDetails from "./food-upload/UploadFoodDetails.jsx"
 import Home from "./Home.jsx"
+import CDashboard from './CDashboard.jsx' // Imported to enable dashboard access after login
 
 function App() {
   return (
-    <>
-      <div className='main_page'>
-
-        {/* Header */}
-        <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className='header_title'>Lighten The World</span>
-        <div className='header_links'>
-
-          {/* To Navigate to the How It Works Page */}
-          {NAV_LINKS.map((l) => (
-            <button
-              key={l}
-              className='headerbtn'
-              onClick={() => {
-                if (l === "How It Works") {
-                  setCurrentPage("how");
-                }
-              }}
-            >
-              {l}
-            </button>
-          ))}
-
-          
-          <button className='loginbtn' onClick={() => setCurrentPage("login")}>Login</button>
-          <button className='signupbtn' onClick={() => setCurrentPage("signup")}>Sign Up</button>
-        </div>
-        </nav>
-
-        {/* Banner */}
-        <section className='banner'>
-          <div className={`banner_bg ${visible ? "loaded" : ""}`}/>
-          <div className='banner_overlay'>
-          <div className={`banner_content ${visible ? "visible" : ""}`}>
-            <h1 className='banner_title'>
-              Share Extra Food<br/>
-              Help Your Community
-            </h1>
-            <div className='bannerbtn'>
-              <button className='btn1'>Find Food Near Me</button>
-              <button className='btn2'>Post Your Extra Food</button>
-            </div>
-          </div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className='hiw'>
-          <h2 className='hiwtitle'>How It Works</h2>
-          <div className='steps'>
-            {steps.map((s, i) => (
-              <div className="step_card" key={s.title}>
-                <div className="step_icon">{s.icon}</div>
-                <p className="step_number">Step {i + 1}</p>
-                <div className="divider" />
-                <p className="steps_title">{s.title}</p>
-                <p className="steps_desc">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-      </div>
-    </>
+    <Router> {/* Wrapped in Router to enable application-wide navigation */}
+      <Routes> {/* Added Routes container to manage different page paths */}
+        <Route path="/" element={<Home />} /> {/* Defined root path for Home page */}
+        <Route path="/Login" element={<Login />} /> {/* Defined path for Login page */}
+        <Route path="/Signup" element={<Signup />} /> {/* Defined path for Signup page */}
+        <Route path="/HowItWorks" element={<HowItWorks />} /> {/* Defined path for How It Works page */}
+        <Route path="/UploadFoodDetails" element={<UploadFoodDetails />} /> {/* Defined path for Food Upload page */}
+        <Route path="/Dashboard" element={<CDashboard />} /> {/* Added path for the new demo Dashboard */}
+      </Routes>
+    </Router>
   )
 }
 
