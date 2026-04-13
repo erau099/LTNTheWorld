@@ -1,11 +1,33 @@
 import { useState } from "react";
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Added useNavigate for redirection
+import { signup } from "./utils/auth"; // Imported local auth utility for signup logic
 
-function Signup({ setCurrentPage }) {
+function Signup() {
+    const navigate = useNavigate(); // Hook to programmatically navigate between pages
     const [showWaiver, setShowWaiver] = useState(false);
     const [canAcceptWaiver, setCanAcceptWaiver] = useState(false);
     const [waiverChecked, setWaiverChecked] = useState(false);
+
+    // Form data state to store user inputs locally
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        retypePassword: "",
+        dob: "",
+        phoneNumber: "",
+        role: ""
+    });
+
+    const [error, setError] = useState(""); // State to store and display error messages
+
+    // Generic handler to update form state based on input names
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleWaiverScroll = (e) => {
         const el = e.target;
@@ -17,6 +39,39 @@ function Signup({ setCurrentPage }) {
     const handleWaiverAccept = () => {
         setWaiverChecked(true);
         setShowWaiver(false);
+    };
+
+    // Form submission logic to process signup request
+    const handleSubmit = (e) => {
+        e.preventDefault(); // Prevent default browser form refresh
+        setError(""); // Clear previous error messages
+
+        // Basic password confirmation check
+        if (formData.password !== formData.retypePassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        // Check for required fields before proceeding
+        if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+            setError("Please fill in all required fields");
+            return;
+        }
+
+        // Ensure user has accepted the waiver
+        if (!waiverChecked) {
+            setError("Please accept the liability waiver");
+            return;
+        }
+
+        // Save user data to localStorage via auth utility
+        const result = signup(formData);
+        if (result.success) {
+            alert("Account created successfully!");
+            navigate("/Login"); // Redirect to login on successful signup
+        } else {
+            setError(result.message); // Show error if signup fails (e.g., user exists)
+        }
     };
 
     return (
@@ -35,51 +90,114 @@ function Signup({ setCurrentPage }) {
                     <p className="login_label">Please Enter Your Details</p>
                     <h2 className="login_header">Create Account</h2>
 
-                    <form className="login_info">
+                    {/* Display error messages at the top of the form */}
+                    {error && <p className="error_message" style={{color: 'red', textAlign: 'center'}}>{error}</p>}
+
+                    {/* Added onSubmit handler to form element */}
+                    <form className="login_info" onSubmit={handleSubmit}>
                         <div className="create_col">
-                            <input type="text" placeholder="First Name" />
-                            <input type="text" placeholder="Last Name" />
+                            {/* Added value and onChange to make inputs controlled */}
+                            <input 
+                                type="text" 
+                                name="firstName"
+                                placeholder="First Name" 
+                                value={formData.firstName}
+                                onChange={handleChange}
+                                required
+                            />
+                            <input 
+                                type="text" 
+                                name="lastName"
+                                placeholder="Last Name" 
+                                value={formData.lastName}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
 
-                        <input type="email" placeholder="Email Address" />
-                        <input type="password" placeholder="Password" />
-                        <input type="password" placeholder="Retype Password" />
+                        <input 
+                            type="email" 
+                            name="email"
+                            placeholder="Email Address" 
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                        />
+                        <input 
+                            type="password" 
+                            name="password"
+                            placeholder="Password" 
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                        />
+                        <input 
+                            type="password" 
+                            name="retypePassword"
+                            placeholder="Retype Password" 
+                            value={formData.retypePassword}
+                            onChange={handleChange}
+                            required
+                        />
 
                         <div className="create_col">
-                            <input type="text" placeholder="DOB: MM/DD/YYYY" />
-                            <input type="text" placeholder="Phone Number" />
+                            <input 
+                                type="text" 
+                                name="dob"
+                                placeholder="DOB: MM/DD/YYYY" 
+                                value={formData.dob}
+                                onChange={handleChange}
+                            />
+                            <input 
+                                type="text" 
+                                name="phoneNumber"
+                                placeholder="Phone Number" 
+                                value={formData.phoneNumber}
+                                onChange={handleChange}
+                            />
                         </div>
 
-                        <select className="select_role">
+                        <select 
+                            className="select_role" 
+                            name="role"
+                            value={formData.role}
+                            onChange={handleChange}
+                            required
+                        >
                             <option value="">Select Role</option>
                             <option value="donor">Donor</option>
                             <option value="recipient">Recipient</option>
                         </select>
-                    </form>
 
-                    <div className="waiver_checkbox">
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={waiverChecked}
-                                disabled={!canAcceptWaiver}
-                                onChange={(e) => setWaiverChecked(e.target.checked)}
-                            />
-                            {" "}I have read and agree to the{" "}
-                            <span
-                                className="waiver_link"
-                                onClick={() => setShowWaiver(true)}
+                        <div className="waiver_checkbox">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={waiverChecked}
+                                    disabled={!canAcceptWaiver}
+                                    onChange={(e) => setWaiverChecked(e.target.checked)}
+                                />
+                                {" "}I have read and agree to the{" "}
+                                <span
+                                    className="waiver_link"
+                                    onClick={() => setShowWaiver(true)}
+                                    style={{textDecoration: 'underline', cursor: 'pointer', color: '#2d7a3a'}}
+                                >
+                                    liability waiver
+                                </span>
+                            </label>
+                        </div>
+
+                        <div className="continue_btn">
+                            <button 
+                                type="submit" // Changed to submit type for form processing
+                                className="submit_btn" 
+                                disabled={!waiverChecked}
                             >
-                                liability waiver
-                            </span>
-                        </label>
-                    </div>
-
-                    <div className="continue_btn">
-                        <button className="submit_btn" disabled = {!waiverChecked}>
-                            Continue
-                        </button>
-                    </div>
+                                Continue
+                            </button>
+                        </div>
+                    </form>
 
                     <div className="center_cancel_btn">
                         <Link to="/"><button className="cancel_btn">Cancel</button></Link>
