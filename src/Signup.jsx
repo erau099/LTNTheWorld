@@ -1,11 +1,58 @@
 import { useState } from "react";
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-function Signup({ setCurrentPage }) {
+function Signup() {
+    const navigate = useNavigate();
     const [showWaiver, setShowWaiver] = useState(false);
     const [canAcceptWaiver, setCanAcceptWaiver] = useState(false);
     const [waiverChecked, setWaiverChecked] = useState(false);
+
+    // Form states
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        dob: "",
+        phone: "",
+        role: ""
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSignup = (e) => {
+        e.preventDefault();
+        
+        if (formData.password !== formData.confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        // Get existing users
+        const users = JSON.parse(localStorage.getItem("users") || "[]");
+        
+        // Check if user already exists
+        if (users.find(u => u.email === formData.email)) {
+            alert("Email already registered!");
+            return;
+        }
+
+        // Add new user
+        const newUser = { ...formData };
+        delete newUser.confirmPassword;
+        users.push(newUser);
+        
+        // Save back to localStorage
+        localStorage.setItem("users", JSON.stringify(users));
+        
+        alert("Account created successfully! You can now log in.");
+        navigate("/Login");
+    };
 
     const handleWaiverScroll = (e) => {
         const el = e.target;
@@ -35,51 +82,51 @@ function Signup({ setCurrentPage }) {
                     <p className="login_label">Please Enter Your Details</p>
                     <h2 className="login_header">Create Account</h2>
 
-                    <form className="login_info">
+                    <form className="login_info" onSubmit={handleSignup}>
                         <div className="create_col">
-                            <input type="text" placeholder="First Name" />
-                            <input type="text" placeholder="Last Name" />
+                            <input type="text" placeholder="First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                            <input type="text" placeholder="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
                         </div>
 
-                        <input type="email" placeholder="Email Address" />
-                        <input type="password" placeholder="Password" />
-                        <input type="password" placeholder="Retype Password" />
+                        <input type="email" placeholder="Email Address" name="email" value={formData.email} onChange={handleChange} required />
+                        <input type="password" placeholder="Password" name="password" value={formData.password} onChange={handleChange} required />
+                        <input type="password" placeholder="Retype Password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
 
                         <div className="create_col">
-                            <input type="text" placeholder="DOB: MM/DD/YYYY" />
-                            <input type="text" placeholder="Phone Number" />
+                            <input type="text" placeholder="DOB: MM/DD/YYYY" name="dob" value={formData.dob} onChange={handleChange} required />
+                            <input type="text" placeholder="Phone Number" name="phone" value={formData.phone} onChange={handleChange} required />
                         </div>
 
-                        <select className="select_role">
+                        <select className="select_role" name="role" value={formData.role} onChange={handleChange} required>
                             <option value="">Select Role</option>
                             <option value="donor">Donor</option>
                             <option value="recipient">Recipient</option>
                         </select>
+
+                        <div className="waiver_checkbox">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={waiverChecked}
+                                    disabled={!canAcceptWaiver}
+                                    onChange={(e) => setWaiverChecked(e.target.checked)}
+                                />
+                                {" "}I have read and agree to the{" "}
+                                <span
+                                    className="waiver_link"
+                                    onClick={() => setShowWaiver(true)}
+                                >
+                                    liability waiver
+                                </span>
+                            </label>
+                        </div>
+
+                        <div className="continue_btn">
+                            <button type="submit" className="submit_btn" disabled = {!waiverChecked}>
+                                Continue
+                            </button>
+                        </div>
                     </form>
-
-                    <div className="waiver_checkbox">
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={waiverChecked}
-                                disabled={!canAcceptWaiver}
-                                onChange={(e) => setWaiverChecked(e.target.checked)}
-                            />
-                            {" "}I have read and agree to the{" "}
-                            <span
-                                className="waiver_link"
-                                onClick={() => setShowWaiver(true)}
-                            >
-                                liability waiver
-                            </span>
-                        </label>
-                    </div>
-
-                    <div className="continue_btn">
-                        <button className="submit_btn" disabled = {!waiverChecked}>
-                            Continue
-                        </button>
-                    </div>
 
                     <div className="center_cancel_btn">
                         <Link to="/"><button className="cancel_btn">Cancel</button></Link>
