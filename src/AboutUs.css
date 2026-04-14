@@ -5,7 +5,7 @@
   flex-direction: column;
 }
 
-.nav {
+.about-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,29 +13,29 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.nav-logo {
+.about-nav-logo {
   font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
 }
 
-.nav-links {
+.about-nav-links {
   display: flex;
   align-items: center;
   gap: 32px;
 }
 
-.nav-links a {
+.about-nav-links a {
   font-size: 14px;
   color: #555;
   text-decoration: none;
 }
 
-.nav-links a:hover {
+.about-nav-links a:hover {
   color: #1a1a1a;
 }
 
-.nav-btn {
+.about-nav-btn {
   background: #4a1b0c;
   color: #fff;
   border: none;
@@ -45,26 +45,26 @@
   cursor: pointer;
 }
 
-.nav-btn:hover {
+.about-nav-btn:hover {
   background: #6b2712;
 }
 
-.section {
+.about-section {
   display: flex;
   align-items: center;
   gap: 48px;
   padding: 64px 48px;
 }
 
-.section.reverse {
+.about-section.about-reverse {
   flex-direction: row-reverse;
 }
 
-.text {
+.about-text {
   flex: 1;
 }
 
-.text h2 {
+.about-text h2 {
   font-size: 32px;
   font-weight: 700;
   margin: 0 0 20px;
@@ -72,7 +72,7 @@
   text-align: center;
 }
 
-.text p {
+.about-text p {
   font-size: 15px;
   line-height: 1.75;
   color: #555;
@@ -81,14 +81,14 @@
   font-weight: 600;
 }
 
-.circle {
+.about-circle {
   flex: 0 0 280px;
   height: 280px;
   border-radius: 50%;
   background: #7a1a1a;
 }
 
-.footer {
+.about-footer {
   border-top: 1px solid #e0e0e0;
   padding: 20px 48px;
   display: flex;
@@ -97,7 +97,7 @@
   margin-top: auto;
 }
 
-.footer span {
+.about-footer span {
   font-size: 13px;
   color: #555;
 }

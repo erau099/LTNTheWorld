@@ -57,7 +57,7 @@ function Home() {
         <span className='header_title'>Love Thy Neighbor</span>
         <div className='header_links'>
             <Link to="/HowItWorks"><button className="headerbtn">How It Works</button></Link>
-            <Link to="/AboutUs"><button className="headerbtn">About Us</button></Link>
+            <Link to="/about"><button className="headerbtn">About Us</button></Link>
             <Link to="/donor-profile"><button className="headerbtn">Donor Profile</button></Link>
             <Link to="/receiver-profile"><button className="headerbtn">Receiver Profile</button></Link>
             <Link to="/Login"><button className='loginbtn'>Login</button></Link>

@@ -1,20 +1,21 @@
-import './About.css';
- 
+import './AboutUs.css';
+import { Link } from 'react-router-dom';
+
 function About() {
   return (
     <div className="about-page">
-      <nav className="nav">
-        <div className="nav-logo">Lighten The World</div>
-        <div className="nav-links">
-          <a href="#">Home</a>
-          <a href="#">How It Works</a>
-          <a href="#">Login</a>
-          <button className="nav-btn">Sign Up</button>
+      <nav className="about-nav">
+        <div className="about-nav-logo">Lighten The World</div>
+        <div className="about-nav-links">
+          <Link to="/">Home</Link>
+          <Link to="/HowItWorks">How It Works</Link>
+          <Link to="/Login">Login</Link>
+          <Link to="/Signup"><button className="about-nav-btn">Sign Up</button></Link>
         </div>
       </nav>
- 
-      <section className="section">
-        <div className="text">
+
+      <section className="about-section">
+        <div className="about-text">
           <h2>Our Story</h2>
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
@@ -25,11 +26,11 @@ function About() {
             mollit anim id est laborum.
           </p>
         </div>
-        <div className="circle"></div>
+        <div className="about-circle"></div>
       </section>
- 
-      <section className="section reverse">
-        <div className="text">
+
+      <section className="about-section about-reverse">
+        <div className="about-text">
           <h2>Our Goal</h2>
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
@@ -40,15 +41,15 @@ function About() {
             mollit anim id est laborum.
           </p>
         </div>
-        <div className="circle"></div>
+        <div className="about-circle"></div>
       </section>
- 
-      <footer className="footer">
+
+      <footer className="about-footer">
         <span>Contact Us:</span>
         <span>jjobs@gmail.com</span>
       </footer>
     </div>
   );
 }
- 
+
 export default About;

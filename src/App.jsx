@@ -8,6 +8,7 @@ import Home from "./Home.jsx"
 import CDashboard from './CDashboard.jsx' // Imported to enable dashboard access after login
 import DonorProfile from "./DonorProfile.jsx";
 import ReceiverProfile from "./ReceiverProfile.jsx";
+import About from "./AboutUs.jsx" 
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/Dashboard" element={<CDashboard />} /> {/* Added path for the new demo Dashboard */}
         <Route path="/donor-profile" element={<DonorProfile />} />
         <Route path="/receiver-profile" element={<ReceiverProfile />} />
+        <Route path="/about" element={<About />} /> 
       </Routes>
     </Router>
   )
