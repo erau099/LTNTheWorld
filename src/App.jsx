@@ -9,6 +9,8 @@ import CDashboard from './CDashboard.jsx' // Imported to enable dashboard access
 import DonorProfile from "./DonorProfile.jsx";
 import ReceiverProfile from "./ReceiverProfile.jsx";
 import About from "./AboutUs.jsx" 
+import RecipientPastOrders from "./recipient-orders/RecipientPastOrders";
+import DonorPastListings from "./donor-listings/DonorPastListings";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/donor-profile" element={<DonorProfile />} />
         <Route path="/receiver-profile" element={<ReceiverProfile />} />
         <Route path="/about" element={<About />} /> 
+        <Route path="/recipient-past-orders" element={<RecipientPastOrders />} />
+        <Route path="/donor-past-listings" element={<DonorPastListings />} />
       </Routes>
     </Router>
   )
