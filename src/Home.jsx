@@ -38,6 +38,14 @@ const steps = [
 
 
 function Home() {
+  const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    fetch('/api/hello')
+      .then(res => res.text())
+      .then(setMessage)
+  }, []);
+
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -85,6 +93,8 @@ function Home() {
           </div>
           </div>
         </section>
+
+        <p style={{textAlign: 'center', color: 'green'}}>{message}</p>
 
         {/* How It Works */}
         <section className='hiw'>
