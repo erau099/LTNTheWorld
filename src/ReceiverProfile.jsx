@@ -148,9 +148,17 @@ export default function ReceiverProfile() {
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <span className="header_title">Hello, {user.firstName}</span>
         <div className="header_links">
-          {NAV_LINKS.map((l) => (
-            <button key={l} className="headerbtn">{l}</button>
-          ))}
+          <button className="headerbtn" onClick={() => navigate("/")}>
+            Home
+          </button>
+
+          <button className="headerbtn" onClick={() => navigate("/recipient-dashboard")}>
+            Dashboard
+          </button>
+
+          <button className="headerbtn" onClick={() => navigate("/recipient-past-orders")}>
+            Orders
+          </button>
 
           <div className="gear_wrap" ref={dropdownRef}>
             <button
