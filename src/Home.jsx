@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
 import './App.css'
+import { useAuth } from './context/AuthContext';
 
 const steps = [
   {
@@ -39,6 +40,7 @@ const steps = [
 
 function Home() {
   const [message, setMessage] = useState('')
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     fetch('/api/hello')
@@ -66,6 +68,22 @@ function Home() {
         <div className='header_links'>
             <Link to="/HowItWorks"><button className="headerbtn">How It Works</button></Link>
             <Link to="/about"><button className="headerbtn">About Us</button></Link>
+            <Link to="/donor-profile"><button className="headerbtn">Donor Profile</button></Link>
+            <Link to="/receiver-profile"><button className="headerbtn">Receiver Profile</button></Link>
+            <Link to="/recipient-past-orders"><button className="headerbtn">Orders</button></Link>
+            <Link to="/donor-past-listings"><button className="headerbtn">Listings</button></Link>
+            
+            {user ? (
+                <>
+                    <span className="user_greeting" style={{color: 'white', marginRight: '10px'}}>Hi, {user.name}</span>
+                    <button className="loginbtn" onClick={logout}>Logout</button>
+                </>
+            ) : (
+                <>
+                    <Link to="/Login"><button className='loginbtn'>Login</button></Link>
+                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+                </>
+            )}
             <Link to="/recipient-dashboard"><button className="headerbtn">Recipient Dashboard</button></Link>
             <Link to="/donor-dashboard"><button className="headerbtn">Donor Dashboard</button></Link>
             <Link to="/Login"><button className='loginbtn'>Login</button></Link>

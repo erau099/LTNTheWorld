@@ -1,6 +1,7 @@
 import "./Login.css";
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
 function Login({}) {
     // Store values
@@ -8,6 +9,7 @@ function Login({}) {
     const [password, setPassword] = useState('')
     const [popup, setPopup] = useState('')
     const navigate = useNavigate()
+    const { setUser } = useAuth()
 
     // Login function
     const handleLogin = async (e) =>{
@@ -20,12 +22,16 @@ function Login({}) {
             body: JSON.stringify({username, password})
         })
 
-        const result = await response.text()
-
-        // Java returns either success or failure
-        if(result == 'success'){
-            setPopup('success')
-            setTimeout(() => navigate('/'), 1500)
+        if(response.ok){
+            const result = await response.json()
+            // result contains status, name, role
+            if(result.status === 'success'){
+                setUser({ name: result.name, role: result.role })
+                setPopup('success')
+                setTimeout(() => navigate('/'), 1500)
+            } else {
+                setPopup('error')
+            }
         } else{
             setPopup('error')
         }

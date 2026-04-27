@@ -42,7 +42,7 @@ function Signup() {
     };
 
     // Form submission logic to process signup request
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default browser form refresh
         setError(""); // Clear previous error messages
 
@@ -64,13 +64,28 @@ function Signup() {
             return;
         }
 
-        // Save user data to localStorage via auth utility
-        const result = signup(formData);
-        if (result.success) {
-            alert("Account created successfully!");
-            navigate("/Login"); // Redirect to login on successful signup
-        } else {
-            setError(result.message); // Show error if signup fails (e.g., user exists)
+        // Send data to springboot as JSON to /api/auth/signup
+        try {
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: `${formData.firstName} ${formData.lastName}`,
+                    email: formData.email,
+                    password: formData.password,
+                    role: formData.role.toUpperCase() // Spring expects DONOR or RECIPIENT
+                })
+            });
+
+            if (response.ok) {
+                alert("Account created successfully!");
+                navigate("/Login"); // Redirect to login on successful signup
+            } else {
+                const message = await response.text();
+                setError(message);
+            }
+        } catch (err) {
+            setError("Failed to connect to the server.");
         }
     };
 
