@@ -77,6 +77,10 @@ function Signup({ setCurrentPage }) {
                                 liability waiver
                             </span>
                         </label>
+                        
+                        <p className="waiver_helper_text">
+                            Please review the waiver before continuing with account creation.
+                        </p>
                     </div>
 
                     <div className="continue_btn">

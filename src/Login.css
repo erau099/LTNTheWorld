@@ -234,3 +234,10 @@
     background-color: #9ec9eb;
     transform: none;
 }
+/* Helper text below the waiver checkbox */
+.waiver_helper_text {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #6f6f6f;
+    line-height: 1.4;
+}
