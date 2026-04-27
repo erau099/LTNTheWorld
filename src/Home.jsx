@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
 import './App.css'
+import { useAuth } from './context/AuthContext';
 
 const steps = [
   {
@@ -39,6 +40,7 @@ const steps = [
 
 function Home() {
   const [message, setMessage] = useState('')
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     fetch('/api/hello')
@@ -70,8 +72,18 @@ function Home() {
             <Link to="/receiver-profile"><button className="headerbtn">Receiver Profile</button></Link>
             <Link to="/recipient-past-orders"><button className="headerbtn">Orders</button></Link>
             <Link to="/donor-past-listings"><button className="headerbtn">Listings</button></Link>
-            <Link to="/Login"><button className='loginbtn'>Login</button></Link>
-            <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+            
+            {user ? (
+                <>
+                    <span className="user_greeting" style={{color: 'white', marginRight: '10px'}}>Hi, {user.name}</span>
+                    <button className="loginbtn" onClick={logout}>Logout</button>
+                </>
+            ) : (
+                <>
+                    <Link to="/Login"><button className='loginbtn'>Login</button></Link>
+                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+                </>
+            )}
         </div>
         </nav>
 

@@ -1,7 +1,10 @@
 import './AboutUs.css';
 import { Link } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 
 function About() {
+  const { user, logout } = useAuth();
+
   return (
     <div className="about-page">
       <nav className="about-nav">
@@ -9,8 +12,17 @@ function About() {
         <div className="about-nav-links">
           <Link to="/">Home</Link>
           <Link to="/HowItWorks">How It Works</Link>
-          <Link to="/Login">Login</Link>
-          <Link to="/Signup"><button className="about-nav-btn">Sign Up</button></Link>
+          {user ? (
+            <>
+              <span className="user-greeting" style={{marginRight: '10px'}}>Hi, {user.name}</span>
+              <button className="about-nav-btn" onClick={logout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/Login">Login</Link>
+              <Link to="/Signup"><button className="about-nav-btn">Sign Up</button></Link>
+            </>
+          )}
         </div>
       </nav>
 

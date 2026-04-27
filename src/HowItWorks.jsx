@@ -2,13 +2,16 @@ import "./HowItWorks.css";
 import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
 import groceriesHero from "./assets/groceries-2-2.png";
+import { useAuth } from "./context/AuthContext";
 
 
 function HowItWorks({ onGoHome }) {
+    const { user, logout } = useAuth();
+
     return (
     <div className="main_page">
       
-      {/* HEADER (same as App.jsx, just changed button) */}
+      {/* HEADER */}
       <nav className="nav">
         <span className="header_title">Love Thy Neighbor</span>
 
@@ -17,17 +20,26 @@ function HowItWorks({ onGoHome }) {
             <button className="headerbtn">Home</button>
           </Link>
 
-          <Link to="/AboutUs">
+          <Link to="/about">
             <button className="headerbtn">About Us</button>
           </Link>
 
-          <Link to="/Login">
-            <button className="loginbtn">Login</button>
-          </Link>
+          {user ? (
+                <>
+                    <span className="user_greeting" style={{color: 'white', marginRight: '10px'}}>Hi, {user.name}</span>
+                    <button className="loginbtn" onClick={logout}>Logout</button>
+                </>
+            ) : (
+                <>
+                    <Link to="/Login">
+                        <button className="loginbtn">Login</button>
+                    </Link>
 
-          <Link to="/Signup">
-            <button className="signupbtn">Sign Up</button>
-          </Link>
+                    <Link to="/Signup">
+                        <button className="signupbtn">Sign Up</button>
+                    </Link>
+                </>
+            )}
         </div>
       </nav>
 
