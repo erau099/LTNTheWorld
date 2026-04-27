@@ -11,6 +11,8 @@ import ReceiverProfile from "./ReceiverProfile.jsx";
 import About from "./AboutUs.jsx" 
 import RecipientPastOrders from "./recipient-orders/RecipientPastOrders";
 import DonorPastListings from "./donor-listings/DonorPastListings";
+import RecipientDashboard from './recipient-dashboard/RecipientDashboard.jsx'
+import DonorDashboard from './donor-dashboard/DonorDashboard.jsx'
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
         <Route path="/about" element={<About />} /> 
         <Route path="/recipient-past-orders" element={<RecipientPastOrders />} />
         <Route path="/donor-past-listings" element={<DonorPastListings />} />
+        <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
+        <Route path="/donor-dashboard" element={<DonorDashboard />} />
       </Routes>
     </Router>
   )

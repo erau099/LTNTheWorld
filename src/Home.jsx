@@ -66,10 +66,8 @@ function Home() {
         <div className='header_links'>
             <Link to="/HowItWorks"><button className="headerbtn">How It Works</button></Link>
             <Link to="/about"><button className="headerbtn">About Us</button></Link>
-            <Link to="/donor-profile"><button className="headerbtn">Donor Profile</button></Link>
-            <Link to="/receiver-profile"><button className="headerbtn">Receiver Profile</button></Link>
-            <Link to="/recipient-past-orders"><button className="headerbtn">Orders</button></Link>
-            <Link to="/donor-past-listings"><button className="headerbtn">Listings</button></Link>
+            <Link to="/recipient-dashboard"><button className="headerbtn">Recipient Dashboard</button></Link>
+            <Link to="/donor-dashboard"><button className="headerbtn">Donor Dashboard</button></Link>
             <Link to="/Login"><button className='loginbtn'>Login</button></Link>
             <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
         </div>
