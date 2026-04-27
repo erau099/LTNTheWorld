@@ -169,24 +169,27 @@ function Signup() {
                             <option value="recipient">Recipient</option>
                         </select>
 
-                        <div className="waiver_checkbox">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={waiverChecked}
-                                    disabled={!canAcceptWaiver}
-                                    onChange={(e) => setWaiverChecked(e.target.checked)}
-                                />
-                                {" "}I have read and agree to the{" "}
-                                <span
-                                    className="waiver_link"
-                                    onClick={() => setShowWaiver(true)}
-                                    style={{textDecoration: 'underline', cursor: 'pointer', color: '#2d7a3a'}}
-                                >
-                                    liability waiver
-                                </span>
-                            </label>
-                        </div>
+                    <div className="waiver_checkbox">
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={waiverChecked}
+                                disabled={!canAcceptWaiver}
+                                onChange={(e) => setWaiverChecked(e.target.checked)}
+                            />
+                            {" "}I have read and agree to the{" "}
+                            <span
+                                className="waiver_link"
+                                onClick={() => setShowWaiver(true)}
+                            >
+                                liability waiver
+                            </span>
+                        </label>
+                        
+                        <p className="waiver_helper_text">
+                            Please review the waiver before continuing with account creation.
+                        </p>
+                    </div>
 
                         <div className="continue_btn">
                             <button 
@@ -209,6 +212,10 @@ function Signup() {
                 <div className="waiver_modal">
                     <div className="waiver_content">
                         <h3>Liability Waiver</h3>
+                        <p className="waiver_intro_text">
+                             Scroll through the waiver below before accepting.
+                        </p>
+
 
                         <div className="waiver_box" onScroll={handleWaiverScroll}>
                             <p>
