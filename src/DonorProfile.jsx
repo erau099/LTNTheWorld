@@ -198,9 +198,19 @@ export default function DonorProfile() {
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <span className="header_title">Hello, {user.firstName}</span>
         <div className="header_links">
-          {NAV_LINKS.map((l) => (
-            <button key={l} className="headerbtn">{l}</button>
-          ))}
+            <div className="header_links">
+              <button className="headerbtn" onClick={() => navigate("/")}>
+                Home
+              </button>
+
+              <button className="headerbtn" onClick={() => navigate("/donor-dashboard")}>
+                Dashboard
+              </button>
+
+              <button className="headerbtn" onClick={() => navigate("/donor-past-listings")}>
+                Past Listings
+              </button>
+            </div>
 
           <div className="gear_wrap" ref={dropdownRef}>
             <button
