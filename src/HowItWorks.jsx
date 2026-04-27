@@ -1,4 +1,6 @@
 import "./HowItWorks.css";
+import { useState, useEffect } from 'react'
+import { Link } from "react-router-dom";
 import groceriesHero from "./assets/groceries-2-2.png";
 
 
@@ -8,17 +10,24 @@ function HowItWorks({ onGoHome }) {
       
       {/* HEADER (same as App.jsx, just changed button) */}
       <nav className="nav">
-        <span className="header_title">Lighten The World</span>
+        <span className="header_title">Love Thy Neighbor</span>
 
         <div className="header_links">
-          <button className="headerbtn" onClick={onGoHome}>
-            Home
-          </button>
+          <Link to="/">
+            <button className="headerbtn">Home</button>
+          </Link>
 
-          <button className="headerbtn">About Us</button>
+          <Link to="/AboutUs">
+            <button className="headerbtn">About Us</button>
+          </Link>
 
-          <button className="loginbtn">Login</button>
-          <button className="signupbtn">Sign Up</button>
+          <Link to="/Login">
+            <button className="loginbtn">Login</button>
+          </Link>
+
+          <Link to="/Signup">
+            <button className="signupbtn">Sign Up</button>
+          </Link>
         </div>
       </nav>
 

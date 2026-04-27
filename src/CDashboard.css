@@ -1,0 +1,64 @@
+.cdashboard {
+    font-family: 'Lato', sans-serif;
+    background: #f9f6f1;
+    min-height: 100vh;
+}
+
+.cdashboard .header_title {
+    color: #2d7a3a;
+}
+
+.dashboard_content {
+    padding: 100px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dashboard_content h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: #1a3a1f;
+    margin-bottom: 20px;
+}
+
+.user_json_simulation {
+    margin-top: 40px;
+    padding: 30px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #ece7df;
+    display: inline-block;
+    text-align: left;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.user_json_simulation h3 {
+    font-size: 1.1rem;
+    color: #2d7a3a;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.user_json_simulation pre {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: #444;
+    line-height: 1.4;
+}
+
+.role_badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #eaf4ec;
+    color: #2d7a3a;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 10px;
+}

@@ -1,0 +1,164 @@
+.upload_card {
+    min-height: 100vh;
+    display: flex;
+    background-color: #eef6ef;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px;
+    font-family: 'Lato', sans-serif;
+}
+
+.upload_banner {
+    width:100%;
+    max-width: 720px;
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(160, 140. 150, 0.45);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.upload_header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 18px 34px;
+    gap: 50px;
+    background-color: #d9d9d9;
+    flex-wrap: wrap;
+}
+
+.num_on, .num_off {
+    width: 32px;
+    height: 32px;
+    background-color: #2d7a3a;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0;
+}
+
+.num_off {
+    opacity: 0.25;
+}
+
+.num_text_on, .num_text_off {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.num_text_off {
+    opacity: 0.25;
+}
+
+.upload_body {
+    padding: 28px 30px 50px;
+}
+
+.upload_format {
+    margin-bottom: 20px;
+    min-height: 80px;
+    margin-top: 10px;
+}
+
+.page_title {
+    margin: 0 0 16px 0;
+    font-size: 24px;
+    font-weight: 700;
+
+}
+
+.input_title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.user_input {
+    width: 100%;
+    border: 1px solid #cfcfcf;
+    Border-radius: 4px;
+    padding: 12px 14px;
+    font-size: 14px;
+    background-color: white;
+    outline: none;
+}
+
+.selection_form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.sel_btn_on, .sel_btn_off {
+    border: none;
+    background: #ececec;
+    color: #7a7a7a;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.upload_nav_btn {
+    margin-top: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.upload_cancel_btn, .upload_next_btn {
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    background-color: #d8d8d8;
+    padding: 0 24px;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+}
+
+.upload_cancel_btn {
+    background-color: #d8d8d8;
+    color: #4f4f4f;
+}
+
+/* Cancel button hover */
+.upload_cancel_btn:hover {
+    background: #b8b8b8;
+    transform: translateY(-2px);
+}
+
+/* Cancel button on click */
+.upload_cancel_btn:active {
+    transform: translateY(1px);
+}
+
+.upload_next_btn {
+    background: #2d7a3a;
+    color: white;
+}
+
+.upload_next_btn:hover {
+    background: #1f5a29;
+    transform: translateY(-1px);
+}
+
+.upload_next_btn:active {
+    transform: translateY(1px);
+}
+
+
+
+

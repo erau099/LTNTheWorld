@@ -1,139 +1,38 @@
-import { useState, useEffect } from 'react'
 import './App.css'
-import "./index.css";
-import HowItWorks from "./HowItWorks";
-import Login from "./Login.jsx";
-import Signup from "./Signup.jsx";
-
-const NAV_LINKS = ["How It Works", "About Us"];
-
-const steps = [
-  {
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-        <path d="M24 4C13 4 4 13 4 24s9 20 20 20 20-9 20-20S35 4 24 4z" fill="#d4edda" />
-        <path d="M16 24h16M24 16v16" stroke="#2d7a3a" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-    ),
-    title: "Post Extra Food",
-    desc: "List your extra food for others",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-        <circle cx="20" cy="20" r="13" stroke="#2d7a3a" strokeWidth="3" fill="#d4edda" />
-        <path d="M30 30l10 10" stroke="#2d7a3a" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-    ),
-    title: "Find Food Nearby",
-    desc: "Search and claim available food",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-        <path d="M24 8C17.4 8 12 13.4 12 20c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
-        fill="#d4edda" stroke="#2d7a3a" strokeWidth="2" strokeLinejoin="round"/>
-        <circle cx="24" cy="20" r="4" fill="#2d7a3a" />
-      </svg>
-    ),
-    title: "Pick up & Enjoy",
-    desc: "Meet up and pick up food",
-  },
-];
-
+import { HashRouter as Router, Routes, Route } from 'react-router-dom' // Imported to fix broken navigation
+import HowItWorks from "./HowItWorks"
+import Login from "./Login.jsx"
+import Signup from "./Signup.jsx"
+import UploadFoodDetails from "./food-upload/UploadFoodDetails.jsx"
+import Home from "./Home.jsx"
+import CDashboard from './CDashboard.jsx' // Imported to enable dashboard access after login
+import DonorProfile from "./DonorProfile.jsx";
+import ReceiverProfile from "./ReceiverProfile.jsx";
+import About from "./AboutUs.jsx" 
+import RecipientPastOrders from "./recipient-orders/RecipientPastOrders";
+import DonorPastListings from "./donor-listings/DonorPastListings";
+import RecipientDashboard from './recipient-dashboard/RecipientDashboard.jsx'
+import DonorDashboard from './donor-dashboard/DonorDashboard.jsx'
 
 function App() {
-  const [scrolled, setScrolled] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  {/* To switch from Home Page to other Pages */}
-  const [currentPage, setCurrentPage] = useState("home");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-    setTimeout(() => setVisible(true), 100);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  if (currentPage === "how") {
-    return <HowItWorks onGoHome={() => setCurrentPage("home")} />;
-  }
-
-  if(currentPage === "login") {
-    return <Login onGoHome={() => setCurrentPage("home")} />;
-  }
-
-  if(currentPage === "signup") {
-    return <Signup onGoHome={() => setCurrentPage("home")} />;
-  }
-
-
   return (
-    <>
-      <div className='main_page'>
-
-        {/* Header */}
-        <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className='header_title'>Lighten The World</span>
-        <div className='header_links'>
-
-          {/* To Navigate to the How It Works Page */}
-          {NAV_LINKS.map((l) => (
-            <button
-              key={l}
-              className='headerbtn'
-              onClick={() => {
-                if (l === "How It Works") {
-                  setCurrentPage("how");
-                }
-              }}
-            >
-              {l}
-            </button>
-          ))}
-
-          
-          <button className='loginbtn' onClick={() => setCurrentPage("login")}>Login</button>
-          <button className='signupbtn' onClick={() => setCurrentPage("signup")}>Sign Up</button>
-        </div>
-        </nav>
-
-        {/* Banner */}
-        <section className='banner'>
-          <div className={`banner_bg ${visible ? "loaded" : ""}`}/>
-          <div className='banner_overlay'>
-          <div className={`banner_content ${visible ? "visible" : ""}`}>
-            <h1 className='banner_title'>
-              Share Extra Food<br/>
-              Help Your Community
-            </h1>
-            <div className='bannerbtn'>
-              <button className='btn1'>Find Food Near Me</button>
-              <button className='btn2'>Post Your Extra Food</button>
-            </div>
-          </div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className='hiw'>
-          <h2 className='hiwtitle'>How It Works</h2>
-          <div className='steps'>
-            {steps.map((s, i) => (
-              <div className="step_card" key={s.title}>
-                <div className="step_icon">{s.icon}</div>
-                <p className="step_number">Step {i + 1}</p>
-                <div className="divider" />
-                <p className="steps_title">{s.title}</p>
-                <p className="steps_desc">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-      </div>
-    </>
+    <Router> {/* Wrapped in Router to enable application-wide navigation */}
+      <Routes> {/* Added Routes container to manage different page paths */}
+        <Route path="/" element={<Home />} /> {/* Defined root path for Home page */}
+        <Route path="/Login" element={<Login />} /> {/* Defined path for Login page */}
+        <Route path="/Signup" element={<Signup />} /> {/* Defined path for Signup page */}
+        <Route path="/HowItWorks" element={<HowItWorks />} /> {/* Defined path for How It Works page */}
+        <Route path="/UploadFoodDetails" element={<UploadFoodDetails />} /> {/* Defined path for Food Upload page */}
+        <Route path="/Dashboard" element={<CDashboard />} /> {/* Added path for the new demo Dashboard */}
+        <Route path="/donor-profile" element={<DonorProfile />} />
+        <Route path="/receiver-profile" element={<ReceiverProfile />} />
+        <Route path="/about" element={<About />} /> 
+        <Route path="/recipient-past-orders" element={<RecipientPastOrders />} />
+        <Route path="/donor-past-listings" element={<DonorPastListings />} />
+        <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
+        <Route path="/donor-dashboard" element={<DonorDashboard />} />
+      </Routes>
+    </Router>
   )
 }
 

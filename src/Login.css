@@ -286,3 +286,20 @@
     min-height: 16px;
     flex-shrink: 0;
 }
+.popup {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.success_popup { background: #d4edda; color: #2d7a3a; }
+.error_popup   { background: #f8d7da; color: #842029; }
+.error_popup button { background: none; border: none; cursor: pointer; font-size: 16px; color: #842029; }
