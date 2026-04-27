@@ -99,6 +99,10 @@ function Signup({ setCurrentPage }) {
                 <div className="waiver_modal">
                     <div className="waiver_content">
                         <h3>Liability Waiver</h3>
+                        <p className="waiver_intro_text">
+                             Scroll through the waiver below before accepting.
+                        </p>
+
 
                         <div className="waiver_box" onScroll={handleWaiverScroll}>
                             <p>
