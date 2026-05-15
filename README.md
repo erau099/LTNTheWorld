@@ -1,3 +1,58 @@
+# 🌍 Lighten The World
+https://ltn-the-world.vercel.app/
+
+## 📌 Project Overview
+Lighten The World is a completely web based food donation and receiving app, seeking to service Sacramento in providing a platform that easily allows individuals to submit their food donations into a listable, filterable catalog that allows users in need to claim and pickup those donations. 
+
+## 🛠️ Tech Stack
+### Frontend
+* Programming Language: JavaScript, HTML, CSS
+* Framework: REACT
+### Backend
+* Programming Language: Java, MySQL
+* Framework: Springboot
+
+
+## 🌟 Core Features
+
+### User Authentication
+* User signup and login
+* Secure authentication
+* Role selection (Donor or Recipient)
+* User profile management
+
+### Food Sharing
+* Upload food listings
+* Add food descriptions
+* Upload food images
+* Set pickup time and date
+* Add pickup instructions
+
+### Location Services
+* Pickup location selection
+* Maps integration
+* Nearby food discovery
+
+### Dashboard Features
+* Browse available food listings
+* Filter by category, location, time
+* View listings history
+* Add, edit, or delete listings
+* Leave a review
+
+## 📝 Jira
+
+
+## 🧪 Testing
+
+## 🚀 Deployment
+
+## 👨‍💻 Developer Instructions
+
+## 👥 Team Members
+
+## 📄 License
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
