@@ -80,8 +80,7 @@ function Home() {
                 </>
             ) : (
                 <>
-                    <Link to="/Login"><button className='loginbtn'>Login</button></Link>
-                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+
                 </>
             )}
             <Link to="/recipient-dashboard"><button className="headerbtn">Recipient Dashboard</button></Link>

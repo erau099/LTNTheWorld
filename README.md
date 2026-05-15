@@ -1,4 +1,4 @@
-# 🌍 Lighten The World
+# 🌍 Love Thy Neighbor
 https://ltn-the-world.vercel.app/
 
 ## 📌 Project Overview
