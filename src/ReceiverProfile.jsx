@@ -262,8 +262,19 @@ export default function ReceiverProfile() {
 
           <button className="rp-saveBtn" type="submit" disabled={!canSave}>
             Save Changes
-          </button>
+          </button>         
         </form>
+        {/* Read-only waiver status shown on the user's profile */}
+        <div className="waiver_signed_info">
+          <span className="waiver_signed_title">
+            Waiver Signed
+          </span>
+          <p className="waiver_signed_date">
+            {user?.waiver?.acceptedAt
+            ? new Date(user.waiver.acceptedAt).toLocaleString()
+            : "Waiver date unavailable"}
+          </p>
+        </div>
       </div>
     </div>
   );
