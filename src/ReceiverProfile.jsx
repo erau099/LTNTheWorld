@@ -5,6 +5,7 @@ import "./index.css";
 import "./App.css";
 import "./CDashboard.css";
 import "./ReceiverProfile.css";
+import WaiverSummary from "./waivers/WaiverSummary";
 
 const NAV_LINKS = ["Discover", "Orders"];
 const DROPDOWN = ["Profile", "Swap View", "Sign Out"];

@@ -1,5 +1,17 @@
-// Temporary waiver service used until the backend/database is connected.
-// Later, these functions can be replaced with API calls to the Spring Boot backend.
+// Waiver service for handling waiver acceptance data on the frontend.
+//
+// createWaiverRecord():
+// - Marks the waiver as accepted
+// - Records the exact acceptance date/time
+// - Stores the current waiver version
+//
+// getWaiverFromUser():
+// - Checks whether a user object has waiver data
+// - Returns the stored waiver record if one exists
+//
+// For now, this works with the temporary frontend/localStorage setup.
+// Later, these functions can be updated to send or retrieve waiver data
+// through the Spring Boot API once PostgreSQL is connected.
 
 export const WAIVER_VERSION = "1.0";
 
