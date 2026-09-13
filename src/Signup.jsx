@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom"; // Added useNavigate for redirection
 import { signup } from "./utils/auth"; // Imported local auth utility for signup logic
+import { createWaiverRecord } from "./utils/waiverService";
 
 function Signup() {
     const navigate = useNavigate(); // Hook to programmatically navigate between pages
@@ -65,7 +66,13 @@ function Signup() {
         }
 
         // Save user data to localStorage via auth utility
-        const result = signup(formData);
+        const waiver = createWaiverRecord();
+
+        const result = signup({
+            ...formData,
+            waiver
+        });
+
         if (result.success) {
             alert("Account created successfully!");
             navigate("/Login"); // Redirect to login on successful signup
