@@ -1,0 +1,3 @@
+Changes to postgreSQL lovethyneighbordb:
+Added tables "admins" and "food" into lovethyneighbor database
+Added foreign keys to "admins" table and "food" table
