@@ -14,6 +14,7 @@ import DonorPastListings from "./donor-listings/DonorPastListings";
 import RecipientDashboard from './recipient-dashboard/RecipientDashboard.jsx'
 import DonorDashboard from './donor-dashboard/DonorDashboard.jsx'
 import UploadFoodLocation from './food-upload/UploadFoodLocation.jsx'
+import AdminDashboard from "./admin/AdminDashboard.jsx";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/donor-past-listings" element={<DonorPastListings />} />
         <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
         <Route path="/donor-dashboard" element={<DonorDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
     </Router>
   )
