@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./AdminDashboard.css";
+import AdminHeader from "./AdminHeader";
 
 function AdminDashboard() {
 
@@ -13,45 +14,46 @@ function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
+        
+        <AdminHeader />
+            <main className="admin-main">
 
-      <main className="admin-main">
+                {/* Admin Dashboard Title */}
+                <section className="admin-welcome">
+                <h1>Admin Dashboard</h1>
+                <p>
+                    Manage users and review activity across the Lighten The World
+                    platform.
+                </p>
+                </section>
 
-        {/* Admin Dashboard Title */}
-        <section className="admin-welcome">
-          <h1>Admin Dashboard</h1>
-          <p>
-            Manage users and review activity across the Lighten The World
-            platform.
-          </p>
-        </section>
+                {/* Dashboard Overview */}
+                <section className="admin-overview">
 
-        {/* Dashboard Overview */}
-        <section className="admin-overview">
+                <div className="admin-card">
+                    <h2>Total Users</h2>
+                    <p className="admin-card-number">
+                    {dashboardStats.totalUsers}
+                    </p>
+                </div>
 
-          <div className="admin-card">
-            <h2>Total Users</h2>
-            <p className="admin-card-number">
-              {dashboardStats.totalUsers}
-            </p>
-          </div>
+                <div className="admin-card">
+                    <h2>Active Listings</h2>
+                    <p className="admin-card-number">
+                    {dashboardStats.activeListings}
+                    </p>
+                </div>
 
-          <div className="admin-card">
-            <h2>Active Listings</h2>
-            <p className="admin-card-number">
-              {dashboardStats.activeListings}
-            </p>
-          </div>
+                <div className="admin-card">
+                    <h2>Pending Reports</h2>
+                    <p className="admin-card-number">
+                    {dashboardStats.pendingReports}
+                    </p>
+                </div>
 
-          <div className="admin-card">
-            <h2>Pending Reports</h2>
-            <p className="admin-card-number">
-              {dashboardStats.pendingReports}
-            </p>
-          </div>
+                </section>
 
-        </section>
-
-      </main>
+            </main>
 
     </div>
   );
