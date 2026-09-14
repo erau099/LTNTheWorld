@@ -5,6 +5,7 @@ import "./index.css";
 import "./App.css";
 import "./CDashboard.css";
 import "./ReceiverProfile.css";
+import WaiverText from "./Waivers/WaiverText.jsx";
 
 const NAV_LINKS = ["Discover", "Orders"];
 const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
@@ -61,6 +62,8 @@ export default function ReceiverProfile() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [user, setUser] = useState({ firstName: "Test" });
+
+  const [showSignedWaiver, setShowSignedWaiver] = useState(false);
 
   useEffect(() => {
 
@@ -264,7 +267,53 @@ export default function ReceiverProfile() {
             Save Changes
           </button>
         </form>
+
+        {/* Read-only waiver status shown on the user's profile */}
+        <div className="waiver_signed_info">
+          <span className="waiver_signed_title">
+            Waiver Signed
+          </span>
+
+          <p className="waiver_signed_date">
+            {user?.waiver?.acceptedAt
+              ? new Date(user.waiver.acceptedAt).toLocaleString()
+              : "Waiver date unavailable"}
+          </p>
+
+          <button
+            type="button"
+            className="waiver_view_btn"
+            onClick={() => setShowSignedWaiver(true)}
+          >
+            View Waiver
+          </button>
+        </div>
       </div>
+
+      {/* Read-only signed waiver modal */}
+      {showSignedWaiver && (
+        <div className="waiver_modal">
+          <div className="waiver_content">
+            <h3>Signed Liability Waiver</h3>
+
+            <p className="waiver_intro_text">
+              This waiver is shown for reference only.
+            </p>
+
+            <div className="waiver_box">
+              <WaiverText />
+            </div>
+
+            <button
+              type="button"
+              className="submit_btn"
+              onClick={() => setShowSignedWaiver(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

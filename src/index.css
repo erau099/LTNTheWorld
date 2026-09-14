@@ -335,3 +335,39 @@
   color: #666;
   line-height: 1.55;
 }
+/*----------------------waiverstuff-------------------------------------------------------
+/* Displays the user's waiver status and signing date */
+.waiver_signed_info {
+  margin-top: 20px;
+}
+
+/* Waiver status label */
+.waiver_signed_title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #4f4f4f;
+}
+
+/* Read-only waiver signing date */
+.waiver_signed_date {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #8a8a8a;
+}
+
+/* Opens the read-only waiver from the profile page */
+.waiver_view_btn {
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  background-color: #2d7a3a;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Hover state for the waiver view button */
+.waiver_view_btn:hover {
+  background-color: #1f5a29;
+}
