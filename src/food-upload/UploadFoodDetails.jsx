@@ -63,7 +63,7 @@ function UploadFoodDetails({}) {
 
                     <div className="upload_nav_btn">
                         <button className="upload_cancel_btn">Cancel</button>
-                        <button className="upload_next_btn">Next: Location & Time</button>
+                        <Link to="/UploadFoodLocation"><button className="upload_next_btn">Next: Location & Time</button></Link>
                     </div>
                 </form>
             </div>
