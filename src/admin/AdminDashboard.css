@@ -59,14 +59,69 @@
   margin: 0;
 }
 
-/* Mobile Layout */
+/* User Management */
 
-@media (max-width: 768px) {
-  .admin-main {
-    padding: 40px 20px;
-  }
+.admin-user-management {
+  margin-top: 60px;
+}
 
-  .admin-overview {
-    grid-template-columns: 1fr;
-  }
+.admin-section-header {
+  margin-bottom: 24px;
+}
+
+.admin-section-header h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a3a1f;
+  margin: 0 0 8px 0;
+}
+
+.admin-section-header p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* User Management Table */
+
+.admin-user-table {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.admin-user-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1fr 1fr 1fr;
+  gap: 20px;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.admin-user-row:last-child {
+  border-bottom: none;
+}
+
+.admin-user-table-header {
+  background-color: #f0ece6;
+  font-weight: 700;
+  color: #1a3a1f;
+}
+
+/* User Action Button */
+
+.admin-user-action {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2d7a3a;
+  color: white;
+  cursor: pointer;
+}
+
+.admin-user-action:hover {
+  opacity: 0.9;
 }

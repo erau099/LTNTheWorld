@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./AdminDashboard.css";
 import AdminHeader from "./AdminHeader";
+import AdminUserManagement from "./AdminUserManagement";
 
 function AdminDashboard() {
 
@@ -16,6 +17,8 @@ function AdminDashboard() {
     <div className="admin-dashboard">
         
         <AdminHeader />
+
+
             <main className="admin-main">
 
                 {/* Admin Dashboard Title */}
@@ -52,6 +55,9 @@ function AdminDashboard() {
                 </div>
 
                 </section>
+
+                        {/* User Management */}
+                        <AdminUserManagement />
 
             </main>
 
