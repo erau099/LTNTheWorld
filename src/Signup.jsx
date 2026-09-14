@@ -87,7 +87,6 @@ function Signup() {
                     dateOfBirth: formData.dob,       // must be "YYYY-MM-DD" format for Spring to parse
                     phoneNumber: formData.phoneNumber,
                     role: formData.role,              // already lowercase from the <select>, don't uppercase it
-                    role: formData.role.toUpperCase(), // Spring expects DONOR or RECIPIENT
                     waiver
                 })
             });
