@@ -15,6 +15,9 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername()); // We use username as email
@@ -41,6 +44,45 @@ public class AuthController {
         );
 
         userRepository.save(newUser);
+        return ResponseEntity.ok("success");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        User user = userOpt.get();
+        user.setPassword(request.getNewPassword());
+        userRepository.save(user);
+
+        emailService.sendPasswordResetNotification(user.getEmail());
+
+        return ResponseEntity.ok("success");
+    }
+
+    @PostMapping("/change-email")
+    public ResponseEntity<?> changeEmail(@RequestBody ChangeEmailRequest request) {
+        Optional<User> userOpt = userRepository.findByEmail(request.getCurrentEmail());
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already in use");
+        }
+
+        User user = userOpt.get();
+        String oldEmail = user.getEmail();
+        user.setEmail(request.getNewEmail());
+        userRepository.save(user);
+
+        emailService.sendEmailChangeNotification(oldEmail, request.getNewEmail());
+
         return ResponseEntity.ok("success");
     }
 }
@@ -86,4 +128,24 @@ class SignupRequest {
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
     public void setRole(String role) { this.role = role; }
+}
+
+class ResetPasswordRequest {
+    private String email;
+    private String newPassword;
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getNewPassword() { return newPassword; }
+    public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
+}
+
+class ChangeEmailRequest {
+    private String currentEmail;
+    private String newEmail;
+
+    public String getCurrentEmail() { return currentEmail; }
+    public void setCurrentEmail(String currentEmail) { this.currentEmail = currentEmail; }
+    public String getNewEmail() { return newEmail; }
+    public void setNewEmail(String newEmail) { this.newEmail = newEmail; }
 }
