@@ -80,9 +80,13 @@ function Signup() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name: `${formData.firstName} ${formData.lastName}`,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
                     email: formData.email,
                     password: formData.password,
+                    dateOfBirth: formData.dob,       // must be "YYYY-MM-DD" format for Spring to parse
+                    phoneNumber: formData.phoneNumber,
+                    role: formData.role,              // already lowercase from the <select>, don't uppercase it
                     role: formData.role.toUpperCase(), // Spring expects DONOR or RECIPIENT
                     waiver
                 })
