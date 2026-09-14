@@ -202,7 +202,7 @@ function Signup() {
                         <div className="create_col">
 
                             <input
-                                type="text"
+                                type="date"
                                 name="dob"
                                 placeholder="DOB: MM/DD/YYYY"
                                 value={formData.dob}
