@@ -14,6 +14,8 @@ import DonorPastListings from "./donor-listings/DonorPastListings";
 import RecipientDashboard from './recipient-dashboard/RecipientDashboard.jsx'
 import DonorDashboard from './donor-dashboard/DonorDashboard.jsx'
 import UploadFoodLocation from './food-upload/UploadFoodLocation.jsx'
+import UploadFoodPhoto from './food-upload/UploadFoodPhoto.jsx'
+import FoodSubmission from './food-upload/FoodSubmission.jsx'
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/HowItWorks" element={<HowItWorks />} /> {/* Defined path for How It Works page */}
         <Route path="/UploadFoodDetails" element={<UploadFoodDetails />} /> {/* Defined path for Food Upload page */}
         <Route path="/UploadFoodLocation" element={<UploadFoodLocation />} />
+        <Route path="/UploadFoodPhoto" element={<UploadFoodPhoto />} />
+        <Route path="/FoodSubmission" element={<FoodSubmission />} />
         <Route path="/Dashboard" element={<CDashboard />} /> {/* Added path for the new demo Dashboard */}
         <Route path="/donor-profile" element={<DonorProfile />} />
         <Route path="/receiver-profile" element={<ReceiverProfile />} />

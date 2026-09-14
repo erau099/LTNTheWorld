@@ -47,8 +47,8 @@ function UploadFoodLocation({}) {
 
 
                     <div className="upload_nav_btn">
-                        <button className="upload_cancel_btn">Back</button>
-                        <Link to="/UploadFoodLocation"><button className="upload_next_btn">Upload Photo</button></Link>
+                        <Link to="/UploadFoodDetails"><button className="upload_cancel_btn">Back</button></Link>
+                        <Link to="/UploadFoodPhoto"><button className="upload_next_btn">Next:Upload Photo</button></Link>
                     </div>
                 </form>
             </div>
