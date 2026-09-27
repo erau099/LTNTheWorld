@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -14,6 +15,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -27,7 +31,8 @@ public class AuthController {
         
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername()); // We use username as email
 
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(request.getPassword())) {
+        // Check if user exists and password matches (hashed password comparison)
+        if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
             User user = userOpt.get();
             return ResponseEntity.ok(new LoginResponse("success", user.getName(), user.getRole()));
         } else {
@@ -45,7 +50,7 @@ public class AuthController {
             request.getFirstName(),
             request.getLastName(),
             request.getEmail(),
-            request.getPassword(),
+            passwordEncoder.encode(request.getPassword()), // Call encode method to hash the password before saving
             request.getDateOfBirth(),
             request.getPhoneNumber(),
             request.getRole()
