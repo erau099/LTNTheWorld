@@ -11,6 +11,17 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    public void sendSignupConfirmation(String toEmail, String firstName, String verificationLink) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Confirm your Love Thy Neighbor account");
+        message.setText("Hi " + firstName + ",\n\n"
+                + "Thanks for signing up for Love Thy Neighbor. Please confirm your account by clicking the link below:\n\n"
+                + verificationLink + "\n\n"
+                + "If you did not create this account, you can ignore this email.");
+        mailSender.send(message);
+    }
+
     public void sendPasswordResetNotification(String toEmail) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);

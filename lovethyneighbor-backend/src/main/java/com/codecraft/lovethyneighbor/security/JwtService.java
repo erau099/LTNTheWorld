@@ -25,7 +25,7 @@ public class JwtService {
 
     // Called at login — builds a signed token containing just userId and role
     // Note: no PII
-    public String generateToken(Long userId, String role) {
+    public String generateToken(java.util.UUID userId, String role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + EXPIRATION_MILLIS);
 

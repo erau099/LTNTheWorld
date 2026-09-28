@@ -40,6 +40,14 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private java.time.LocalDateTime createdAt;
 
+    // Whether the user has clicked the verification link sent to their email
+    @Column(name = "verified", nullable = false, columnDefinition = "boolean default false")
+    private boolean verified = false;
+
+    // Random token emailed to the user at signup; cleared once verified
+    @Column(name = "verification_token")
+    private String verificationToken;
+
     // Default constructor
     public User() {}
 
@@ -78,6 +86,10 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+    public boolean isVerified() { return verified; }
+    public void setVerified(boolean verified) { this.verified = verified; }
+    public String getVerificationToken() { return verificationToken; }
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
 
     // Convenience method so existing AuthController code (getName()) doesn't break
     public String getName() { return firstName + " " + lastName; }
