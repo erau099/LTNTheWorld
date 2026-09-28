@@ -2,12 +2,15 @@ package com.codecraft.lovethyneighbor;
 import com.codecraft.lovethyneighbor.security.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -26,6 +29,9 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
+    @Value("${app.backend-url}")
+    private String backendUrl;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         /*
@@ -42,6 +48,12 @@ public class AuthController {
         // Check if user exists and password matches (hashed password comparison)
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
             User user = userOpt.get();
+
+            if (!user.isVerified()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Please verify your email before logging in");
+            }
+
             String token = jwtService.generateToken(user.getId(), user.getRole());
             return ResponseEntity.ok(new LoginResponse("success", user.getName(), user.getRole(), token));
         } else {
@@ -79,8 +91,32 @@ public class AuthController {
             request.getRole()
         );
 
+        String token = UUID.randomUUID().toString();
+        newUser.setVerificationToken(token);
+
         userRepository.save(newUser);
+
+        String verificationLink = backendUrl + "/api/auth/verify-email?token=" + token;
+        emailService.sendSignupConfirmation(newUser.getEmail(), newUser.getFirstName(), verificationLink);
+
         return ResponseEntity.ok("success");
+    }
+
+    @GetMapping(value = "/verify-email", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
+        Optional<User> userOpt = userRepository.findByVerificationToken(token);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("<h2>Invalid or expired verification link.</h2>");
+        }
+
+        User user = userOpt.get();
+        user.setVerified(true);
+        user.setVerificationToken(null);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("<h2>Your email has been verified. You can now log in.</h2>");
     }
 
     @PostMapping("/reset-password")
