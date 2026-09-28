@@ -1,9 +1,12 @@
 package com.codecraft.lovethyneighbor;
 
+import com.codecraft.lovethyneighbor.security.JwtService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -14,10 +17,7 @@ import java.util.Base64;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = {
-    "http://localhost:5173",
-    "http://localhost:5174"
-})
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -25,24 +25,33 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
     private EmailService emailService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // Testing purposes ONLY REMOVE WHEN FINISHED
-        if (request.getUsername().equals("admin")
-                && request.getPassword().equals("1234")) {
-            return ResponseEntity.ok(
-                new LoginResponse("success", "Admin", "ADMIN")
-            );
-        }
 
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
 
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(request.getPassword())) {
+        // Check if user exists and password matches
+        if (userOpt.isPresent()
+                && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
+
             User user = userOpt.get();
+            String token = jwtService.generateToken(user.getId(), user.getRole());
+
             return ResponseEntity.ok(
-                new LoginResponse("success", user.getName(), user.getRole())
+                    new LoginResponse(
+                            "success",
+                            user.getName(),
+                            user.getRole(),
+                            token
+                    )
             );
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("error");
@@ -51,41 +60,63 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("User already exists");
         }
 
+        // Only allow valid account roles to be stored
+        String role = request.getRole();
+
+        if (role == null ||
+                (!role.equals("donor")
+                        && !role.equals("recipient")
+                        && !role.equals("both"))) {
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid role");
+        }
+
         User newUser = new User(
-            request.getFirstName(),
-            request.getLastName(),
-            request.getEmail(),
-            request.getPassword(),
-            request.getDateOfBirth(),
-            request.getPhoneNumber(),
-            request.getRole()
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getDateOfBirth(),
+                request.getPhoneNumber(),
+                request.getRole()
         );
 
         userRepository.save(newUser);
+
         return ResponseEntity.ok("success");
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+    public ResponseEntity<?> forgotPassword(
+            @RequestBody ForgotPasswordRequest request) {
+
+        Optional<User> userOpt =
+                userRepository.findByEmail(request.getEmail());
 
         if (userOpt.isPresent()) {
+
             User user = userOpt.get();
 
             String rawToken = generateResetToken();
             String tokenHash = hashToken(rawToken);
 
             user.setResetTokenHash(tokenHash);
-            user.setResetTokenExpiration(LocalDateTime.now().plusMinutes(30));
+            user.setResetTokenExpiration(
+                    LocalDateTime.now().plusMinutes(30)
+            );
+
             userRepository.save(user);
 
             String resetLink =
-                    "http://localhost:5173/#/reset-password?token=" + rawToken;
+                    "http://localhost:5173/#/reset-password?token="
+                            + rawToken;
 
             emailService.sendPasswordResetEmail(
                     user.getEmail(),
@@ -99,9 +130,12 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<?> resetPassword(
+            @RequestBody ResetPasswordRequest request) {
 
-        if (request.getToken() == null || request.getToken().isBlank()) {
+        if (request.getToken() == null
+                || request.getToken().isBlank()) {
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Invalid reset token");
         }
@@ -119,10 +153,12 @@ public class AuthController {
         User user = userOpt.get();
 
         if (user.getResetTokenExpiration() == null
-                || user.getResetTokenExpiration().isBefore(LocalDateTime.now())) {
+                || user.getResetTokenExpiration()
+                .isBefore(LocalDateTime.now())) {
 
             user.setResetTokenHash(null);
             user.setResetTokenExpiration(null);
+
             userRepository.save(user);
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -130,35 +166,43 @@ public class AuthController {
         }
 
         if (request.getNewPassword() == null
-                || !request.getNewPassword().equals(request.getConfirmPassword())) {
+                || !request.getNewPassword()
+                .equals(request.getConfirmPassword())) {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Passwords do not match");
         }
 
         if (!isValidPassword(request.getNewPassword())) {
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(
-                        "Password must be at least 8 characters and include "
-                        + "uppercase, lowercase, a number, and a special character."
+                            "Password must be at least 8 characters and include "
+                                    + "uppercase, lowercase, a number, and a special character."
                     );
         }
 
-        user.setPassword(request.getNewPassword());
+        user.setPassword(
+                passwordEncoder.encode(request.getNewPassword())
+        );
 
-        // Immediately invalidate token so it can only be used once
+        // Invalidate token immediately after use
         user.setResetTokenHash(null);
         user.setResetTokenExpiration(null);
 
         userRepository.save(user);
 
-        emailService.sendPasswordResetNotification(user.getEmail());
+        emailService.sendPasswordResetNotification(
+                user.getEmail()
+        );
 
         return ResponseEntity.ok("success");
     }
 
     @PostMapping("/change-email")
-    public ResponseEntity<?> changeEmail(@RequestBody ChangeEmailRequest request) {
+    public ResponseEntity<?> changeEmail(
+            @RequestBody ChangeEmailRequest request) {
+
         Optional<User> userOpt =
                 userRepository.findByEmail(request.getCurrentEmail());
 
@@ -199,26 +243,34 @@ public class AuthController {
 
     private String hashToken(String token) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest =
+                    MessageDigest.getInstance("SHA-256");
 
-            byte[] hashBytes = digest.digest(
-                    token.getBytes(StandardCharsets.UTF_8)
-            );
+            byte[] hashBytes =
+                    digest.digest(
+                            token.getBytes(StandardCharsets.UTF_8)
+                    );
 
             StringBuilder hexString = new StringBuilder();
 
             for (byte b : hashBytes) {
-                hexString.append(String.format("%02x", b));
+                hexString.append(
+                        String.format("%02x", b)
+                );
             }
 
             return hexString.toString();
 
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Could not hash reset token", e);
+            throw new RuntimeException(
+                    "Could not hash reset token",
+                    e
+            );
         }
     }
 
     private boolean isValidPassword(String password) {
+
         if (password == null || password.length() < 8) {
             return false;
         }
@@ -229,18 +281,25 @@ public class AuthController {
         boolean hasSpecial = false;
 
         for (char c : password.toCharArray()) {
+
             if (Character.isUpperCase(c)) {
                 hasUpper = true;
+
             } else if (Character.isLowerCase(c)) {
                 hasLower = true;
+
             } else if (Character.isDigit(c)) {
                 hasDigit = true;
+
             } else {
                 hasSpecial = true;
             }
         }
 
-        return hasUpper && hasLower && hasDigit && hasSpecial;
+        return hasUpper
+                && hasLower
+                && hasDigit
+                && hasSpecial;
     }
 }
 
@@ -259,16 +318,24 @@ class LoginResponse {
     private String status;
     private String name;
     private String role;
+    private String token;
 
-    public LoginResponse(String status, String name, String role) {
+    public LoginResponse(
+            String status,
+            String name,
+            String role,
+            String token) {
+
         this.status = status;
         this.name = name;
         this.role = role;
+        this.token = token;
     }
 
     public String getStatus() { return status; }
     public String getName() { return name; }
     public String getRole() { return role; }
+    public String getToken() { return token; }
 }
 
 class SignupRequest {
