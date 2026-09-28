@@ -17,6 +17,8 @@ import UploadFoodLocation from './food-upload/UploadFoodLocation.jsx'
 import UploadFoodPhoto from './food-upload/UploadFoodPhoto.jsx'
 import FoodSubmission from './food-upload/FoodSubmission.jsx'
 import AdminDashboard from "./admin/AdminDashboard.jsx";
+import ForgotPassword from "./ForgotPassword.jsx"
+import ResetPassword from "./ResetPassword.jsx"
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/" element={<Home />} /> {/* Defined root path for Home page */}
         <Route path="/Login" element={<Login />} /> {/* Defined path for Login page */}
         <Route path="/Signup" element={<Signup />} /> {/* Defined path for Signup page */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/HowItWorks" element={<HowItWorks />} /> {/* Defined path for How It Works page */}
         <Route path="/UploadFoodDetails" element={<UploadFoodDetails />} /> {/* Defined path for Food Upload page */}
         <Route path="/UploadFoodLocation" element={<UploadFoodLocation />} />

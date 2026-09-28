@@ -1,6 +1,7 @@
 package com.codecraft.lovethyneighbor;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "logins")
@@ -30,6 +31,12 @@ public class User {
     @Column(nullable = false)
     private String role; // must be exactly "donor", "recipient", or "both" — lowercase, matches DB CHECK constraint
 
+    @Column(name = "reset_token_hash")
+    private String resetTokenHash;
+
+    @Column(name = "reset_token_expiration")
+    private LocalDateTime resetTokenExpiration;
+    
     // Default constructor
     public User() {}
 
@@ -61,6 +68,22 @@ public class User {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getResetTokenHash() {
+    return resetTokenHash;
+    }
+
+    public void setResetTokenHash(String resetTokenHash) {
+       this.resetTokenHash = resetTokenHash;
+    }
+
+    public LocalDateTime getResetTokenExpiration() {
+     return resetTokenExpiration;
+    }
+
+    public void setResetTokenExpiration(LocalDateTime resetTokenExpiration) {
+        this.resetTokenExpiration = resetTokenExpiration;
+    }
 
     // Convenience method so existing AuthController code (getName()) doesn't break
     public String getName() { return firstName + " " + lastName; }
