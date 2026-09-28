@@ -44,6 +44,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists");
         }
 
+        // Only allow valid account roles to be stored
+        String role = request.getRole();
+
+        if (
+            role == null ||
+            (!role.equals("donor") &&
+             !role.equals("recipient") &&
+             !role.equals("both"))
+        ) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Invalid role");
+        }
+
         User newUser = new User(
             request.getFirstName(),
             request.getLastName(),
