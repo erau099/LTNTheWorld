@@ -1,5 +1,8 @@
 package com.codecraft.lovethyneighbor;
 
+import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
+import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -22,9 +25,12 @@ public class User {
     private String password;
 
     @Column(name = "date_of_birth", nullable = false)
+    @Convert(converter = EncryptedLocalDateConverter.class)
     private java.time.LocalDate dateOfBirth;
 
+    // Encrypted using AES-256-GCM with a unique IV for each record, stored in the database as base64-encoded string
     @Column(name = "phone_number")
+    @Convert (converter = EncryptedStringConverter.class)
     private String phoneNumber;
 
     @Column(nullable = false)

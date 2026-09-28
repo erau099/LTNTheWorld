@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+// import { useEffect } from 'react'
+import { useAuth } from "../context/AuthContext";
 
 import "../index.css";
 import "../App.css";
@@ -8,6 +10,7 @@ import "./DonorDashboard.css";
 
 function DonorDashboard() {
     const navigate = useNavigate();
+	const { logout } = useAuth();
 
 	// Tracks if the page is scrolled so the header can change style.
 	const [scrolled, setScrolled] = useState(false);
@@ -44,7 +47,8 @@ function DonorDashboard() {
 		},
 	];
 
-	useEffect(() => {
+	// Scroll + dropdown
+	useEffect(() => {		
 		const onScroll = () => setScrolled(window.scrollY > 10);
 
 		function handleClickOut(e) {
@@ -67,6 +71,7 @@ function DonorDashboard() {
 		if (item === "Profile") {
 			navigate("/donor-profile");
 		} else if (item === "Sign Out") {
+			logout();
 			navigate("/");
 		}
 
