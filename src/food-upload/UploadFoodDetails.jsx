@@ -2,6 +2,58 @@ import "./UploadFood.css"
 import { Link } from "react-router-dom"
 
 function UploadFoodDetails({}) {
+    //Form data for the food details form
+    const [formData, setFormData] = useState({
+        listingTitle: "",
+        description: "",
+        tag: "",
+        allergens: "",
+    });
+    
+    const [error, setError] = useState(""); // State to hold and display error messages
+
+    // Generic handler to update form based on input names for food details form 
+    const handleChange = (e) => {
+        const {name, value} = e.target;
+        setFormData((prev => ({...prev, [name]: value})));
+    };
+
+    const handleSubmitDetails = async (e) => {
+        e.preventDefault();
+        setError("");
+        if(
+            !formData.listingTitle ||
+            !formData.description ||
+            !formData.tag ||
+            !formData.allergens
+            
+        ) {
+            setError("Please set up food details before proceeding."); 
+            return;
+        }
+        try {
+            const response = await fetch('api/auth/food', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    listingTitle:formData.listingTitle,
+                    description:formData.description,
+                    tag:formData.tag,
+                    allergens:formData.allergens
+                }),
+            });
+            if(response.ok){
+                alert("Food details submitted successfully!");
+                navigate("/DonorDashboard");
+            }) else {
+                const message = await response.json();
+                setError(message);
+            }
+        } catch (error) {
+            console.error("Error submitting food details:", error);
+        }
+    }
+
     return(
         <div className="upload_food_details">
 

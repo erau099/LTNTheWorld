@@ -1,8 +1,12 @@
-package com.codecraft.lovethyneighbor;
+package com.codecraft;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.codecraft.lovethyneighbor.User;
+
+
 
 @Entity
 @Table(name = "food")
@@ -15,11 +19,18 @@ public class Food {
 
     @Column(name = "fooditem") private String foodItem;
 
+    @Column(name = "description") private String description;
+
     @Column(name = "user_id") private Long userId;
 
     @Column(name = "tags") private String tags;
 
     @Column(name = "allergens") private String allergens;
+
+    @Column (name = "id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
+    private User user;
 
     public Food() {}
 
