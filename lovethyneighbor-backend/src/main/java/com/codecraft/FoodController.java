@@ -11,7 +11,18 @@ public class FoodController {
     @Autowired private FoodRepository foodRepository;
 
     @PostMapping
-    public ResponseEntity<Food> createFoodListing(@RequestBody Food food) {
+public ResponseEntity<?> createFoodListing(@RequestBody Food food) {
+
+        if (food.getDate() == null ||
+            food.getPickupTime() == null ||
+            food.getFoodItem() == null ||
+            food.getFoodItem().trim().isEmpty() ||
+            food.getUserId() == null) {
+
+            return ResponseEntity.badRequest()
+                    .body("Missing required food listing information.");
+        }
+
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.ok(savedFood);
     }
