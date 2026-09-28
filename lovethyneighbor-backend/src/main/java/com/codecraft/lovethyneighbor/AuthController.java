@@ -1,9 +1,11 @@
 package com.codecraft.lovethyneighbor;
+import com.codecraft.lovethyneighbor.security.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -16,23 +18,32 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired 
+    private JwtService jwtService;
+
+    @Autowired
     private EmailService emailService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // Testing purposes ONLY REMOVE WHEN FINISHED
+        /*
         if (request.getUsername().equals("admin")
                 && request.getPassword().equals("1234")) {
             return ResponseEntity.ok(
                 new LoginResponse("success", "Admin", "ADMIN")
             );
         }
+        */
         
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername()); // We use username as email
 
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(request.getPassword())) {
+        // Check if user exists and password matches (hashed password comparison)
+        if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
             User user = userOpt.get();
-            return ResponseEntity.ok(new LoginResponse("success", user.getName(), user.getRole()));
+            String token = jwtService.generateToken(user.getId(), user.getRole());
+            return ResponseEntity.ok(new LoginResponse("success", user.getName(), user.getRole(), token));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("error");
         }
@@ -44,11 +55,25 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists");
         }
 
+        // Only allow valid account roles to be stored
+        String role = request.getRole();
+
+        if (
+            role == null ||
+            (!role.equals("donor") &&
+             !role.equals("recipient") &&
+             !role.equals("both"))
+        ) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Invalid role");
+        }
+
         User newUser = new User(
             request.getFirstName(),
             request.getLastName(),
             request.getEmail(),
-            request.getPassword(),
+            passwordEncoder.encode(request.getPassword()), // Call encode method to hash the password before saving
             request.getDateOfBirth(),
             request.getPhoneNumber(),
             request.getRole()
@@ -112,16 +137,19 @@ class LoginResponse {
     private String status;
     private String name;
     private String role;
+    private String token;
 
-    public LoginResponse(String status, String name, String role) {
+    public LoginResponse(String status, String name, String role, String token) {
         this.status = status;
         this.name = name;
         this.role = role;
+        this.token = token;
     }
 
     public String getStatus() { return status; }
     public String getName() { return name; }
     public String getRole() { return role; }
+    public String getToken() { return token; }
 }
 
 class SignupRequest {

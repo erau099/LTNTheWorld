@@ -26,9 +26,14 @@ function Login({}) {
             const result = await response.json()
             // result contains status, name, role
             if(result.status === 'success'){
+                // Store the jwt token in localStorage
+                localStorage.setItem('token', result.token)
                 setUser({ name: result.name, role: result.role })
                 setPopup('success')
-                setTimeout(() => navigate('/'), 1500)
+
+                // Determine destination based on role
+                const destination = result.role === 'recipient' ? '/recipient-dashboard' : '/donor-dashboard'
+                setTimeout(() => navigate(destination), 1500)
             } else {
                 setPopup('error')
             }

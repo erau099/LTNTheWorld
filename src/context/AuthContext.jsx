@@ -7,10 +7,12 @@ export const AuthProvider = ({ children }) => {
 
     // Logout clears the global state
     const logout = () => {
+        localStorage.removeItem('token');
         setUser(null);
     };
 
     // Note: No localStorage or Cookies here as per requirement
+    // ^^ I am using localStorage to store the JWT token for now, we can change this to cookies or sessionStorage if needed
     // Volatility: Refreshing the page clears the state because it's only in memory (useState)
 
     return (

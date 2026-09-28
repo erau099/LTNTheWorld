@@ -24,6 +24,7 @@ function RecipientDashboard() {
 			pickup: "Pick up 01/01/2001 @ 16:00 - 17:00",
 			rating: "N/A",
 			category: "Fresh / Hot",
+			allergies: ["Peanut", "Tomato", "Pickles"],
 		},
 		{
 			donor: "Frankie Flummer",
@@ -31,6 +32,7 @@ function RecipientDashboard() {
 			pickup: "Pick up 01/01/2001 @ 16:00 - 17:00",
 			rating: "3.9",
 			category: "Canned",
+			allergies: ["Tomato"],
 		},
 		{
 			donor: "Jane Jonathans",
@@ -42,7 +44,7 @@ function RecipientDashboard() {
 		{
 			donor: "Joshua Joe",
 			food: "Black Beans",
-			pickup: "Pick up 01/01/2001 @ 16:00 - 17:00",
+			pickup: "Pick up: 01/01/2001 @ 16:00 - 17:00",
 			rating: "1.2",
 			category: "Canned",
 		},
@@ -76,6 +78,9 @@ function RecipientDashboard() {
 
 		setDropdownOpen(false);
 	};
+
+	// Handles the cards to be able to be shown when clicked
+	const [selectListing, setSelectListing] = useState(false)
 
 	return (
 		<div className="recipient-dashboard">
@@ -149,7 +154,9 @@ function RecipientDashboard() {
 				{/* Food cards shown to recipients */}
 				<section className="top-picks-grid">
 					{listings.map((item, index) => (
-						<article className="food-card" key={index}>
+						<article className="food-card" 
+									key={index} 
+									onClick={() => setSelectListing(item)}>
 							<div className="food-image">
 								<span className="category-tag">{item.category}</span>
 							</div>
@@ -170,6 +177,43 @@ function RecipientDashboard() {
 							</div>
 						</article>
 					))}
+				</section>
+				<section>
+					{selectListing && (
+						<div className="food_card_popup"
+								onClick={() => setSelectListing(false)}>
+							<div className="food_popup_background"
+								onClick={(e) => e.stopPropagation()}>
+
+									<div className="upload_banner">
+										<section className="upload_header">
+											<p className="num_text_on">{selectListing.food}</p>
+										</section>
+
+										<div className="food_popup_image"></div>
+
+										<div className="food_popup_info">
+											<p className="donor_name_popup">Posted by: {selectListing.donor}</p>
+											<p className="category_popup">Category: {selectListing.category}</p>
+											<p className="pickup_popup">{selectListing.pickup}</p>
+											<p className="rating_popup">★ {selectListing.rating}</p>
+											<div className="allergies_popup">
+												<p> Allergies: </p>
+												{selectListing.allergies?.map((allergy, index) => (
+													<span className="allergy_btn" key={index}> {allergy}</span>
+												))}
+											</div>
+											<button className="upload_cancel_btn"
+												onClick={() => setSelectListing(false)}>Back</button>
+											<button className="upload_next_btn">Submit</button>
+										</div>
+									</div>
+								
+
+							</div>
+						</div>
+					)}
+
 				</section>
 			</main>
 		</div>
