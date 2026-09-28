@@ -21,6 +21,7 @@
     height: 56px;
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 18px 34px;
     gap: 50px;
     background-color: #d9d9d9;
@@ -158,6 +159,60 @@
 .upload_next_btn:active {
     transform: translateY(1px);
 }
+
+.upload_square_box {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 300px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    gap: 24px;
+    box-sizing: border-box;
+}
+
+.upload_photo_btn {
+    display: flex;
+    gap: 16px;
+}
+
+.submission_format {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+}
+
+.circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #2d7a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.check_logo {
+    width: 40px;
+    height: 40px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.submission_description {
+    gap: 16px;
+    padding-bottom: 40px;
+    padding-top: 20px;
+}
+
 
 
 
