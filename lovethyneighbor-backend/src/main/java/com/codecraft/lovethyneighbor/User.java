@@ -6,8 +6,8 @@ import jakarta.persistence.*;
 @Table(name = "logins")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private java.util.UUID id;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -45,8 +45,8 @@ public class User {
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public java.util.UUID getId() { return id; }
+    public void setId(java.util.UUID id) { this.id = id; }
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
