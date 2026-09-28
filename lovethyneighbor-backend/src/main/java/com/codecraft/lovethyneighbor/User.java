@@ -30,6 +30,10 @@ public class User {
     @Column(nullable = false)
     private String role; // must be exactly "donor", "recipient", or "both" — lowercase, matches DB CHECK constraint
 
+    // Stores the date and time when the user account is first created
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
     // Default constructor
     public User() {}
 
@@ -43,6 +47,12 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.role = role;
     }
+    
+    // Automatically sets the creation timestamp before the user is saved for the first time
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+    }   
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -61,6 +71,7 @@ public class User {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
 
     // Convenience method so existing AuthController code (getName()) doesn't break
     public String getName() { return firstName + " " + lastName; }
