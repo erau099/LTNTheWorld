@@ -169,7 +169,10 @@ function DonorDashboard() {
 					))}
 
 					{/* Button placeholder for adding a new listing */}
-					<button className="add-listing-button">+</button>
+					<button className="add-listing-button" 
+						onClick={() => navigate("/UploadFoodDetails")}>
+							+
+						</button>
 				</div>
 			</main>
 		</div>

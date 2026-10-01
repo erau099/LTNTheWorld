@@ -102,7 +102,7 @@ function Home() {
             <div className='bannerbtn'>
                 
               {/*Temporary -> Remove after done with upload food pages*/}
-              <Link to="/UploadFoodDetails"><button className='btn1'>Find Food Near Me</button></Link>
+              <button className='btn1'>Find Food Near Me</button>
               <button className='btn2'>Post Your Extra Food</button>
             </div>
           </div>
