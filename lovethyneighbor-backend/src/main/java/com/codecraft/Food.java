@@ -1,10 +1,10 @@
-package com.codecraft;
+package com.codecraft.lovethyneighbor;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.codecraft.lovethyneighbor.User;
+
 
 
 
@@ -27,18 +27,15 @@ public class Food {
 
     @Column(name = "allergens") private String allergens;
 
-    @Column (name = "id", nullable = false)
-    @ManyToOne
-    @JoinColumn(name = "id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
-    private User user;
 
     public Food() {}
 
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem,
+    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
         Long userId, String tags, String allergens) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
+        this.description = description;
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
@@ -72,6 +69,13 @@ public class Food {
         this.foodItem = foodItem;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
     public Long getUserId() {
         return userId;
     }
