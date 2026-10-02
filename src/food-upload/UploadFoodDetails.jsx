@@ -1,5 +1,6 @@
 import "./UploadFood.css"
 import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 function UploadFoodDetails({}) {
     //Form data for the food details form
@@ -53,6 +54,7 @@ function UploadFoodDetails({}) {
             console.error("Error submitting food details:", error);
         }
     }
+    const navigate = useNavigate();
 
     return(
         <div className="upload_food_details">
@@ -114,7 +116,10 @@ function UploadFoodDetails({}) {
                     </div>
 
                     <div className="upload_nav_btn">
-                        <button className="upload_cancel_btn">Cancel</button>
+                        <button className="upload_cancel_btn" 
+                            onClick={() => navigate("/donor-dashboard")}>
+                                Cancel
+                        </button>
                         <Link to="/UploadFoodLocation"><button className="upload_next_btn">Next: Location & Time</button></Link>
                     </div>
                 </form>

@@ -17,7 +17,7 @@ public class Food {
 
     @Column(name = "pickup_time") private LocalDateTime pickupTime;
 
-    @Column(name = "fooditem") private String foodItem;
+    @Column(name = "\"foodItem\"") private String foodItem;
 
     @Column(name = "description") private String description;
 
