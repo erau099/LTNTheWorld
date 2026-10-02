@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -25,12 +26,12 @@ public class JwtService {
 
     // Called at login — builds a signed token containing just userId and role
     // Note: no PII
-    public String generateToken(Long userId, String role) {
+    public String generateToken(UUID userId, String role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + EXPIRATION_MILLIS);
 
         return Jwts.builder()
-                .subject(String.valueOf(userId))   // "sub" claim
+                .subject(userId.toString())   // "sub" claim
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiry)
