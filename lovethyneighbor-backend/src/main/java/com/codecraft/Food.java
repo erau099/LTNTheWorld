@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+
+
+
+
 @Entity
 @Table(name = "food")
 public class Food {
@@ -15,19 +19,23 @@ public class Food {
 
     @Column(name = "\"foodItem\"") private String foodItem;
 
+    @Column(name = "description") private String description;
+
     @Column(name = "user_id") private Long userId;
 
     @Column(name = "tags") private String tags;
 
     @Column(name = "allergens") private String allergens;
 
+
     public Food() {}
 
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem,
+    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
         Long userId, String tags, String allergens) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
+        this.description = description;
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
@@ -61,6 +69,13 @@ public class Food {
         this.foodItem = foodItem;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
     public Long getUserId() {
         return userId;
     }
