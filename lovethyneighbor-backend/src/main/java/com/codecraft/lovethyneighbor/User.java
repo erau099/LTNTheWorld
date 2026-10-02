@@ -1,6 +1,9 @@
 package com.codecraft.lovethyneighbor;
 
 import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
+
+import java.time.LocalDateTime;
+
 import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
 
 import jakarta.persistence.*;
@@ -40,6 +43,13 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private java.time.LocalDateTime createdAt;
 
+    @Column(name = "reset_token_hash")
+    private String resetTokenHash;
+
+    @Column(name = "reset_token_expiration")
+    private LocalDateTime resetTokenExpiration;
+
+
     // Default constructor
     public User() {}
 
@@ -78,6 +88,10 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+    public String getResetTokenHash() { return resetTokenHash; }
+    public void setResetTokenHash(String resetTokenHash) { this.resetTokenHash = resetTokenHash; }
+    public LocalDateTime getResetTokenExpiration() { return resetTokenExpiration; }
+    public void setResetTokenExpiration(LocalDateTime resetTokenExpiration) { this.resetTokenExpiration = resetTokenExpiration; }
 
     // Convenience method so existing AuthController code (getName()) doesn't break
     public String getName() { return firstName + " " + lastName; }
