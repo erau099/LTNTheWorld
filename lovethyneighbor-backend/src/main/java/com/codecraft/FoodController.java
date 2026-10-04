@@ -3,15 +3,18 @@ package com.codecraft.lovethyneighbor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/food")
+@RestController 
+@RequestMapping ("/api/food")
 @CrossOrigin(origins = "http://localhost:5173")
 public class FoodController {
-    @Autowired private FoodRepository foodRepository;
+
+    @Autowired
+    private FoodRepository foodRepository;
 
     @PostMapping
-public ResponseEntity<?> createFoodListing(@RequestBody Food food) {
+    public ResponseEntity<?> createFoodListing(@RequestBody Food food) {
 
         if (food.getDate() == null ||
             food.getPickupTime() == null ||
@@ -25,5 +28,12 @@ public ResponseEntity<?> createFoodListing(@RequestBody Food food) {
 
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.ok(savedFood);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getFoodById(@PathVariable Long id) {
+        return foodRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
