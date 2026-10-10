@@ -73,6 +73,16 @@ function DonorDashboard() {
 		setDropdownOpen(false);
 	};
 
+	// Handles the cards to be able to be shown when clicked
+	const [selectListing, setSelectListing] = useState(false)
+
+	// Handles the filtering for the listings
+	const [selectFiltering, setSelectedFiltering] = useState("All")
+
+	const filteredListings = listings.filter((item) => {
+		return selectFiltering === "All" || item.category === selectFiltering;
+	})
+
 	return (
 		<div className="donor-dashboard">
 			{/* Header navigation for donor pages */}
@@ -137,14 +147,14 @@ function DonorDashboard() {
 
 				{/* Filter buttons for listing status */}
 				<div className="filter-row">
-					<button className="filter-button active">All</button>
-					<button className="filter-button">Pending</button>
-					<button className="filter-button">Completed</button>
+					<button className={selectFiltering === "All" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("All")}>All</button>
+					<button className={selectFiltering === "Pending" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Pending")}>Pending</button>
+					<button className={selectFiltering === "Completed" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Completed")}>Completed</button>
 				</div>
 
 				{/* Donor listing cards */}
 				<div className="donor-content-row">
-					{listings.map((item, index) => (
+					{filteredListings.map((item, index) => (
 						<div key={index} className="donor-food-card">
 							<div className="donor-food-image">
 								<span className="category-tag">{item.category}</span>
