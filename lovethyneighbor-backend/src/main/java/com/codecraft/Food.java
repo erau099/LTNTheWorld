@@ -1,9 +1,9 @@
-package com.codecraft.lovethyneighbor;
+package com.codecraft;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import com.codecraft.lovethyneighbor.*;
 
 
 
@@ -27,6 +27,10 @@ public class Food {
 
     @Column(name = "allergens") private String allergens;
 
+    @Column (name = "id", nullable = false)
+    @OneToMany
+    @JoinColumn(name = "id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
+    private User user;
 
     public Food() {}
 

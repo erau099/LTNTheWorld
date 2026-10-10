@@ -18,10 +18,11 @@ function UploadFoodDetails({}) {
         const {name, value} = e.target;
         setFormData((prev => ({...prev, [name]: value})));
     };
-
+    //handling submission for food details form
     const handleSubmitDetails = async (e) => {
         e.preventDefault();
         setError("");
+        //checking if all required fields are filled before submission
         if(
             !formData.listingTitle ||
             !formData.description ||
@@ -45,8 +46,7 @@ function UploadFoodDetails({}) {
             });
             if(response.ok){
                 alert("Food details submitted successfully!");
-                navigate("/DonorDashboard");
-            }) else {
+            } else {
                 const message = await response.json();
                 setError(message);
             }
@@ -81,15 +81,25 @@ function UploadFoodDetails({}) {
                 </section>
 
                 <form className="upload_body">
+
                     <div className="upload_format">
                         <h2 className="page_title">Food Details</h2>
                         <p className="input_title">Listing Title</p>
-                        <input type="text" className="user_input"></input>
+                        <input type="text" 
+                        className="user_input"
+                        value={formData.listingTitle}
+                        onChange={handleChange}
+                        required
+                        ></input>
                     </div>
 
                     <div className="upload_format">
                         <p className="input_title>">Description</p>
-                        <input type="text" className="user_input"></input>
+                        <input type="text" 
+                        className="user_input"
+                        value={formData.description}
+                        onChange={handleChange}
+                        ></input>
                     </div>
 
                     <div className="upload_format">
@@ -120,7 +130,10 @@ function UploadFoodDetails({}) {
                             onClick={() => navigate("/donor-dashboard")}>
                                 Cancel
                         </button>
-                        <Link to="/UploadFoodLocation"><button className="upload_next_btn">Next: Location & Time</button></Link>
+                        <Link to="/UploadFoodLocation"><button className="upload_next_btn"
+                        onClick={handleSubmitDetails}>
+                            Next: Location & Time
+                        </button></Link>
                     </div>
                 </form>
             </div>
