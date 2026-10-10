@@ -151,9 +151,9 @@ function RecipientDashboard() {
 			<main className="recipient-main">
 				{/* Filter buttons for food categories */}
 				<div className="filter-row">
-					<button className="filter-button active" onClick={() => setSelectedFiltering("All")}>All</button>
-					<button className="filter-button" onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
-					<button className="filter-button" onClick={() => setSelectedFiltering("Canned")}>Canned</button>
+					<button className={selectFiltering === "All" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("All")}>All</button>
+					<button className={selectFiltering === "Fresh / Hot" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
+					<button className={selectFiltering === "Canned" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Canned")}>Canned</button>
 				</div>
 
 				<h2>Top Picks:</h2>
