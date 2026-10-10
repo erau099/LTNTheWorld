@@ -76,14 +76,14 @@
   color: rgb(118, 112, 0);
 }
 
-.filter-btn.approved {
-  background: rgba(1, 180, 39, 0.5);
-  color: rgb(0, 106, 22);
+.filter-btn.cancelled {
+  background: rgba(255, 0, 13, 0.5);
+  color: rgb(117, 0, 0);
 }
 
 .filter-btn.completed {
-  background: rgba(0, 130, 174, 0.5);
-  color: rgb(2, 110, 146);
+  background: rgba(50, 237, 4, 0.5);
+  color: rgb(5, 108, 0);
 }
 
 .orders-table {
@@ -122,14 +122,14 @@
   color: #000;
 }
 
-.review-btn.approved {
-  background: rgba(1, 180, 39, 0.5);
-  color: rgb(0, 106, 22);
+.review-btn.cancelled {
+  background: rgba(255, 0, 13, 0.5);
+  color: #000;
 }
 
 .review-btn.completed {
-  background: rgba(0, 130, 174, 0.5);
-  color: rgb(2, 110, 146);
+  background: rgba(0, 227, 49, 0.5);
+  color: #000;
 }
 
 .header-review-btn {

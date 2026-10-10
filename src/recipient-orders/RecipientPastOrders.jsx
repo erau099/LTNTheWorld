@@ -30,7 +30,7 @@ const orders = [
 		date: "01/03/2026",
 		time: "1:30pm",
 		food: "Donuts",
-		status: "approved",
+		status: "cancelled",
 	},
 	{
 		id: 4,
@@ -38,7 +38,7 @@ const orders = [
 		date: "01/03/2026",
 		time: "1:30pm",
 		food: "Donuts",
-		status: "approved",
+		status: "cancelled",
 	},
 	{
 		id: 5,
@@ -71,6 +71,12 @@ function RecipientPastOrders() {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
 	}, []);
+	
+	const [selectFiltering, setSelectedOrders] = useState("All")
+
+	const filteredOrders = orders.filter((order) => {
+		return selectFiltering === "All" || order.status === selectFiltering;
+	})
 
 	return (
 		<div className="orders-page">
@@ -142,9 +148,9 @@ function RecipientPastOrders() {
 						</div>
 
 						<div className="orders-filters">
-							<button className="filter-btn pending">Pending</button>
-							<button className="filter-btn approved">Approved</button>
-							<button className="filter-btn completed">Completed</button>
+							<button className="filter-btn pending" onClick={() => setSelectedOrders("pending")}>Pending</button>
+							<button className="filter-btn cancelled" onClick={() => setSelectedOrders("cancelled")}>Cancelled</button>
+							<button className="filter-btn completed" onClick={() => setSelectedOrders("completed")}>Completed</button>
 						</div>
 					</div>
 				</div>
@@ -159,9 +165,10 @@ function RecipientPastOrders() {
 						<button className="review-btn header-review-btn">Review</button>
 					</div>
 
-					{orders.length > 0 ? (
-						orders.map((order) => (
-							<div className="orders-row" key={order.id}>
+					{filteredOrders.length > 0 ? (
+						filteredOrders.map((order, id) => (
+							<div className="orders-row"
+							key={id}>
 								<span>{order.donor}</span>
 								<span>{order.date}</span>
 								<span>{order.time}</span>
