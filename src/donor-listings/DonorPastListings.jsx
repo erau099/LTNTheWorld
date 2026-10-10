@@ -38,7 +38,7 @@ const listings = [
 		date: "01/03/2026",
 		time: "1:30pm",
 		food: "Donuts",
-		status: "approved",
+		status: "cancelled",
 	},
 	{
 		id: 5,
@@ -71,6 +71,12 @@ function DonorPastListings() {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
 	}, []);
+
+	const[selectFiltering, setSelectedListings] = useState("All")
+
+	const filteredListings = listings.filter((listing) => {
+		return selectFiltering === "All" || listing.status === selectFiltering;
+	})
 
 	return (
 		<div className="orders-page">
@@ -142,9 +148,9 @@ function DonorPastListings() {
 						</div>
 
 						<div className="orders-filters">
-							<button className="filter-btn pending">Pending</button>
-							<button className="filter-btn approved">Approved</button>
-							<button className="filter-btn completed">Completed</button>
+							<button className="filter-btn pending" onClick={() => setSelectedListings("pending")}>Pending</button>
+							<button className="filter-btn cancelled" onClick={() => setSelectedListings("cancelled")}>Cancelled</button>
+							<button className="filter-btn completed" onClick={() => setSelectedListings("completed")}>Completed</button>
 						</div>
 					</div>
 				</div>
@@ -159,9 +165,10 @@ function DonorPastListings() {
 						<button className="review-btn header-review-btn">Review</button>
 					</div>
 
-					{listings.length > 0 ? (
-						listings.map((listing) => (
-							<div className="orders-row" key={listing.id}>
+					{filteredListings.length > 0 ? (
+						filteredListings.map((listing, id) => (
+							<div className="orders-row" 
+							key={id}>
 								<span>{listing.donor}</span>
 								<span>{listing.date}</span>
 								<span>{listing.time}</span>
