@@ -82,6 +82,13 @@ function RecipientDashboard() {
 	// Handles the cards to be able to be shown when clicked
 	const [selectListing, setSelectListing] = useState(false)
 
+	// Handles the filtering for the listings
+	const [selectFiltering, setSelectedFiltering] = useState("All")
+
+	const filteredListings = listings.filter((item) => {
+		return selectFiltering === "All" || item.category === selectFiltering;
+	})
+
 	return (
 		<div className="recipient-dashboard">
 			{/* Header navigation for recipient pages */}
@@ -144,16 +151,16 @@ function RecipientDashboard() {
 			<main className="recipient-main">
 				{/* Filter buttons for food categories */}
 				<div className="filter-row">
-					<button className="filter-button active">All</button>
-					<button className="filter-button">Fresh / Hot</button>
-					<button className="filter-button">Canned</button>
+					<button className="filter-button active" onClick={() => setSelectedFiltering("All")}>All</button>
+					<button className="filter-button" onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
+					<button className="filter-button" onClick={() => setSelectedFiltering("Canned")}>Canned</button>
 				</div>
 
 				<h2>Top Picks:</h2>
 
 				{/* Food cards shown to recipients */}
 				<section className="top-picks-grid">
-					{listings.map((item, index) => (
+					{filteredListings.map((item, index) => (
 						<article className="food-card" 
 									key={index} 
 									onClick={() => setSelectListing(item)}>
