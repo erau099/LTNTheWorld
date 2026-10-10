@@ -72,10 +72,10 @@ function DonorPastListings() {
 		};
 	}, []);
 
-	const[selectFiltering, setSelectedListings] = useState("All")
+	const[selectFiltering, setSelectedListings] = useState("all")
 
 	const filteredListings = listings.filter((listing) => {
-		return selectFiltering === "All" || listing.status === selectFiltering;
+		return selectFiltering === "all" || listing.status === selectFiltering;
 	})
 
 	return (
@@ -148,9 +148,10 @@ function DonorPastListings() {
 						</div>
 
 						<div className="orders-filters">
-							<button className="filter-btn pending" onClick={() => setSelectedListings("pending")}>Pending</button>
-							<button className="filter-btn cancelled" onClick={() => setSelectedListings("cancelled")}>Cancelled</button>
-							<button className="filter-btn completed" onClick={() => setSelectedListings("completed")}>Completed</button>
+							<button className={selectFiltering === "all" ? "filter-btn all" : "filter-btn all off"} onClick={() => setSelectedListings("all")}>All</button>
+							<button className={selectFiltering === "pending" ? "filter-btn pending" : "filter-btn pending off"} onClick={() => setSelectedListings("pending")}>Pending</button>
+							<button className={selectFiltering === "cancelled" ? "filter-btn cancelled" : "filter-btn cancelled off"} onClick={() => setSelectedListings("cancelled")}>Cancelled</button>
+							<button className={selectFiltering === "completed" ? "filter-btn completed": "filter-btn completed off"} onClick={() => setSelectedListings("completed")}>Completed</button>
 						</div>
 					</div>
 				</div>
