@@ -72,10 +72,10 @@ function RecipientPastOrders() {
 		};
 	}, []);
 	
-	const [selectFiltering, setSelectedOrders] = useState("All")
+	const [selectFiltering, setSelectedOrders] = useState("all")
 
 	const filteredOrders = orders.filter((order) => {
-		return selectFiltering === "All" || order.status === selectFiltering;
+		return selectFiltering === "all" || order.status === selectFiltering;
 	})
 
 	return (
@@ -148,9 +148,10 @@ function RecipientPastOrders() {
 						</div>
 
 						<div className="orders-filters">
-							<button className="filter-btn pending" onClick={() => setSelectedOrders("pending")}>Pending</button>
-							<button className="filter-btn cancelled" onClick={() => setSelectedOrders("cancelled")}>Cancelled</button>
-							<button className="filter-btn completed" onClick={() => setSelectedOrders("completed")}>Completed</button>
+							<button className={selectFiltering === "all" ? "filter-button all" : "filter-button all off"} onClick={() => setSelectedOrders("all")}>All</button>
+							<button className={selectFiltering === "pending" ? "filter-btn pending" : "filter-btn pending off"} onClick={() => setSelectedOrders("pending")}>Pending</button>
+							<button className={selectFiltering === "cancelled" ? "filter-btn cancelled" : "filter-btn cancelled off"} onClick={() => setSelectedOrders("cancelled")}>Cancelled</button>
+							<button className={selectFiltering === "completed" ? "filter-btn completed": "filter-btn completed off"} onClick={() => setSelectedOrders("completed")}>Completed</button>
 						</div>
 					</div>
 				</div>

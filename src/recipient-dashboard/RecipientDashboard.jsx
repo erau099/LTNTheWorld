@@ -83,10 +83,10 @@ function RecipientDashboard() {
 	const [selectListing, setSelectListing] = useState(false)
 
 	// Handles the filtering for the listings
-	const [selectFiltering, setSelectedFiltering] = useState("All")
+	const [selectFiltering, setSelectedFiltering] = useState("all")
 
 	const filteredListings = listings.filter((item) => {
-		return selectFiltering === "All" || item.category === selectFiltering;
+		return selectFiltering === "all" || item.category === selectFiltering;
 	})
 
 	return (
@@ -151,7 +151,7 @@ function RecipientDashboard() {
 			<main className="recipient-main">
 				{/* Filter buttons for food categories */}
 				<div className="filter-row">
-					<button className={selectFiltering === "All" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("All")}>All</button>
+					<button className={selectFiltering === "all" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("all")}>All</button>
 					<button className={selectFiltering === "Fresh / Hot" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
 					<button className={selectFiltering === "Canned" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Canned")}>Canned</button>
 				</div>

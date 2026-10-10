@@ -30,7 +30,7 @@ const listings = [
 		date: "01/03/2026",
 		time: "1:30pm",
 		food: "Donuts",
-		status: "approved",
+		status: "pending",
 	},
 	{
 		id: 4,

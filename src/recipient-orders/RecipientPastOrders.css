@@ -71,9 +71,18 @@
   cursor: pointer;
 }
 
+.filter-button.off {
+  opacity: 0.5;
+}
+
 .filter-btn.pending {
   background: rgba(237, 194, 3, 0.5);
   color: rgb(118, 112, 0);
+}
+
+.filter-button.all {
+  background: rgba(126, 125, 121, 0.5);
+  color: rgb(0, 0, 0);
 }
 
 .filter-btn.cancelled {
