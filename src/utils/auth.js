@@ -3,6 +3,7 @@
 
 const USERS_KEY = "demo_users";
 const CURRENT_USER_KEY = "demo_current_user";
+const FOOD_KEY = "demo_food_details";
 
 export const signup = (userData) => {
     // Get existing users
@@ -23,6 +24,23 @@ export const signup = (userData) => {
     
     return { success: true };
 };
+
+// Temporary Food Details
+export const foodDetails = (userData, foodData) => {
+    // Get existing users
+    const foodDetailsJson = localStorage.getItem(FOOD_KEY);
+    const foodDetails = foodDetailsJson ? JSON.parse(foodDetailsJson) : {};
+
+    // Check if user doesn't exist
+    if (!users[userData.email]){
+        return { success: false, message: "User does not exist" };
+    }
+
+    // Save new Food Listing Details
+    //user[userData.email]
+    //foodDetails[];
+
+}
 
 export const login = (email, password) => {
     const usersJson = localStorage.getItem(USERS_KEY);

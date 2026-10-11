@@ -64,6 +64,12 @@ function Signup() {
             setError("Please fill in all required fields");
             return;
         }
+        
+        // Require the user to select either a donor or recipient role
+        if (!formData.role) {
+            setError("Please select a role");
+            return;
+        }
 
         // Ensure user has accepted the waiver
         if (!waiverChecked) {

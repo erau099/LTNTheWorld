@@ -3,6 +3,57 @@ import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom";
 
 function UploadFoodDetails({}) {
+    //Form data for the food details form
+    const [formData, setFormData] = useState({
+        listingTitle: "",
+        description: "",
+        tag: "",
+        allergens: "",
+    });
+    
+    const [error, setError] = useState(""); // State to hold and display error messages
+
+    // Generic handler to update form based on input names for food details form 
+    const handleChange = (e) => {
+        const {name, value} = e.target;
+        setFormData((prev => ({...prev, [name]: value})));
+    };
+    //handling submission for food details form
+    const handleSubmitDetails = async (e) => {
+        e.preventDefault();
+        setError("");
+        //checking if all required fields are filled before submission
+        if(
+            !formData.listingTitle ||
+            !formData.description ||
+            !formData.tag ||
+            !formData.allergens
+            
+        ) {
+            setError("Please set up food details before proceeding."); 
+            return;
+        }
+        try {
+            const response = await fetch('api/auth/food', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    listingTitle:formData.listingTitle,
+                    description:formData.description,
+                    tag:formData.tag,
+                    allergens:formData.allergens
+                }),
+            });
+            if(response.ok){
+                alert("Food details submitted successfully!");
+            } else {
+                const message = await response.json();
+                setError(message);
+            }
+        } catch (error) {
+            console.error("Error submitting food details:", error);
+        }
+    }
     const navigate = useNavigate();
 
     return(
@@ -30,15 +81,25 @@ function UploadFoodDetails({}) {
                 </section>
 
                 <form className="upload_body">
+
                     <div className="upload_format">
                         <h2 className="page_title">Food Details</h2>
                         <p className="input_title">Listing Title</p>
-                        <input type="text" className="user_input"></input>
+                        <input type="text" 
+                        className="user_input"
+                        value={formData.listingTitle}
+                        onChange={handleChange}
+                        required
+                        ></input>
                     </div>
 
                     <div className="upload_format">
                         <p className="input_title>">Description</p>
-                        <input type="text" className="user_input"></input>
+                        <input type="text" 
+                        className="user_input"
+                        value={formData.description}
+                        onChange={handleChange}
+                        ></input>
                     </div>
 
                     <div className="upload_format">
@@ -69,7 +130,10 @@ function UploadFoodDetails({}) {
                             onClick={() => navigate("/donor-dashboard")}>
                                 Cancel
                         </button>
-                        <Link to="/UploadFoodLocation"><button className="upload_next_btn">Next: Location & Time</button></Link>
+                        <Link to="/UploadFoodLocation"><button className="upload_next_btn"
+                        onClick={handleSubmitDetails}>
+                            Next: Location & Time
+                        </button></Link>
                     </div>
                 </form>
             </div>

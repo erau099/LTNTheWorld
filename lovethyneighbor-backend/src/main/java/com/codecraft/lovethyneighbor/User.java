@@ -1,5 +1,12 @@
 package com.codecraft.lovethyneighbor;
 
+import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
+
+import java.time.LocalDateTime;
+
+import com.codecraft.Food;
+import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -22,13 +29,30 @@ public class User {
     private String password;
 
     @Column(name = "date_of_birth", nullable = false)
+    @Convert(converter = EncryptedLocalDateConverter.class)
     private java.time.LocalDate dateOfBirth;
 
+    // Encrypted using AES-256-GCM with a unique IV for each record, stored in the database as base64-encoded string
     @Column(name = "phone_number")
+    @Convert (converter = EncryptedStringConverter.class)
     private String phoneNumber;
 
     @Column(nullable = false)
     private String role; // must be exactly "donor", "recipient", or "both" — lowercase, matches DB CHECK constraint
+
+    // Stores the date and time when the user account is first created
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @Column(name = "reset_token_hash")
+    private String resetTokenHash;
+
+    @Column(name = "reset_token_expiration")
+    private LocalDateTime resetTokenExpiration;
+
+    // Links the Food entity to the User Entity creating a many-to-one relationship from food to user
+    @OneToMany(mappedBy = "user")
+    private java.util.List<Food> foodListings;
 
     @Column(name = "status")
     private String status = "ACTIVE";
@@ -65,6 +89,12 @@ public class User {
         this.status = status != null ? status : "ACTIVE";
         this.canPostListings = canPostListings != null ? canPostListings : true;
     }
+    
+    // Automatically sets the creation timestamp before the user is saved for the first time
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+    }   
 
     // Getters and Setters
     public java.util.UUID getId() { return id; }
@@ -83,6 +113,11 @@ public class User {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+    public String getResetTokenHash() { return resetTokenHash; }
+    public void setResetTokenHash(String resetTokenHash) { this.resetTokenHash = resetTokenHash; }
+    public LocalDateTime getResetTokenExpiration() { return resetTokenExpiration; }
+    public void setResetTokenExpiration(LocalDateTime resetTokenExpiration) { this.resetTokenExpiration = resetTokenExpiration; }
     public String getStatus() { return status != null ? status : "ACTIVE"; }
     public void setStatus(String status) { this.status = status; }
     public Boolean getCanPostListings() { return canPostListings != null ? canPostListings : true; }

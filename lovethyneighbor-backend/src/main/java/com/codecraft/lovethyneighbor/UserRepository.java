@@ -5,4 +5,6 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, java.util.UUID> {
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByResetTokenHash(String resetTokenHash);
 }

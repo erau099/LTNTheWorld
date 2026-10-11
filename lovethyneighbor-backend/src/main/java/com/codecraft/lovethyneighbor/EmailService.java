@@ -11,6 +11,23 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    public void sendPasswordResetEmail(String toEmail, String resetLink) {
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(toEmail);
+        message.setSubject("Reset your Love Thy Neighbor password");
+
+        message.setText(
+                "We received a request to reset the password for your "
+                + "Love Thy Neighbor account.\n\n"
+                + "Use the link below to reset your password:\n\n"
+                + resetLink
+                + "\n\nThis link will expire in 30 minutes."
+                + "\nIf you did not request a password reset, you can ignore this email.");
+
+        mailSender.send(message);
+    }
+
     public void sendPasswordResetNotification(String toEmail) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);

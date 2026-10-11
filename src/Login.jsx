@@ -1,6 +1,6 @@
 import "./Login.css";
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 function Login({}) {
@@ -9,6 +9,8 @@ function Login({}) {
     const [password, setPassword] = useState('')
     const [popup, setPopup] = useState('')
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const passwordReset = searchParams.get("reset") === "success"
     const { setUser } = useAuth()
 
     // Login function
@@ -26,9 +28,14 @@ function Login({}) {
             const result = await response.json()
             // result contains status, name, role
             if(result.status === 'success'){
+                // Store the jwt token in localStorage
+                localStorage.setItem('token', result.token)
                 setUser({ name: result.name, role: result.role })
                 setPopup('success')
-                setTimeout(() => navigate('/'), 1500)
+
+                // Determine destination based on role
+                const destination = result.role === 'recipient' ? '/recipient-dashboard' : '/donor-dashboard'
+                setTimeout(() => navigate(destination), 1500)
             } else {
                 setPopup('error')
             }
@@ -60,7 +67,11 @@ function Login({}) {
                     <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
                 </div>
             </nav>
-
+            {passwordReset && (
+                <div className="popup success_popup">
+                    ✅ Password reset successfully! You can now sign in.
+                </div>
+            )}
             {/*Login Card */}
             <div className="login_banner">
             <section className="login_card">
@@ -83,6 +94,9 @@ function Login({}) {
                         onChange = {e => setPassword(e.target.value)}
                     />
 
+                    <Link to="/forgot-password">
+                        Forgot Password?
+                    </Link>
 
                     <button className="submit_btn" type="submit">Sign In</button>
                 </form>
