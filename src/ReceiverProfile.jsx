@@ -112,6 +112,7 @@ export default function ReceiverProfile() {
     password: "******",
     dob: "01/01/2001",
     phone: "(916)-111-1111",
+    allergies: "",
   });
 
   const [editing, setEditing] = useState({
@@ -121,6 +122,7 @@ export default function ReceiverProfile() {
     password: false,
     dob: false,
     phone: false,
+    allergies: false,
   });
 
   const canSave = useMemo(() => true, []);
@@ -261,6 +263,16 @@ export default function ReceiverProfile() {
                 ariaLabel="Phone number"
               />
             </div>
+
+            <EditableInput
+              name="allergies"
+              value={form.allergies}
+              onChange={handleChange}
+              placeholder="Allergies: Peanut, Milk, Shellfish"
+              editable={editing.allergies}
+              onToggleEdit={toggleEdit}
+              ariaLabel="Allergies"
+            />
           </div>
 
           <button className="rp-saveBtn" type="submit" disabled={!canSave}>
