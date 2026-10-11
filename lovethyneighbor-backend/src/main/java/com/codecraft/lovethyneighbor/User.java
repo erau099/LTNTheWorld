@@ -30,6 +30,12 @@ public class User {
     @Column(nullable = false)
     private String role; // must be exactly "donor", "recipient", or "both" — lowercase, matches DB CHECK constraint
 
+    @Column(name = "status")
+    private String status = "ACTIVE";
+
+    @Column(name = "can_post_listings")
+    private Boolean canPostListings = true;
+
     // Default constructor
     public User() {}
 
@@ -42,6 +48,22 @@ public class User {
         this.dateOfBirth = dateOfBirth;
         this.phoneNumber = phoneNumber;
         this.role = role;
+        this.status = "ACTIVE";
+        this.canPostListings = true;
+    }
+
+    public User(String firstName, String lastName, String email, String password,
+                 java.time.LocalDate dateOfBirth, String phoneNumber, String role,
+                 String status, Boolean canPostListings) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.dateOfBirth = dateOfBirth;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.status = status != null ? status : "ACTIVE";
+        this.canPostListings = canPostListings != null ? canPostListings : true;
     }
 
     // Getters and Setters
@@ -61,6 +83,10 @@ public class User {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public String getStatus() { return status != null ? status : "ACTIVE"; }
+    public void setStatus(String status) { this.status = status; }
+    public Boolean getCanPostListings() { return canPostListings != null ? canPostListings : true; }
+    public void setCanPostListings(Boolean canPostListings) { this.canPostListings = canPostListings; }
 
     // Convenience method so existing AuthController code (getName()) doesn't break
     public String getName() { return firstName + " " + lastName; }

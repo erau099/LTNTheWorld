@@ -17,6 +17,8 @@ import UploadFoodLocation from './food-upload/UploadFoodLocation.jsx'
 import UploadFoodPhoto from './food-upload/UploadFoodPhoto.jsx'
 import FoodSubmission from './food-upload/FoodSubmission.jsx'
 import AdminDashboard from "./admin/AdminDashboard.jsx";
+import AdminLogin from "./admin/AdminLogin.jsx";
+import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
 
 function App() {
   return (
@@ -38,7 +40,15 @@ function App() {
         <Route path="/donor-past-listings" element={<DonorPastListings />} />
         <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
         <Route path="/donor-dashboard" element={<DonorDashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route
+          path="/admin-dashboard"
+          element={
+            <AdminProtectedRoute>
+              <AdminDashboard />
+            </AdminProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   )

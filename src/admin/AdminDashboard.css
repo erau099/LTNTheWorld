@@ -66,6 +66,9 @@
 }
 
 .admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
   margin-bottom: 24px;
 }
 
@@ -83,6 +86,100 @@
   margin: 0;
 }
 
+.admin-refresh-btn {
+  background-color: #f0ece6;
+  color: #1a3a1f;
+  border: 1px solid #d3cdc3;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-refresh-btn:hover:not(:disabled) {
+  background-color: #e5ded4;
+}
+
+.admin-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error Banner */
+
+.admin-error-banner {
+  background-color: #fde8e8;
+  border: 1px solid #f8b4b4;
+  color: #9b1c1c;
+  padding: 16px 20px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.admin-error-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.admin-retry-btn {
+  background-color: #9b1c1c;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.admin-retry-btn:hover {
+  opacity: 0.9;
+}
+
+/* Loading & Empty State */
+
+.admin-loading-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 48px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #666;
+}
+
+.admin-spinner {
+  width: 38px;
+  height: 38px;
+  border: 4px solid #f0ece6;
+  border-top-color: #2d7a3a;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-empty-users {
+  padding: 40px;
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+}
+
 /* User Management Table */
 
 .admin-user-table {
@@ -94,11 +191,12 @@
 
 .admin-user-row {
   display: grid;
-  grid-template-columns: 1.2fr 2fr 1fr 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: 1.3fr 1.8fr 0.9fr 1.1fr 1fr 0.9fr;
+  gap: 16px;
   align-items: center;
-  padding: 18px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid #e5e5e5;
+  font-size: 0.95rem;
 }
 
 .admin-user-row:last-child {
@@ -109,19 +207,98 @@
   background-color: #f0ece6;
   font-weight: 700;
   color: #1a3a1f;
+  font-size: 0.92rem;
+  letter-spacing: 0.3px;
 }
 
-/* User Action Button */
+.user-name-cell {
+  font-weight: 600;
+  color: #222;
+}
+
+.user-email-cell {
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Badges */
+
+.role-badge {
+  background-color: #f3f4f6;
+  color: #374151;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.badge-active {
+  background-color: #def7ec;
+  color: #03543f;
+}
+
+.badge-suspended {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+}
+
+.posting-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.badge-allowed {
+  background-color: #e1effe;
+  color: #1e429f;
+}
+
+.badge-restricted {
+  background-color: #fef08a;
+  color: #854d0e;
+}
+
+/* User Action Buttons */
 
 .admin-user-action {
-  padding: 8px 14px;
+  padding: 7px 14px;
   border: none;
   border-radius: 6px;
-  background-color: #2d7a3a;
   color: white;
+  font-weight: 600;
+  font-size: 0.88rem;
   cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease;
 }
 
-.admin-user-action:hover {
+.admin-user-action:hover:not(:disabled) {
   opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.admin-user-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-action-suspend {
+  background-color: #c81e1e;
+}
+
+.admin-action-activate {
+  background-color: #2d7a3a;
 }
