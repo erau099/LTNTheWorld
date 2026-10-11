@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../index.css";
 
 function AdminHeader() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
-    const handleHome = () => {
+  const handleHome = () => {
+    navigate("/");
+  };
+
+  const handleLogout = () => {
+    logout();
     navigate("/");
   };
 
@@ -25,10 +32,18 @@ function AdminHeader() {
           Dashboard
         </button>
 
+        {user && (
+          <span style={{ color: "white", fontSize: "0.9rem", alignSelf: "center", marginRight: "10px" }}>
+            Admin: {user.name || "Administrator"}
+          </span>
+        )}
 
-        <button className="gear_btn"
-          onClick={() => navigate("/admin-settings")}>
-          ⚙
+        <button
+          className="headerbtn"
+          onClick={handleLogout}
+          style={{ backgroundColor: "#d9534f", color: "white" }}
+        >
+          Sign Out
         </button>
       </div>
     </nav>
