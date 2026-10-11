@@ -37,6 +37,9 @@ public class User {
     @Convert (converter = EncryptedStringConverter.class)
     private String phoneNumber;
 
+    @Column(name = "allergies")
+    private String allergies;
+
     @Column(nullable = false)
     private String role; // must be exactly "donor", "recipient", or "both" — lowercase, matches DB CHECK constraint
 
@@ -111,6 +114,8 @@ public class User {
     public void setDateOfBirth(java.time.LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getAllergies() { return allergies; }
+    public void setAllergies(String allergies) { this.allergies = allergies; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     public java.time.LocalDateTime getCreatedAt() { return createdAt; }

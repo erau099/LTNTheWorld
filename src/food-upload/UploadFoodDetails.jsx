@@ -46,6 +46,7 @@ function UploadFoodDetails({}) {
             });
             if(response.ok){
                 alert("Food details submitted successfully!");
+                navigate("/DonorDashboard");
             } else {
                 const message = await response.json();
                 setError(message);
