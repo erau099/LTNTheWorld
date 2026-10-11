@@ -82,6 +82,59 @@ function RecipientDashboard() {
 	// Handles the cards to be able to be shown when clicked
 	const [selectListing, setSelectListing] = useState(false)
 
+	// Stores the logged-in recipient's saved allergies
+	const [recipientAllergies, setRecipientAllergies] = useState([]);
+
+	// Loads the logged-in recipient's allergies from the backend
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+
+		if (!token) return;
+
+		fetch("/api/users/me/allergies", {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		})
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error("Unable to load allergies");
+				}
+
+				return response.text();
+			})
+			.then((allergies) => {
+				const allergyList = allergies
+					? allergies.split(",").map((allergy) => allergy.trim()).filter(Boolean)
+					: [];
+
+				setRecipientAllergies(allergyList);
+			})
+			.catch((error) => {
+				console.error("Error loading recipient allergies:", error);
+			});
+	}, []);
+
+	// Checks the selected food listing against the recipient's saved allergies
+	const handleListingClick = (item) => {
+		const listingAllergies = item.allergies || [];
+
+		const matchingAllergies = listingAllergies.filter((listingAllergy) =>
+			recipientAllergies.some((recipientAllergy) =>
+				recipientAllergy.toLowerCase().replace(/s$/, "") ===
+				listingAllergy.toLowerCase().replace(/s$/, "")
+			)
+		);
+
+		if (matchingAllergies.length > 0) {
+			alert(
+				`Allergy Warning! This food contains: ${matchingAllergies.join(", ")}`
+			);
+		}
+
+		setSelectListing(item);
+	};
+
 	return (
 		<div className="recipient-dashboard">
 			{/* Header navigation for recipient pages */}
@@ -156,7 +209,7 @@ function RecipientDashboard() {
 					{listings.map((item, index) => (
 						<article className="food-card" 
 									key={index} 
-									onClick={() => setSelectListing(item)}>
+									onClick={() => handleListingClick(item)}>
 							<div className="food-image">
 								<span className="category-tag">{item.category}</span>
 							</div>
