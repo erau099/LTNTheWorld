@@ -20,8 +20,7 @@ function UploadFoodLocation({}) {
         if(
             !formData.location ||
             !formData.date ||
-            !formData.timeStart ||
-            !formData.timeEnd
+            !formData.time
         ) {
             setError("Please set up food location before proceeding.");
             return;
@@ -33,8 +32,7 @@ function UploadFoodLocation({}) {
                 body: JSON.stringify({
                     location:formData.location,
                     date:formData.date,
-                    timeStart:formData.timeStart,
-                    timeEnd:formData.timeEnd
+                    timeEnd:formData.time
                 }),
             });
             if(response.ok){
@@ -98,7 +96,12 @@ function UploadFoodLocation({}) {
                         <p className="input_title">Time Start</p>
                         <p className="input_title">Time End</p>
                         <input type="time" id="meeting_start" name="meeting_end" required/>
-                        <input type="time" id="meeting_end" name="meeting_end" required/>
+                        <input type="time" 
+                        id="meeting_end" 
+                        name="meeting_end"
+                        value={formData.time}
+                        onChange={handleChange} 
+                        required/>
                     </div>
 
 
