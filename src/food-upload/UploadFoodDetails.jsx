@@ -1,14 +1,15 @@
 import "./UploadFood.css"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom";
+import React, {  useState } from "react";
 
 function UploadFoodDetails({}) {
     //Form data for the food details form
     const [formData, setFormData] = useState({
-        listingTitle: "",
-        description: "",
-        tag: "",
-        allergens: "",
+        listingTitle: '',
+        description: '',
+        tag: '',
+        allergens: '',
     });
     
     const [error, setError] = useState(""); // State to hold and display error messages
@@ -18,10 +19,15 @@ function UploadFoodDetails({}) {
         const {name, value} = e.target;
         setFormData((prev => ({...prev, [name]: value})));
     };
+    // Handler for the selection buttons for tags and allergens
+    const handleSelect = (name, value) => {
+        setFormData((prev => ({...prev, [name]: value})));
+    }
+
     //handling submission for food details form
     const handleSubmitDetails = async (e) => {
         e.preventDefault();
-        setError("");
+        setError("Input not valid. Please fill out all required fields."); // Reset error message
         //checking if all required fields are filled before submission
         if(
             !formData.listingTitle ||
@@ -105,23 +111,23 @@ function UploadFoodDetails({}) {
                     <div className="upload_format">
                         <p className="input_title">Select tags that describe your food item</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on">Fresh / Hot</button>
-                            <button className="sel_btn_off">Canned</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('tags', 'Fresh / Hot')}>Fresh / Hot</button>
+                            <button className="sel_btn_off" onClick={() => handleSelect('tags', 'Canned')}>Canned</button>
                         </div>
                     </div>
 
                     <div className="upload_format">
                         <p className="input_title">Please select all applicable allergens</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on">Milk</button>
-                            <button className="sel_btn_on">Eggs</button>
-                            <button className="sel_btn_on">Fish</button>
-                            <button className="sel_btn_on">Shellfish</button>
-                            <button className="sel_btn_on">Peanuts</button>
-                            <button className="sel_btn_on">Tree Nuts</button>
-                            <button className="sel_btn_on">Soy</button>
-                            <button className="sel_btn_on">Diary</button>
-                            <button className="sel_btn_off">Wheat</button>
+                            <button className="sel_btn_on" onCClick={() => handleSelect('allergens', 'Milk')}>Milk</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Eggs')}>Eggs</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Fish')}>Fish</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Shellfish')}>Shellfish</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Peanuts')}>Peanuts</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Tree Nuts')}>Tree Nuts</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Soy')}>Soy</button>
+                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Dairy')}>Dairy</button>
+                            <button className="sel_btn_off" onClick={() => handleSelect('allergens', 'Wheat')}>Wheat</button>
                         </div>
                     </div>
 

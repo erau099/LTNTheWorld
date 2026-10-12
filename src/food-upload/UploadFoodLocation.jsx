@@ -1,12 +1,13 @@
 import "./UploadFood.css"
 import { Link } from "react-router-dom"
+import React, {  useState } from "react"; 
 
 function UploadFoodLocation({}) {
     //Form data for the food location form
     const [formData, setFormData] = useState({
-        location: "",
-        date: "",
-        time: "",
+        location: '',
+        date: '',
+        time: '',
     });
 
     // Generic handler to update form based on input names for food location form
