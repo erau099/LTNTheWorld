@@ -19,10 +19,6 @@ function UploadFoodDetails({}) {
         const {name, value} = e.target;
         setFormData((prev => ({...prev, [name]: value})));
     };
-    // Handler for the selection buttons for tags and allergens
-    const handleSelect = (name, value) => {
-        setFormData((prev => ({...prev, [name]: value})));
-    }
 
     //handling submission for food details form
     const handleSubmitDetails = async (e) => {
