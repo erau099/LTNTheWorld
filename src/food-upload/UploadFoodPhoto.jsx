@@ -1,7 +1,7 @@
 import "./UploadFood.css"
 import { Link } from "react-router-dom"
 
-function UploadFoodPhoto({}) {
+function UploadFoodPhoto() {
     return(
         <div className="upload_food_details">
 
@@ -32,15 +32,20 @@ function UploadFoodPhoto({}) {
                             <div className="upload_square_box">
                                 <p className="upload_title">Upload up to 3 photos of the food you are listing:</p>
                                 <div className="upload_photo_btn">
-                                    <button className="upload_next_btn">Upload Photos</button>
-                                    <button className="upload_next_btn">Open Camera</button>
+                                    <button type="button" className="upload_next_btn">Upload Photos</button>
+                                    <button type="button" className="upload_next_btn">Open Camera</button>
                                 </div>
                             </div>
                         </div>
 
                         <div className="upload_nav_btn">
-                            <Link to="/UploadFoodLocation"><button className="upload_cancel_btn">Back</button></Link>
-                            <Link to="/FoodSubmission"><button className="upload_next_btn">Submit</button></Link>
+                            <Link to="/UploadFoodLocation">
+                                <button type="button" className="upload_cancel_btn">Back</button>
+                            </Link>
+
+                            <Link to="/FoodSubmission">
+                                <button type="button" className="upload_next_btn">Submit</button>
+                            </Link>
                         </div>
                     </form>
                 </div>
