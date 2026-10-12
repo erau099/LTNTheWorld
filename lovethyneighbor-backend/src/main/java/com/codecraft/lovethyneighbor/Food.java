@@ -1,41 +1,44 @@
-package com.codecraft;
+package com.codecraft.lovethyneighbor;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import com.codecraft.lovethyneighbor.*;
-
-
-
 
 @Entity
 @Table(name = "food")
 public class Food {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "date") private LocalDate date;
+    @Column(name = "date")
+    private LocalDate date;
 
-    @Column(name = "pickup_time") private LocalDateTime pickupTime;
+    @Column(name = "pickup_time")
+    private LocalDateTime pickupTime;
 
-    @Column(name = "\"foodItem\"") private String foodItem;
+    @Column(name = "\"foodItem\"")
+    private String foodItem;
 
-    @Column(name = "description") private String description;
+    @Column(name = "description")
+    private String description;
 
-    @Column(name = "user_id") private Long userId;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @Column(name = "tags") private String tags;
+    @Column(name = "tags")
+    private String tags;
 
-    @Column(name = "allergens") private String allergens;
+    @Column(name = "allergens")
+    private String allergens;
 
-    @Column (name = "id", nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
-    private User user;
+    @Column(name = "status")
+    private String status = "ACTIVE";
 
     public Food() {}
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-        Long userId, String tags, String allergens) {
+                Long userId, String tags, String allergens) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -43,10 +46,27 @@ public class Food {
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
+        this.status = "ACTIVE";
+    }
+
+    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
+                Long userId, String tags, String allergens, String status) {
+        this.date = date;
+        this.pickupTime = pickupTime;
+        this.foodItem = foodItem;
+        this.description = description;
+        this.userId = userId;
+        this.tags = tags;
+        this.allergens = allergens;
+        this.status = status != null ? status : "ACTIVE";
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public LocalDate getDate() {
@@ -80,6 +100,7 @@ public class Food {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public Long getUserId() {
         return userId;
     }
@@ -102,5 +123,13 @@ public class Food {
 
     public void setAllergens(String allergens) {
         this.allergens = allergens;
+    }
+
+    public String getStatus() {
+        return status != null ? status : "ACTIVE";
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

@@ -1,8 +1,13 @@
-import "./UploadFood.css"
-import { Link } from "react-router-dom"
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import "./UploadFood.css";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-function UploadFoodDetails({}) {
+function UploadFoodDetails() {
+    const { user } = useAuth();
+    const isRestricted = user?.canPostListings === false;
+    const navigate = useNavigate();
+
     //Form data for the food details form
     const [formData, setFormData] = useState({
         listingTitle: "",
@@ -22,6 +27,12 @@ function UploadFoodDetails({}) {
     const handleSubmitDetails = async (e) => {
         e.preventDefault();
         setError("");
+
+        if (isRestricted) {
+            setError("Your ability to post listings has been restricted by an administrator.");
+            return;
+        }
+
         //checking if all required fields are filled before submission
         if(
             !formData.listingTitle ||
@@ -34,14 +45,15 @@ function UploadFoodDetails({}) {
             return;
         }
         try {
-            const response = await fetch('api/auth/food', {
+            const response = await fetch('/api/food', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    listingTitle:formData.listingTitle,
-                    description:formData.description,
-                    tag:formData.tag,
-                    allergens:formData.allergens
+                    foodItem: formData.listingTitle,
+                    description: formData.description,
+                    tags: formData.tag,
+                    allergens: formData.allergens,
+                    status: 'ACTIVE'
                 }),
             });
             if(response.ok){
@@ -55,15 +67,12 @@ function UploadFoodDetails({}) {
             console.error("Error submitting food details:", error);
         }
     }
-    const navigate = useNavigate();
 
-    return(
+    return (
         <div className="upload_food_details">
-
             {/* Header */}
             <nav className="nav">
                 <span className="header_title">Lighten The World</span>
-
                 <div className="header_links">
                     <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
                 </div>
@@ -82,59 +91,93 @@ function UploadFoodDetails({}) {
                 </section>
 
                 <form className="upload_body">
+                    {isRestricted && (
+                        <div style={{
+                            backgroundColor: "#fee2e2",
+                            border: "1px solid #ef4444",
+                            color: "#991b1b",
+                            padding: "12px 16px",
+                            borderRadius: "8px",
+                            marginBottom: "16px",
+                            fontWeight: "600",
+                            textAlign: "center"
+                        }}>
+                            ⚠️ Your ability to post listings has been restricted by an administrator.
+                        </div>
+                    )}
+
+                    {error && (
+                        <div style={{
+                            backgroundColor: "#fef3c7",
+                            border: "1px solid #f59e0b",
+                            color: "#92400e",
+                            padding: "10px 14px",
+                            borderRadius: "6px",
+                            marginBottom: "14px",
+                            textAlign: "center"
+                        }}>
+                            {error}
+                        </div>
+                    )}
 
                     <div className="upload_format">
                         <h2 className="page_title">Food Details</h2>
                         <p className="input_title">Listing Title</p>
                         <input type="text" 
+                        name="listingTitle"
                         className="user_input"
                         value={formData.listingTitle}
                         onChange={handleChange}
+                        disabled={isRestricted}
                         required
                         ></input>
                     </div>
 
                     <div className="upload_format">
-                        <p className="input_title>">Description</p>
+                        <p className="input_title">Description</p>
                         <input type="text" 
+                        name="description"
                         className="user_input"
                         value={formData.description}
                         onChange={handleChange}
+                        disabled={isRestricted}
                         ></input>
                     </div>
 
                     <div className="upload_format">
                         <p className="input_title">Select tags that describe your food item</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on">Fresh / Hot</button>
-                            <button className="sel_btn_off">Canned</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Fresh / Hot</button>
+                            <button type="button" className="sel_btn_off" disabled={isRestricted}>Canned</button>
                         </div>
                     </div>
 
                     <div className="upload_format">
                         <p className="input_title">Please select all applicable allergens</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on">Milk</button>
-                            <button className="sel_btn_on">Eggs</button>
-                            <button className="sel_btn_on">Fish</button>
-                            <button className="sel_btn_on">Shellfish</button>
-                            <button className="sel_btn_on">Peanuts</button>
-                            <button className="sel_btn_on">Tree Nuts</button>
-                            <button className="sel_btn_on">Soy</button>
-                            <button className="sel_btn_on">Diary</button>
-                            <button className="sel_btn_off">Wheat</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Milk</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Eggs</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Fish</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Shellfish</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Peanuts</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Tree Nuts</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Soy</button>
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Diary</button>
+                            <button type="button" className="sel_btn_off" disabled={isRestricted}>Wheat</button>
                         </div>
                     </div>
 
                     <div className="upload_nav_btn">
-                        <button className="upload_cancel_btn" 
-                            onClick={() => navigate("/donor-dashboard")}>
+                        <button type="button" className="upload_cancel_btn" 
+                            onClick={() => navigate("/DonorDashboard")}>
                                 Cancel
                         </button>
-                        <Link to="/UploadFoodLocation"><button className="upload_next_btn"
-                        onClick={handleSubmitDetails}>
-                            Next: Location & Time
-                        </button></Link>
+                        <button type="button" className="upload_next_btn"
+                            disabled={isRestricted}
+                            style={isRestricted ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+                            onClick={handleSubmitDetails}>
+                                Next: Location & Time
+                        </button>
                     </div>
                 </form>
             </div>

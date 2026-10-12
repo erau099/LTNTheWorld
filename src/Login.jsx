@@ -30,12 +30,19 @@ function Login({}) {
             if(result.status === 'success'){
                 // Store the jwt token in localStorage
                 localStorage.setItem('token', result.token)
-                setUser({ name: result.name, role: result.role })
+                setUser({ name: result.name, role: result.role, canPostListings: result.canPostListings })
                 setPopup('success')
 
                 // Determine destination based on role
                 const destination = result.role === 'recipient' ? '/recipient-dashboard' : '/donor-dashboard'
                 setTimeout(() => navigate(destination), 1500)
+            } else {
+                setPopup('error')
+            }
+        } else if (response.status === 403) {
+            const text = await response.text().catch(() => '');
+            if (text.toLowerCase().includes('suspended')) {
+                setPopup('suspended')
             } else {
                 setPopup('error')
             }
@@ -55,6 +62,12 @@ function Login({}) {
             {popup === 'error' && (
                 <div className="popup error_popup">
                     ❌ Incorrect username or password.
+                    <button onClick={() => setPopup('')}>✕</button>
+                </div>
+            )}
+            {popup === 'suspended' && (
+                <div className="popup error_popup">
+                    ⛔ Account is suspended. Please contact support.
                     <button onClick={() => setPopup('')}>✕</button>
                 </div>
             )}

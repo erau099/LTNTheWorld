@@ -1,12 +1,12 @@
-package com.codecraft;
+package com.codecraft.lovethyneighbor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
+import java.util.List;
 
 @RestController 
-@RequestMapping ("/api/food")
+@RequestMapping("/api/food")
 @CrossOrigin(origins = "http://localhost:5173")
 public class FoodController {
 
@@ -26,8 +26,17 @@ public class FoodController {
                     .body("Missing required food listing information.");
         }
 
+        if (food.getStatus() == null || food.getStatus().trim().isEmpty()) {
+            food.setStatus("ACTIVE");
+        }
+
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.ok(savedFood);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Food>> getAllActiveFood() {
+        return ResponseEntity.ok(foodRepository.findByStatusIgnoreCase("ACTIVE"));
     }
 
     @GetMapping("/{id}")
