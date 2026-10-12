@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface FoodRepository extends JpaRepository<Food, Long> {
     List<Food> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<Food> findByStatusIgnoreCase(String status);
+    long countByStatusIgnoreCase(String status);
 }

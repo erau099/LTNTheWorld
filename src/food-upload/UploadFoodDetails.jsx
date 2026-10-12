@@ -1,11 +1,21 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import UploadLayout from "./UploadLayout.jsx"
-import { useFoodDraft, toggleValue, detailsError, clearFoodDraft, FOOD_TAGS, ALLERGENS } from "./foodDraft.js"
+import "./UploadFood.css";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function UploadFoodDetails() {
+    const { user } = useAuth();
+    const isRestricted = user?.canPostListings === false;
     const navigate = useNavigate();
-    const [draft, updateDraft] = useFoodDraft();
+
+    //Form data for the food details form
+    const [formData, setFormData] = useState({
+        listingTitle: "",
+        description: "",
+        tag: "",
+        allergens: "",
+    });
+    
     const [error, setError] = useState(""); // State to hold and display error messages
 
     // Generic handler to update the draft based on input names
@@ -22,23 +32,130 @@ function UploadFoodDetails() {
 
     const handleNext = (e) => {
         e.preventDefault();
-        const message = detailsError(draft);
-        if (message) {
-            setError(message);
+        setError("");
+
+        if (isRestricted) {
+            setError("Your ability to post listings has been restricted by an administrator.");
             return;
         }
-        navigate("/UploadFoodLocation");
-    };
+
+        //checking if all required fields are filled before submission
+        if(
+            !formData.listingTitle ||
+            !formData.description ||
+            !formData.tag ||
+            !formData.allergens
+            
+        ) {
+            setError("Please set up food details before proceeding."); 
+            return;
+        }
+        try {
+            const response = await fetch('/api/food', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    foodItem: formData.listingTitle,
+                    description: formData.description,
+                    tags: formData.tag,
+                    allergens: formData.allergens,
+                    status: 'ACTIVE'
+                }),
+            });
+            if(response.ok){
+                alert("Food details submitted successfully!");
+                navigate("/DonorDashboard");
+            } else {
+                const message = await response.json();
+                setError(message);
+            }
+        } catch (error) {
+            console.error("Error submitting food details:", error);
+        }
+    }
 
     return (
-        <UploadLayout step={1}>
-            <form className="upload_body" onSubmit={handleNext}>
-                <div className="upload_format">
-                    <h2 className="page_title">Food Details</h2>
-                    <label className="input_title" htmlFor="foodItem">Listing Title</label>
-                    <input type="text" id="foodItem" name="foodItem" className="user_input"
-                        maxLength={100} value={draft.foodItem} onChange={handleChange} />
+        <div className="upload_food_details">
+            {/* Header */}
+            <nav className="nav">
+                <span className="header_title">Lighten The World</span>
+                <div className="header_links">
+                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
                 </div>
+
+            {/*Upload Food Card*/}
+            <div className="upload_card">
+                <div className="upload_banner">
+                <section className="upload_header">
+                    <p className="num_on">1</p>
+                    <p className="num_text_on">Food Details</p>
+                    <p className="num_off">2</p>
+                    <p className="num_text_off">Location & Time</p>
+                    <p className="num_off">3</p>
+                    <p className="num_text_off">Upload Photo</p>
+                </section>
+
+                <form className="upload_body">
+                    {isRestricted && (
+                        <div style={{
+                            backgroundColor: "#fee2e2",
+                            border: "1px solid #ef4444",
+                            color: "#991b1b",
+                            padding: "12px 16px",
+                            borderRadius: "8px",
+                            marginBottom: "16px",
+                            fontWeight: "600",
+                            textAlign: "center"
+                        }}>
+                            ⚠️ Your ability to post listings has been restricted by an administrator.
+                        </div>
+                    )}
+
+                    {error && (
+                        <div style={{
+                            backgroundColor: "#fef3c7",
+                            border: "1px solid #f59e0b",
+                            color: "#92400e",
+                            padding: "10px 14px",
+                            borderRadius: "6px",
+                            marginBottom: "14px",
+                            textAlign: "center"
+                        }}>
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="upload_format">
+                        <h2 className="page_title">Food Details</h2>
+                        <p className="input_title">Listing Title</p>
+                        <input type="text" 
+                        name="listingTitle"
+                        className="user_input"
+                        value={formData.listingTitle}
+                        onChange={handleChange}
+                        disabled={isRestricted}
+                        required
+                        ></input>
+                    </div>
+
+                    <div className="upload_format">
+                        <p className="input_title">Description</p>
+                        <input type="text" 
+                        name="description"
+                        className="user_input"
+                        value={formData.description}
+                        onChange={handleChange}
+                        disabled={isRestricted}
+                        ></input>
+                    </div>
+
+                    <div className="upload_format">
+                        <p className="input_title">Select tags that describe your food item</p>
+                        <div className="selection_form">
+                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Fresh / Hot</button>
+                            <button type="button" className="sel_btn_off" disabled={isRestricted}>Canned</button>
+                        </div>
+                    </div>
 
                 <div className="upload_format">
                     <label className="input_title" htmlFor="description">Description</label>

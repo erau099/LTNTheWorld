@@ -11,53 +11,42 @@ import java.util.UUID;
 @Entity
 @Table(name = "food")
 public class Food {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // Pickup day and window
-    @Column(name = "date") private LocalDate date;
+    @Column(name = "date")
+    private LocalDate date;
 
-    @Column(name = "pickup_time") private LocalDateTime pickupTime;
+    @Column(name = "pickup_time")
+    private LocalDateTime pickupTime;
 
-    @Column(name = "pickup_end_time") private LocalDateTime pickupEndTime;
+    @Column(name = "\"foodItem\"")
+    private String foodItem;
 
-    @Column(name = "address") private String address;
+    @Column(name = "description")
+    private String description;
 
-    @Column(name = "\"foodItem\"") private String foodItem;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @Column(name = "description") private String description;
+    @Column(name = "tags")
+    private String tags;
 
-    // Donor who posted the listing (logins.id). Always taken from the JWT, never from the request body.
-    @Column(name = "user_id") private UUID userId;
+    @Column(name = "allergens")
+    private String allergens;
 
-    // Same user_id column as a foreign key to logins, read-only so userId stays the one that gets saved
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
-    @JsonIgnore
-    private User user;
+    @Column(name = "status")
+    private String status = "ACTIVE";
 
-    // Comma-separated, e.g. "Fresh / Hot,Canned"
-    @Column(name = "tags") private String tags;
+    @Column(name = "removal_reason")
+    private String removalReason;
 
-    // Comma-separated, e.g. "Milk,Eggs". Empty means no allergens.
-    @Column(name = "allergens") private String allergens;
-
-    // "pending" when posted, then "approved" / "completed"
-    @Column(name = "status") private String status;
-
-    @Column(name = "created_at", updatable = false) private LocalDateTime createdAt;
-
-    // Up to 3 photos, stored as base64 data URLs
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "food_photos", joinColumns = @JoinColumn(name = "food_id"))
-    @OrderColumn(name = "position")
-    @Column(name = "photo", columnDefinition = "TEXT")
-    private List<String> photos = new ArrayList<>();
-
-
-    public Food() {}
+    public Food() {
+    }
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-        UUID userId, String tags, String allergens) {
+            Long userId, String tags, String allergens) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -65,15 +54,19 @@ public class Food {
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
+        this.status = "ACTIVE";
     }
 
-    // Sets the defaults before the listing is saved for the first time
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        if (status == null) {
-            status = "pending";
-        }
+    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
+            Long userId, String tags, String allergens, String status) {
+        this.date = date;
+        this.pickupTime = pickupTime;
+        this.foodItem = foodItem;
+        this.description = description;
+        this.userId = userId;
+        this.tags = tags;
+        this.allergens = allergens;
+        this.status = status != null ? status : "ACTIVE";
     }
 
     public Long getId() {
@@ -157,13 +150,19 @@ public class Food {
     }
 
     public String getStatus() {
-        return status;
+        return status != null ? status : "ACTIVE";
     }
 
     public void setStatus(String status) {
         this.status = status;
     }
 
+    public String getRemovalReason() {
+        return removalReason;
+    }
+
+    public void setRemovalReason(String removalReason) {
+        this.removalReason = removalReason;
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
