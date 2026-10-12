@@ -125,9 +125,9 @@ public class Food {
         this.allergens = allergens;
     }
 
-    public String getStatus() {
-        return status != null ? status : "ACTIVE";
-    }
+public String getStatus() {
+    return status;
+}
 
     public void setStatus(String status) {
         this.status = status;
