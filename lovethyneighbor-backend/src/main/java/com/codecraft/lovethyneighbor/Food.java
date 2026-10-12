@@ -34,11 +34,11 @@ public class Food {
     @Column(name = "description")
     private String description;
 
-    // Existing required bigint column.
+    // Existing bigint column in the shared database
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // UUID relationship to logins.id.
+    // UUID relationship to logins.id
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -59,6 +59,9 @@ public class Food {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "removal_reason")
+    private String removalReason;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "food_photos",
@@ -68,29 +71,51 @@ public class Food {
     @Column(name = "photo", columnDefinition = "TEXT")
     private List<String> photos = new ArrayList<>();
 
-    public Food() {}
+    // Default constructor required by JPA
+    public Food() {
+    }
 
-    // Constructor retained for compatibility with existing admin tests
-public Food(
-        LocalDate date,
-        LocalDateTime pickupTime,
-        String foodItem,
-        String description,
-        long userId,
-        String tags,
-        String allergens,
-        String status
-) {
-    this.date = date;
-    this.pickupTime = pickupTime;
-    this.foodItem = foodItem;
-    this.description = description;
-    this.userId = userId;
-    this.tags = tags;
-    this.allergens = allergens;
-    this.status = status;
-}
+    // Constructor for existing food listing functionality
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            Long userId,
+            String tags,
+            String allergens
+    ) {
+        this.date = date;
+        this.pickupTime = pickupTime;
+        this.foodItem = foodItem;
+        this.description = description;
+        this.userId = userId;
+        this.tags = tags;
+        this.allergens = allergens;
+    }
 
+    // Constructor retained for admin functionality and tests
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            long userId,
+            String tags,
+            String allergens,
+            String status
+    ) {
+        this.date = date;
+        this.pickupTime = pickupTime;
+        this.foodItem = foodItem;
+        this.description = description;
+        this.userId = userId;
+        this.tags = tags;
+        this.allergens = allergens;
+        this.status = status != null ? status : "ACTIVE";
+    }
+
+    // Set defaults when the food listing is first saved
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
@@ -208,5 +233,13 @@ public Food(
 
     public void setPhotos(List<String> photos) {
         this.photos = photos;
+    }
+
+    public String getRemovalReason() {
+        return removalReason;
+    }
+
+    public void setRemovalReason(String removalReason) {
+        this.removalReason = removalReason;
     }
 }
