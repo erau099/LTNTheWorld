@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 function AdminFoodListings({ onListingCountChange }) {
   const [listings, setListings] = useState([]);
@@ -6,8 +6,10 @@ function AdminFoodListings({ onListingCountChange }) {
   const [error, setError] = useState(null);
   const [removingId, setRemovingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedListing, setSelectedListing] = useState(null);
+  const [removalReason, setRemovalReason] = useState("");
 
-  const fetchActiveListings = useCallback(async () => {
+  const fetchActiveListings = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -26,22 +28,40 @@ function AdminFoodListings({ onListingCountChange }) {
     } finally {
       setLoading(false);
     }
-  }, [onListingCountChange]);
+  };
 
   useEffect(() => {
     fetchActiveListings();
-  }, [fetchActiveListings]);
+  }, []);
 
-  const handleRemoveListing = async (listingId, foodTitle) => {
-    const confirmMessage = `Are you sure you want to remove the listing "${foodTitle || 'this item'}"? It will no longer be visible to users.`;
-    if (!window.confirm(confirmMessage)) return;
+  const handleRemoveClick = (listingId, foodTitle) => {
+    setSelectedListing({
+      id: listingId,
+      title: foodTitle || "this item",
+    });
+    setRemovalReason("");
+  };
 
-    setRemovingId(listingId);
+  const handleCancelRemove = () => {
+    setSelectedListing(null);
+    setRemovalReason("");
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!removalReason.trim()) {
+      return;
+    }
+
+    setRemovingId(selectedListing.id);
+
     try {
-      const response = await fetch(`/api/admin/food/${listingId}/status`, {
+      const response = await fetch(`/api/admin/food/${selectedListing.id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "REMOVED_BY_ADMIN" }),
+        body: JSON.stringify({
+          status: "REMOVED_BY_ADMIN",
+          removalReason: removalReason.trim(),
+        }),
       });
 
       if (!response.ok) {
@@ -49,12 +69,15 @@ function AdminFoodListings({ onListingCountChange }) {
       }
 
       setListings((prev) => {
-        const next = prev.filter((item) => item.id !== listingId);
+        const next = prev.filter((item) => item.id !== selectedListing.id);
         if (onListingCountChange) {
           onListingCountChange(next.length);
         }
         return next;
       });
+
+      setSelectedListing(null);
+      setRemovalReason("");
     } catch (err) {
       console.error("Error removing food listing:", err);
       alert("Failed to remove food listing. Please check backend connection.");
@@ -187,7 +210,7 @@ function AdminFoodListings({ onListingCountChange }) {
                   <span className="food-action-cell">
                     <button
                       className="admin-user-action admin-action-suspend"
-                      onClick={() => handleRemoveListing(item.id, title)}
+                      onClick={() => handleRemoveClick(item.id, title)}
                       disabled={removingId === item.id}
                     >
                       {removingId === item.id ? "Removing..." : "Remove"}
@@ -197,6 +220,48 @@ function AdminFoodListings({ onListingCountChange }) {
               );
             })
           )}
+        </div>
+      )}
+
+      {selectedListing && (
+        <div className="admin-remove-modal">
+          <div className="admin-remove-modal-content">
+            <h3>Remove Listing</h3>
+
+            <p>
+              Why are you removing <strong>{selectedListing.title}</strong>?
+            </p>
+
+            <textarea
+              value={removalReason}
+              onChange={(e) => setRemovalReason(e.target.value)}
+              placeholder="Enter removal reason..."
+              rows="4"
+            />
+
+            <div className="admin-remove-modal-actions">
+              <button
+                className="admin-refresh-btn"
+                onClick={handleCancelRemove}
+                disabled={removingId === selectedListing.id}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="admin-user-action admin-action-suspend"
+                onClick={handleConfirmRemove}
+                disabled={
+                  !removalReason.trim() ||
+                  removingId === selectedListing.id
+                }
+              >
+                {removingId === selectedListing.id
+                  ? "Removing..."
+                  : "Confirm Removal"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>

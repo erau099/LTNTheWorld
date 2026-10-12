@@ -9,7 +9,7 @@ function AdminArchivedListings() {
   useEffect(() => {
     const fetchArchivedListings = async () => {
       try {
-        const response = await fetch("/api/admin/listings/archived");
+        const response = await fetch("/api/admin/food/archived");
 
         if (!response.ok) {
           throw new Error(`Server returned ${response.status}`);

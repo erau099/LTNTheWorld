@@ -35,10 +35,14 @@ public class Food {
     @Column(name = "status")
     private String status = "ACTIVE";
 
-    public Food() {}
+    @Column(name = "removal_reason")
+    private String removalReason;
+
+    public Food() {
+    }
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-                Long userId, String tags, String allergens) {
+            Long userId, String tags, String allergens) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -50,7 +54,7 @@ public class Food {
     }
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-                Long userId, String tags, String allergens, String status) {
+            Long userId, String tags, String allergens, String status) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -131,5 +135,13 @@ public class Food {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getRemovalReason() {
+        return removalReason;
+    }
+
+    public void setRemovalReason(String removalReason) {
+        this.removalReason = removalReason;
     }
 }
