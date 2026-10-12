@@ -88,6 +88,63 @@ function RecipientDashboard() {
 	const filteredListings = listings.filter((item) => {
 		return selectFiltering === "all" || item.category === selectFiltering;
 	})
+	// Stores the logged-in recipient's saved allergies
+	const [recipientAllergies, setRecipientAllergies] = useState([]);
+
+	// Loads the logged-in recipient's allergies from the backend
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+
+		if (!token) return;
+
+		fetch("/api/users/me/allergies", {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		})
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error("Unable to load allergies");
+				}
+
+				return response.text();
+			})
+			.then((allergies) => {
+				const allergyList = allergies
+					? allergies.split(",").map((allergy) => allergy.trim()).filter(Boolean)
+					: [];
+
+				setRecipientAllergies(allergyList);
+			})
+			.catch((error) => {
+				console.error("Error loading recipient allergies:", error);
+			});
+	}, []);
+
+	// Checks the selected food listing against the recipient's saved allergies
+	const handleListingClick = (item) => {
+		const listingAllergies = item.allergies || [];
+
+		const matchingAllergies = listingAllergies.filter((listingAllergy) =>
+			recipientAllergies.some((recipientAllergy) =>
+				recipientAllergy.toLowerCase().replace(/s$/, "") ===
+				listingAllergy.toLowerCase().replace(/s$/, "")
+			)
+		);
+
+		if (matchingAllergies.length > 0) {
+			alert(
+				`Allergy Warning! This food contains: ${matchingAllergies.join(", ")}`
+			);
+		}
+
+		setSelectListing(item);
+	};
+
+	// Gets the food condition from either backend data or current mock listings
+	const getFoodCondition = (item) => {
+		return item.tags || item.category || "Not specified";
+	};
 
 	return (
 		<div className="recipient-dashboard">
@@ -163,9 +220,9 @@ function RecipientDashboard() {
 					{filteredListings.map((item, index) => (
 						<article className="food-card" 
 									key={index} 
-									onClick={() => setSelectListing(item)}>
+									onClick={() => handleListingClick(item)}>
 							<div className="food-image">
-								<span className="category-tag">{item.category}</span>
+								<span className="category-tag">{getFoodCondition(item)}</span>
 							</div>
 
 							<div className="food-info">
@@ -203,7 +260,7 @@ function RecipientDashboard() {
 
 										<div className="food_popup_info">
 											<p className="donor_name_popup">Posted by: {selectListing.donor}</p>
-											<p className="category_popup">Category: {selectListing.category}</p>
+											<p className="category_popup">Condition: {getFoodCondition(selectListing)}</p>
 											<p className="pickup_popup">{selectListing.pickup}</p>
 											<p className="rating_popup">★ {selectListing.rating}</p>
 											<div className="allergies_popup">

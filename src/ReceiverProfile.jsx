@@ -112,6 +112,7 @@ export default function ReceiverProfile() {
     password: "******",
     dob: "01/01/2001",
     phone: "(916)-111-1111",
+    allergies: "",
   });
 
   const [editing, setEditing] = useState({
@@ -121,7 +122,37 @@ export default function ReceiverProfile() {
     password: false,
     dob: false,
     phone: false,
+    allergies: false,
   });
+
+  // Loads the logged-in recipient's saved allergies from the backend
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return;
+
+    fetch("/api/users/me/allergies", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Unable to load allergies");
+        }
+
+        return response.text();
+      })
+      .then((allergies) => {
+        setForm((prev) => ({
+          ...prev,
+          allergies: allergies || "",
+        }));
+      })
+      .catch((error) => {
+        console.error("Error loading allergies:", error);
+      });
+  }, []);
 
   const canSave = useMemo(() => true, []);
 
@@ -134,8 +165,32 @@ export default function ReceiverProfile() {
     setEditing((prev) => ({ ...prev, [field]: !prev[field] }));
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault();
+
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const response = await fetch("/api/users/me/allergies", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            allergies: form.allergies,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Unable to save allergies");
+        }
+      } catch (error) {
+        console.error("Error saving allergies:", error);
+      }
+    }
+
     console.log("Saving receiver profile:", form);
 
     setEditing((prev) => {
@@ -261,6 +316,16 @@ export default function ReceiverProfile() {
                 ariaLabel="Phone number"
               />
             </div>
+
+            <EditableInput
+              name="allergies"
+              value={form.allergies}
+              onChange={handleChange}
+              placeholder="Allergies: Peanut, Milk, Shellfish"
+              editable={editing.allergies}
+              onToggleEdit={toggleEdit}
+              ariaLabel="Allergies"
+            />
           </div>
 
           <button className="rp-saveBtn" type="submit" disabled={!canSave}>
