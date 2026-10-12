@@ -1,50 +1,58 @@
+import { useState } from "react";
 import "./UploadFood.css"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
-function UploadFoodLocation({}) {
+function UploadFoodLocation() {
     //Form data for the food location form
     const [formData, setFormData] = useState({
         location: "",
         date: "",
-        time: "",
+        timeStart: "",
+        timeEnd: "",
     });
+
+    const [error, setError] = useState("");
 
     // Generic handler to update form based on input names for food location form
     const handleChange = (e) => {
         const {name, value} = e.target;
-        setFormData((prev => ({...prev, [name]: value})));
+        setFormData((prev) => ({...prev, [name]: value}));
     };
 
-    const handleSubmitLocation = async (e) => {
+    const handleSubmitLocation = (e) => {
         e.preventDefault();
+        setError("");
+
         if(
             !formData.location ||
             !formData.date ||
-            !formData.time
+            !formData.timeStart ||
+            !formData.timeEnd
         ) {
             setError("Please set up food location before proceeding.");
             return;
         }
-        try {
-            const response = await fetch('api/auth/food', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    location:formData.location,
-                    date:formData.date,
-                    timeEnd:formData.time
-                }),
-            });
-            if(response.ok){
-                setError("Food location submitted successfully!");
-            } else {
-                const message = await response.json();
-                setError(message);
-            }
-        } catch (error) {
-            console.error("Error submitting food location:", error);
-        }
-    }
+
+        // Get the food details saved during step 1
+        const savedDraft = JSON.parse(
+            sessionStorage.getItem("foodListingDraft") || "{}"
+        );
+
+        // Add the location and time information to the same listing draft
+        const updatedDraft = {
+            ...savedDraft,
+            ...formData
+        };
+
+        sessionStorage.setItem(
+            "foodListingDraft",
+            JSON.stringify(updatedDraft)
+        );
+
+        navigate("/UploadFoodPhoto");
+    };
+
+    const navigate = useNavigate();
 
     return(
         <div className="upload_food_details">
@@ -74,48 +82,73 @@ function UploadFoodLocation({}) {
                     <div className="upload_format">
                         <h2 className="page_title">Location</h2>
                         <p className="input_title">Address</p>
-                        <input type="text" 
-                        className="user_input"
-                        value={formData.location}
-                        onChange={handleChange}
-                        required
+                        <input
+                            type="text"
+                            className="user_input"
+                            name="location"
+                            value={formData.location}
+                            onChange={handleChange}
+                            required
                         ></input>
                     </div>
 
                     <div className="upload_format">
-                        <p className="input_title>">Date</p>
-                        <input type="text" 
-                        className="user_input"
-                        value={formData.date}
-                        onChange={handleChange}
-                        required>
-                        </input>
+                        <p className="input_title">Date</p>
+                        <input
+                            type="date"
+                            className="user_input"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleChange}
+                            required
+                        ></input>
                     </div>
 
                     <div className="time_format">
                         <p className="input_title">Time Start</p>
                         <p className="input_title">Time End</p>
-                        <input type="time" id="meeting_start" name="meeting_end" required/>
-                        <input type="time" 
-                        id="meeting_end" 
-                        name="meeting_end"
-                        value={formData.time}
-                        onChange={handleChange} 
-                        required/>
+
+                        <input
+                            type="time"
+                            name="timeStart"
+                            value={formData.timeStart}
+                            onChange={handleChange}
+                            required
+                        />
+
+                        <input
+                            type="time"
+                            name="timeEnd"
+                            value={formData.timeEnd}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
 
+                    {error && <p>{error}</p>}
 
                     <div className="upload_nav_btn">
-                        <Link to="/UploadFoodDetails"><button className="upload_cancel_btn">Back</button></Link>
-                        <Link to="/UploadFoodPhoto"><button className="upload_next_btn" onClick={handleSubmitLocation}>
-                            Next:Upload Photo</button></Link>
+                        <button
+                            type="button"
+                            className="upload_cancel_btn"
+                            onClick={() => navigate("/UploadFoodDetails")}
+                        >
+                            Back
+                        </button>
+
+                        <button
+                            type="button"
+                            className="upload_next_btn"
+                            onClick={handleSubmitLocation}
+                        >
+                            Next: Upload Photo
+                        </button>
                     </div>
                 </form>
             </div>
             </div>
         </div>
     )
-
 }
 
 export default UploadFoodLocation

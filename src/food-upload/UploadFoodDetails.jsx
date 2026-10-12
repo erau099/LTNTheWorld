@@ -1,8 +1,8 @@
+import { useState } from "react";
 import "./UploadFood.css"
-import { Link } from "react-router-dom"
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"
 
-function UploadFoodDetails({}) {
+function UploadFoodDetails() {
     //Form data for the food details form
     const [formData, setFormData] = useState({
         listingTitle: "",
@@ -18,43 +18,61 @@ function UploadFoodDetails({}) {
         const {name, value} = e.target;
         setFormData((prev => ({...prev, [name]: value})));
     };
+
+    // Saves the selected food condition
+    const handleTagSelect = (tag) => {
+        setFormData((prev) => ({
+            ...prev,
+            tag: tag
+        }));
+    };
+
+    // Adds or removes allergens from the listing
+    const handleAllergenToggle = (allergen) => {
+        const currentAllergens = formData.allergens
+            ? formData.allergens.split(",").map((item) => item.trim())
+            : [];
+
+        const updatedAllergens = currentAllergens.includes(allergen)
+            ? currentAllergens.filter((item) => item !== allergen)
+            : [...currentAllergens, allergen];
+
+        setFormData((prev) => ({
+            ...prev,
+            allergens: updatedAllergens.join(", ")
+        }));
+    };
+
+    // Checks whether an allergen is currently selected
+    const isAllergenSelected = (allergen) => {
+        return formData.allergens
+            .split(",")
+            .map((item) => item.trim())
+            .includes(allergen);
+    };
+
     //handling submission for food details form
-    const handleSubmitDetails = async (e) => {
+    const handleSubmitDetails = (e) => {
         e.preventDefault();
         setError("");
+
         //checking if all required fields are filled before submission
         if(
             !formData.listingTitle ||
             !formData.description ||
-            !formData.tag ||
-            !formData.allergens
+            !formData.tag 
             
         ) {
             setError("Please set up food details before proceeding."); 
             return;
         }
-        try {
-            const response = await fetch('api/auth/food', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    listingTitle:formData.listingTitle,
-                    description:formData.description,
-                    tag:formData.tag,
-                    allergens:formData.allergens
-                }),
-            });
-            if(response.ok){
-                alert("Food details submitted successfully!");
-                navigate("/DonorDashboard");
-            } else {
-                const message = await response.json();
-                setError(message);
-            }
-        } catch (error) {
-            console.error("Error submitting food details:", error);
-        }
-    }
+
+        // Store step 1 so the remaining upload pages can use the same listing
+        sessionStorage.setItem("foodListingDraft", JSON.stringify(formData));
+
+        navigate("/UploadFoodLocation");
+    };
+
     const navigate = useNavigate();
 
     return(
@@ -88,6 +106,7 @@ function UploadFoodDetails({}) {
                         <p className="input_title">Listing Title</p>
                         <input type="text" 
                         className="user_input"
+                        name="listingTitle"
                         value={formData.listingTitle}
                         onChange={handleChange}
                         required
@@ -98,6 +117,7 @@ function UploadFoodDetails({}) {
                         <p className="input_title>">Description</p>
                         <input type="text" 
                         className="user_input"
+                        name="description"
                         value={formData.description}
                         onChange={handleChange}
                         ></input>
@@ -106,42 +126,124 @@ function UploadFoodDetails({}) {
                     <div className="upload_format">
                         <p className="input_title">Select tags that describe your food item</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on">Fresh / Hot</button>
-                            <button className="sel_btn_off">Canned</button>
+                            <button
+                                type="button"
+                                className={formData.tag === "Fresh / Hot" ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleTagSelect("Fresh / Hot")}
+                            >
+                                Fresh / Hot
+                            </button>
+
+                            <button
+                                type="button"
+                                className={formData.tag === "Canned" ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleTagSelect("Canned")}
+                            >
+                                Canned
+                            </button>
                         </div>
                     </div>
 
                     <div className="upload_format">
                         <p className="input_title">Please select all applicable allergens</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on">Milk</button>
-                            <button className="sel_btn_on">Eggs</button>
-                            <button className="sel_btn_on">Fish</button>
-                            <button className="sel_btn_on">Shellfish</button>
-                            <button className="sel_btn_on">Peanuts</button>
-                            <button className="sel_btn_on">Tree Nuts</button>
-                            <button className="sel_btn_on">Soy</button>
-                            <button className="sel_btn_on">Diary</button>
-                            <button className="sel_btn_off">Wheat</button>
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Milk") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Milk")}
+                            >
+                                Milk
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Eggs") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Eggs")}
+                            >
+                                Eggs
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Fish") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Fish")}
+                            >
+                                Fish
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Shellfish") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Shellfish")}
+                            >
+                                Shellfish
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Peanuts") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Peanuts")}
+                            >
+                                Peanuts
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Tree Nuts") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Tree Nuts")}
+                            >
+                                Tree Nuts
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Soy") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Soy")}
+                            >
+                                Soy
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Diary") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Diary")}
+                            >
+                                Diary
+                            </button>
+
+                            <button
+                                type="button"
+                                className={isAllergenSelected("Wheat") ? "sel_btn_on" : "sel_btn_off"}
+                                onClick={() => handleAllergenToggle("Wheat")}
+                            >
+                                Wheat
+                            </button>
                         </div>
                     </div>
 
+                    {error && <p>{error}</p>}
+
                     <div className="upload_nav_btn">
-                        <button className="upload_cancel_btn" 
-                            onClick={() => navigate("/donor-dashboard")}>
-                                Cancel
+                        <button
+                            type="button"
+                            className="upload_cancel_btn" 
+                            onClick={() => navigate("/donor-dashboard")}
+                        >
+                            Cancel
                         </button>
-                        <Link to="/UploadFoodLocation"><button className="upload_next_btn"
-                        onClick={handleSubmitDetails}>
+
+                        <button
+                            type="button"
+                            className="upload_next_btn"
+                            onClick={handleSubmitDetails}
+                        >
                             Next: Location & Time
-                        </button></Link>
+                        </button>
                     </div>
                 </form>
             </div>
             </div>
         </div>
-
-
     );
 }
 
