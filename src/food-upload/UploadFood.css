@@ -12,7 +12,7 @@
     width:100%;
     max-width: 720px;
     background: rgba(255, 255, 255, 0.45);
-    border: 1px solid rgba(160, 140. 150, 0.45);
+    border: 1px solid rgba(160, 140, 150, 0.45);
     border-radius: 18px;
     overflow: hidden;
 }
@@ -87,6 +87,13 @@
     font-size: 14px;
     background-color: white;
     outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.user_input:focus {
+    border-color: #2d7a3a;
 }
 
 .selection_form {
@@ -106,6 +113,12 @@
     font-weight: 400;
     cursor: pointer;
     line-height: 1;
+}
+
+/* Selected tag / allergen */
+.sel_btn_on {
+    background: #2d7a3a;
+    color: #ffffff;
 }
 
 .upload_nav_btn {
@@ -158,6 +171,12 @@
 
 .upload_next_btn:active {
     transform: translateY(1px);
+}
+
+.upload_next_btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .upload_square_box {
@@ -213,7 +232,82 @@
     padding-top: 20px;
 }
 
+/* Step number + label pair in the upload header */
+.upload_step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
+.time_format {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
 
+.time_format .input_title {
+    display: block;
+}
 
+.upload_format .input_title {
+    display: block;
+}
 
+.upload_error {
+    color: #b3261e;
+    font-size: 14px;
+    margin: 0 0 12px;
+}
+
+.photo_previews {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.photo_preview {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.photo_preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.photo_remove_btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: #4f4f4f;
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .upload_header {
+        height: auto;
+        gap: 16px;
+        padding: 14px 16px;
+    }
+
+    .time_format {
+        grid-template-columns: 1fr;
+    }
+
+    .upload_nav_btn {
+        margin-top: 40px;
+        gap: 12px;
+    }
+}

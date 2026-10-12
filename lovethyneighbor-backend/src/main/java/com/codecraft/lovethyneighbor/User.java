@@ -4,6 +4,7 @@ import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
 
 import jakarta.persistence.*;
@@ -52,8 +53,9 @@ public class User {
     @Column(name = "reset_token_expiration")
     private LocalDateTime resetTokenExpiration;
 
-    // Links the Food entity to the User Entity
-    @Transient
+    // Links the Food entity to the User Entity creating a many-to-one relationship from food to user
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private java.util.List<Food> foodListings;
 
     @Column(name = "status")

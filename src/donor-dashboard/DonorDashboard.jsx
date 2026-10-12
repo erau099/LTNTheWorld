@@ -2,11 +2,19 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 // import { useEffect } from 'react'
 import { useAuth } from "../context/AuthContext";
+import { apiFetch } from "../api";
 
 import "../index.css";
 import "../App.css";
 import "../CDashboard.css";
 import "./DonorDashboard.css";
+
+// Formats a listing's pickup window, e.g. "Pick up 10/12/2026 @ 4:00 PM - 5:00 PM"
+function formatPickup(item) {
+	const time = (t) => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+	const date = new Date(item.date + "T00:00:00").toLocaleDateString();
+	return `Pick up ${date} @ ${time(item.pickupTime)} - ${time(item.pickupEndTime)}`;
+}
 
 function DonorDashboard() {
     const navigate = useNavigate();
@@ -19,33 +27,21 @@ function DonorDashboard() {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const dropdownRef = useRef(null);
 
-	// Temporary mock listing data for the donor dashboard.
-	const listings = [
-		{
-			food: "Donuts",
-			pickup: "Pick up 01/01/2001 @ 16:00 - 17:00",
-			rating: "3.9",
-			category: "Fresh / Hot",
-		},
-		{
-			food: "Canned Tuna",
-			pickup: "Pick up 01/01/2001 @ 16:00 - 17:00",
-			rating: "4.2",
-			category: "Canned",
-		},
-		{
-			food: "Rice Bowls",
-			pickup: "Pick up 01/01/2001 @ 16:00 - 17:00",
-			rating: "4.9",
-			category: "Fresh / Hot",
-		},
-		{
-			food: "Black Beans",
-			pickup: "Pick up 01/01/2001 @ 16:00 - 17:00",
-			rating: "3.5",
-			category: "Canned",
-		},
-	];
+	// Listings posted by the logged-in donor, loaded from the backend.
+	const [listings, setListings] = useState([]);
+	const [loadError, setLoadError] = useState("");
+	const [filter, setFilter] = useState("all");
+
+	useEffect(() => {
+		apiFetch("/api/food/mine")
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			.then(setListings)
+			.catch(() => setLoadError("Could not load your listings."));
+	}, []);
+
+	const visibleListings = listings.filter(
+		(item) => filter === "all" || item.status === filter
+	);
 
 	// Scroll + dropdown
 	useEffect(() => {		
@@ -77,16 +73,6 @@ function DonorDashboard() {
 
 		setDropdownOpen(false);
 	};
-
-	// Handles the cards to be able to be shown when clicked
-	const [selectListing, setSelectListing] = useState(false)
-
-	// Handles the filtering for the listings
-	const [selectFiltering, setSelectedFiltering] = useState("All")
-
-	const filteredListings = listings.filter((item) => {
-		return selectFiltering === "All" || item.category === selectFiltering;
-	})
 
 	return (
 		<div className="donor-dashboard">
@@ -149,31 +135,43 @@ function DonorDashboard() {
 			{/* Main dashboard content */}
 			<main className="donor-main">
 				<h2>Your Listings</h2>
+				{loadError && <p>{loadError}</p>}
 
 				{/* Filter buttons for listing status */}
 				<div className="filter-row">
-					<button className={selectFiltering === "All" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("All")}>All</button>
-					<button className={selectFiltering === "Pending" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Pending")}>Pending</button>
-					<button className={selectFiltering === "Completed" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Completed")}>Completed</button>
+					{["all", "pending", "completed"].map((status) => (
+						<button
+							key={status}
+							className={`filter-button ${filter === status ? "active" : ""}`}
+							onClick={() => setFilter(status)}
+						>
+							{status.charAt(0).toUpperCase() + status.slice(1)}
+						</button>
+					))}
 				</div>
 
 				{/* Donor listing cards */}
 				<div className="donor-content-row">
-					{filteredListings.map((item, index) => (
-						<div key={index} className="donor-food-card">
-							<div className="donor-food-image">
-								<span className="category-tag">{item.category}</span>
+					{visibleListings.map((item) => (
+						<div key={item.id} className="donor-food-card">
+							<div
+								className="donor-food-image"
+								style={item.photos?.length ? {
+									backgroundImage: `url(${item.photos[0]})`,
+									backgroundSize: "cover",
+									backgroundPosition: "center",
+								} : undefined}
+							>
+								<span className="category-tag">{item.tags?.split(",")[0]}</span>
 							</div>
 
 							<div className="donor-food-info">
 								<div>
-									<p className="food-title">{item.food}</p>
-									<p className="pickup-time">{item.pickup}</p>
+									<p className="food-title">{item.foodItem}</p>
+									<p className="pickup-time">{formatPickup(item)}</p>
 								</div>
 
-								<div className="rating">
-									<span>⭐</span> {item.rating}
-								</div>
+								<div className="rating">{item.status}</div>
 							</div>
 						</div>
 					))}

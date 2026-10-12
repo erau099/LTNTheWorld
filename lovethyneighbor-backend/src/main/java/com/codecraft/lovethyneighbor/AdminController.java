@@ -37,7 +37,7 @@ public class AdminController {
 
         // Test admin fallback credentials
         if ("admin".equals(request.getUsername()) && "1234".equals(request.getPassword())) {
-            return ResponseEntity.ok(new LoginResponse("success", "Admin", "ADMIN"));
+            return ResponseEntity.ok(new LoginResponse("success", "Admin", "ADMIN", null));
         }
 
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
@@ -49,7 +49,7 @@ public class AdminController {
 
             if (passwordMatches) {
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                    return ResponseEntity.ok(new LoginResponse("success", user.getName(), "ADMIN"));
+                    return ResponseEntity.ok(new LoginResponse("success", user.getName(), "ADMIN", null));
                 } else {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body(new MessageResponse("Access denied: Administrator privileges required"));

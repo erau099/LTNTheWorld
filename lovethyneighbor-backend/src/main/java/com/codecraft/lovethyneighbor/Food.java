@@ -1,8 +1,12 @@
 package com.codecraft.lovethyneighbor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "food")
@@ -69,10 +73,6 @@ public class Food {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public LocalDate getDate() {
         return date;
     }
@@ -87,6 +87,22 @@ public class Food {
 
     public void setPickupTime(LocalDateTime pickupTime) {
         this.pickupTime = pickupTime;
+    }
+
+    public LocalDateTime getPickupEndTime() {
+        return pickupEndTime;
+    }
+
+    public void setPickupEndTime(LocalDateTime pickupEndTime) {
+        this.pickupEndTime = pickupEndTime;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getFoodItem() {
@@ -105,12 +121,16 @@ public class Food {
         this.description = description;
     }
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public String getTags() {
@@ -143,5 +163,15 @@ public class Food {
 
     public void setRemovalReason(String removalReason) {
         this.removalReason = removalReason;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<String> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
     }
 }

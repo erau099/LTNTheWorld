@@ -72,6 +72,7 @@ function Home() {
             <Link to="/receiver-profile"><button className="headerbtn">Receiver Profile</button></Link>
             <Link to="/recipient-past-orders"><button className="headerbtn">Orders</button></Link>
             <Link to="/donor-past-listings"><button className="headerbtn">Listings</button></Link>
+            <Link to="/reviews"><button className="headerbtn">Reviews</button></Link>
             
             {user ? (
                 <>

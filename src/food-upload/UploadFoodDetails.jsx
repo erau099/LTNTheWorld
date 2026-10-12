@@ -18,13 +18,19 @@ function UploadFoodDetails() {
     
     const [error, setError] = useState(""); // State to hold and display error messages
 
-    // Generic handler to update form based on input names for food details form 
+    // Generic handler to update the draft based on input names
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData((prev => ({...prev, [name]: value})));
+        const { name, value } = e.target;
+        updateDraft({ [name]: value });
+        setError("");
     };
-    //handling submission for food details form
-    const handleSubmitDetails = async (e) => {
+
+    const handleCancel = () => {
+        clearFoodDraft();
+        navigate("/donor-dashboard");
+    };
+
+    const handleNext = (e) => {
         e.preventDefault();
         setError("");
 
@@ -76,7 +82,6 @@ function UploadFoodDetails() {
                 <div className="header_links">
                     <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
                 </div>
-            </nav>
 
             {/*Upload Food Card*/}
             <div className="upload_card">
@@ -152,39 +157,51 @@ function UploadFoodDetails() {
                         </div>
                     </div>
 
-                    <div className="upload_format">
-                        <p className="input_title">Please select all applicable allergens</p>
-                        <div className="selection_form">
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Milk</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Eggs</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Fish</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Shellfish</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Peanuts</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Tree Nuts</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Soy</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Diary</button>
-                            <button type="button" className="sel_btn_off" disabled={isRestricted}>Wheat</button>
-                        </div>
+                <div className="upload_format">
+                    <label className="input_title" htmlFor="description">Description</label>
+                    <textarea id="description" name="description" className="user_input" rows={3}
+                        maxLength={255} value={draft.description} onChange={handleChange} />
+                </div>
+
+                <div className="upload_format">
+                    {/* Food condition: one choice, shown to recipients on their listings */}
+                    <p className="input_title">Select the tag that describes your food item</p>
+                    <div className="selection_form">
+                        {FOOD_TAGS.map((tag) => (
+                            <button type="button" key={tag}
+                                className={draft.tags.includes(tag) ? "sel_btn_on" : "sel_btn_off"}
+                                aria-pressed={draft.tags.includes(tag)}
+                                onClick={() => { updateDraft({ tags: [tag] }); setError(""); }}>
+                                {tag}
+                            </button>
+                        ))}
                     </div>
+                </div>
 
-                    <div className="upload_nav_btn">
-                        <button type="button" className="upload_cancel_btn" 
-                            onClick={() => navigate("/DonorDashboard")}>
-                                Cancel
-                        </button>
-                        <button type="button" className="upload_next_btn"
-                            disabled={isRestricted}
-                            style={isRestricted ? { opacity: 0.5, cursor: "not-allowed" } : {}}
-                            onClick={handleSubmitDetails}>
-                                Next: Location & Time
-                        </button>
+                <div className="upload_format">
+                    <p className="input_title">Please select all applicable allergens</p>
+                    <div className="selection_form">
+                        {ALLERGENS.map((allergen) => (
+                            <button type="button" key={allergen}
+                                className={draft.allergens.includes(allergen) ? "sel_btn_on" : "sel_btn_off"}
+                                aria-pressed={draft.allergens.includes(allergen)}
+                                onClick={() => updateDraft({ allergens: toggleValue(draft.allergens, allergen) })}>
+                                {allergen}
+                            </button>
+                        ))}
                     </div>
-                </form>
-            </div>
-            </div>
-        </div>
+                </div>
 
+                {error && <p className="upload_error">{error}</p>}
 
+                <div className="upload_nav_btn">
+                    <button type="button" className="upload_cancel_btn" onClick={handleCancel}>
+                        Cancel
+                    </button>
+                    <button type="submit" className="upload_next_btn">Next: Location & Time</button>
+                </div>
+            </form>
+        </UploadLayout>
     );
 }
 
