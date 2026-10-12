@@ -21,7 +21,7 @@ public class Food {
 
     @Column(name = "description") private String description;
 
-    @Column(name = "user_id") private Long userId;
+    @Column(name = "user_id") private java.util.UUID userId;
 
     @Column(name = "tags") private String tags;
 
@@ -29,13 +29,13 @@ public class Food {
 
     @Column (name = "id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id", nullable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Food() {}
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-        Long userId, String tags, String allergens) {
+        java.util.UUID userId, String tags, String allergens) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -80,11 +80,11 @@ public class Food {
     public void setDescription(String description) {
         this.description = description;
     }
-    public Long getUserId() {
+    public java.util.UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(java.util.UUID userId) {
         this.userId = userId;
     }
 

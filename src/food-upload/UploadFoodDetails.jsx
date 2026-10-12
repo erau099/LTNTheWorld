@@ -5,10 +5,10 @@ import { Link, useNavigate } from "react-router-dom"
 function UploadFoodDetails() {
     //Form data for the food details form
     const [formData, setFormData] = useState({
-        listingTitle: "",
-        description: "",
-        tag: "",
-        allergens: "",
+        listingTitle: '',
+        description: '',
+        tag: '',
+        allergens: '',
     });
     
     const [error, setError] = useState(""); // State to hold and display error messages

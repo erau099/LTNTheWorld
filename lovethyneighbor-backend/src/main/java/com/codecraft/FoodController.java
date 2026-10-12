@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
+import com.codecraft.lovethyneighbor.*;
+
 
 @RestController 
 @RequestMapping ("/api/food")
@@ -12,10 +14,19 @@ public class FoodController {
 
     @Autowired
     private FoodRepository foodRepository;
+    private UserRepository userRepository;
+
+    public FoodController(FoodRepository foodRepository, UserRepository userRepository) {
+        this.foodRepository = foodRepository;
+        this.userRepository = userRepository;
+    }
+
 
     @PostMapping
     public ResponseEntity<?> createFoodListing(@RequestBody Food food) {
-
+        
+        User user = userRepository.findById(food.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+        
         if (food.getDate() == null ||
             food.getPickupTime() == null ||
             food.getFoodItem() == null ||
@@ -25,6 +36,14 @@ public class FoodController {
             return ResponseEntity.badRequest()
                     .body("Missing required food listing information.");
         }
+        Food foodListing = new Food();
+        foodListing.setDate(food.getDate());
+        foodListing.setPickupTime(food.getPickupTime());
+        foodListing.setFoodItem(food.getFoodItem());
+        foodListing.setDescription(food.getDescription());
+        foodListing.setTags(food.getTags());
+        foodListing.setAllergens(food.getAllergens());
+        foodListing.setUserId(user.getId());
 
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.ok(savedFood);
@@ -36,4 +55,5 @@ public class FoodController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 }
