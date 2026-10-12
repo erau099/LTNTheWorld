@@ -23,6 +23,9 @@ import AdminLogin from "./admin/AdminLogin.jsx";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
 import Review from "./Review.jsx"
 import AdminArchivedListings from "./admin/AdminArchivedListings.jsx";
+import AdminReports from "./admin/AdminReports.jsx";
+import AdminFlaggedUsers from "./admin/AdminFlaggedUsers.jsx";
+import AdminFlaggedListings from "./admin/AdminFlaggedListings.jsx";
 
 function App() {
   return (
@@ -48,23 +51,11 @@ function App() {
         <Route path="/donor-dashboard" element={<DonorDashboard />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/reviews" element={<Review />} />
-        <Route
-          path="/admin-dashboard"
-          element={
-            <AdminProtectedRoute>
-              <AdminDashboard />
-            </AdminProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin-archived-listings"
-          element={
-            <AdminProtectedRoute>
-              <AdminArchivedListings />
-            </AdminProtectedRoute>
-          }
-        />
+        <Route path="/admin-dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+        <Route path="/admin-archived-listings" element={<AdminProtectedRoute><AdminArchivedListings /></AdminProtectedRoute>} />
+        <Route path="/admin-reports" element={<AdminProtectedRoute><AdminReports /></AdminProtectedRoute>} />
+        <Route path="/admin-flagged-users" element={<AdminProtectedRoute><AdminFlaggedUsers /></AdminProtectedRoute>} />
+        <Route path="/admin-flagged-listings" element={<AdminProtectedRoute><AdminFlaggedListings /></AdminProtectedRoute>} />
       </Routes>
     </Router>
   )

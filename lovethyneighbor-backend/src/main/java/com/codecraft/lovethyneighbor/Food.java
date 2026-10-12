@@ -54,10 +54,18 @@ public class Food {
     private List<String> photos = new ArrayList<>();
 
 
-    public Food() {}
+    @Column(name = "removal_reason")
+    private String removalReason;
+
+    public Food() {
+    }
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
+<<<<<<< HEAD
         UUID userId, String tags, String allergens) {
+=======
+            Long userId, String tags, String allergens) {
+>>>>>>> 05c8188 (Complete admin moderation features)
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -67,6 +75,7 @@ public class Food {
         this.allergens = allergens;
     }
 
+<<<<<<< HEAD
     // Sets the defaults before the listing is saved for the first time
     @PrePersist
     protected void onCreate() {
@@ -74,6 +83,18 @@ public class Food {
         if (status == null) {
             status = "pending";
         }
+=======
+    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
+            Long userId, String tags, String allergens, String status) {
+        this.date = date;
+        this.pickupTime = pickupTime;
+        this.foodItem = foodItem;
+        this.description = description;
+        this.userId = userId;
+        this.tags = tags;
+        this.allergens = allergens;
+        this.status = status != null ? status : "ACTIVE";
+>>>>>>> 05c8188 (Complete admin moderation features)
     }
 
     public Long getId() {
@@ -164,6 +185,7 @@ public class Food {
         this.status = status;
     }
 
+<<<<<<< HEAD
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -174,5 +196,13 @@ public class Food {
 
     public void setPhotos(List<String> photos) {
         this.photos = photos;
+=======
+    public String getRemovalReason() {
+        return removalReason;
+    }
+
+    public void setRemovalReason(String removalReason) {
+        this.removalReason = removalReason;
+>>>>>>> 05c8188 (Complete admin moderation features)
     }
 }
