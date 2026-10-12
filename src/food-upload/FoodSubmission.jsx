@@ -1,41 +1,40 @@
-import "./UploadFood.css"
-import { Link } from "react-router-dom"
+import { Link, Navigate, useLocation } from "react-router-dom"
+import UploadLayout from "./UploadLayout.jsx"
 
-function FoodSubmission ({}) {
-    return(
-        <div className="upload_food_details">
+// Formats "2026-10-11T16:00:00" as "4:00 PM"
+function formatTime(dateTime) {
+    return new Date(dateTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
 
-            {/* Header */}
-            <nav className="nav">
-                <span className="header_tittle">Lighten The World</span>
+function FoodSubmission() {
+    const { state } = useLocation();
+    const listing = state?.listing;
 
-                <div className="header_links">
-                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
-                </div>
-            </nav>
+    // Only reachable right after posting a listing
+    if (!listing) {
+        return <Navigate to="/donor-dashboard" replace />;
+    }
 
-            { /*Upload Food Card*/ }
-            <div className="upload_card">
-                <div className="upload_banner">
-                    <section className="upload_header">
-                        <p className="num_text_on">Submitted</p>
-                    </section>
+    const pickupDate = new Date(listing.date + "T00:00:00").toLocaleDateString();
 
-                    <form className="upload_body">
-                        <div className="upload_format">
-                            <div className="submission_format">
-                                <div className="circle">
-                                </div>
-                                <p className="submission_description">Thank you for your submission. Posted are blank blank blank.....</p>
-                                <Link to="/"><button className="upload_next_btn">Dashboard</button></Link>
-                                
-                            </div>
-                            
-                        </div>
-                    </form>
+    return (
+        <UploadLayout step={0}>
+            <div className="upload_body">
+                <div className="submission_format">
+                    <div className="circle">
+                        <svg className="check_logo" viewBox="0 0 24 24" aria-hidden="true">
+                            <polyline points="5 12 10 17 19 7" />
+                        </svg>
+                    </div>
+                    <h2 className="page_title">Listing posted!</h2>
+                    <p className="submission_description">
+                        Thank you for your donation. <strong>{listing.foodItem}</strong> is now listed for
+                        pickup at {listing.address} on {pickupDate} from {formatTime(listing.pickupTime)} to {formatTime(listing.pickupEndTime)}.
+                    </p>
+                    <Link to="/donor-dashboard"><button className="upload_next_btn">Dashboard</button></Link>
                 </div>
             </div>
-        </div>
+        </UploadLayout>
     );
 }
 

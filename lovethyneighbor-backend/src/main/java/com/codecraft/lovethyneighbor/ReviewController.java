@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;

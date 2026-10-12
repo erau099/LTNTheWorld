@@ -1,10 +1,10 @@
 package com.codecraft.lovethyneighbor;
 
 import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
+import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
-
-import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
 
 import jakarta.persistence.*;
 
@@ -52,10 +52,11 @@ public class User {
     @Column(name = "reset_token_expiration")
     private LocalDateTime resetTokenExpiration;
 
-    // Links the Food entity to the User Entity
-    @Transient
+    // One user can have multiple food listings
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private java.util.List<Food> foodListings;
-
+    
     @Column(name = "status")
     private String status = "ACTIVE";
 

@@ -10,9 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
@@ -38,10 +37,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").permitAll()
                 .requestMatchers("/api/food/**").permitAll()
                 .requestMatchers("/api/hello").permitAll()
+                // Lets a 403 (wrong role) reach the client instead of turning into a 401 on the error page
+                .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                 .requestMatchers("/api/donor/**").hasAnyRole("DONOR", "BOTH")
                 .requestMatchers("/api/recipient/**").hasAnyRole("RECIPIENT", "BOTH")
-                .requestMatchers("/error").permitAll()
+                // Only donors can post food or view their own listings
+                .requestMatchers(HttpMethod.POST, "/api/food").hasAnyRole("DONOR", "BOTH")
+                .requestMatchers("/api/food/mine").hasAnyRole("DONOR", "BOTH")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

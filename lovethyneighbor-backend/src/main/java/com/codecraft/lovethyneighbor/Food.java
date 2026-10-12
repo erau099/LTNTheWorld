@@ -1,9 +1,12 @@
 
 package com.codecraft.lovethyneighbor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "food")
@@ -19,15 +22,30 @@ public class Food {
     @Column(name = "pickup_time")
     private LocalDateTime pickupTime;
 
+    @Column(name = "pickup_end_time")
+    private LocalDateTime pickupEndTime;
+
+    @Column(name = "address")
+    private String address;
+
     @Column(name = "\"foodItem\"")
     private String foodItem;
 
     @Column(name = "description")
     private String description;
 
-    // Existing numeric user ID column
-    @Column(name = "user_id")
+    // Existing required bigint column.
+    @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    // UUID relationship to logins.id.
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id1",
+        foreignKey = @ForeignKey(name = "fk_user_id")
+    )
+    private User user;
 
     @Column(name = "tags")
     private String tags;
@@ -36,37 +54,52 @@ public class Food {
     private String allergens;
 
     @Column(name = "status")
-    private String status = "ACTIVE";
+    private String status;
 
-    // UUID-based relationship to the User entity
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "user_id1",
-        foreignKey = @ForeignKey(name = "fk_user_id")
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "food_photos",
+        joinColumns = @JoinColumn(name = "food_id")
     )
-    private User user;
+    @OrderColumn(name = "position")
+    @Column(name = "photo", columnDefinition = "TEXT")
+    private List<String> photos = new ArrayList<>();
 
     public Food() {}
 
-    public Food(LocalDate date, LocalDateTime pickupTime,
-                String foodItem, String description,
-                Long userId, String tags, String allergens) {
-        this(date, pickupTime, foodItem, description,
-             userId, tags, allergens, "ACTIVE");
-    }
+    // Constructor retained for compatibility with existing admin tests
+public Food(
+        LocalDate date,
+        LocalDateTime pickupTime,
+        String foodItem,
+        String description,
+        long userId,
+        String tags,
+        String allergens,
+        String status
+) {
+    this.date = date;
+    this.pickupTime = pickupTime;
+    this.foodItem = foodItem;
+    this.description = description;
+    this.userId = userId;
+    this.tags = tags;
+    this.allergens = allergens;
+    this.status = status;
+}
 
-    public Food(LocalDate date, LocalDateTime pickupTime,
-                String foodItem, String description,
-                Long userId, String tags, String allergens,
-                String status) {
-        this.date = date;
-        this.pickupTime = pickupTime;
-        this.foodItem = foodItem;
-        this.description = description;
-        this.userId = userId;
-        this.tags = tags;
-        this.allergens = allergens;
-        this.status = status != null ? status : "ACTIVE";
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (status == null) {
+            status = "pending";
+        }
     }
 
     public Long getId() {
@@ -93,6 +126,22 @@ public class Food {
         this.pickupTime = pickupTime;
     }
 
+    public LocalDateTime getPickupEndTime() {
+        return pickupEndTime;
+    }
+
+    public void setPickupEndTime(LocalDateTime pickupEndTime) {
+        this.pickupEndTime = pickupEndTime;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getFoodItem() {
         return foodItem;
     }
@@ -115,6 +164,14 @@ public class Food {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getTags() {
@@ -141,11 +198,15 @@ public class Food {
         this.status = status;
     }
 
-    public User getUser() {
-        return user;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public List<String> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
     }
 }
