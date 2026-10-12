@@ -111,23 +111,23 @@ function UploadFoodDetails({}) {
                     <div className="upload_format">
                         <p className="input_title">Select tags that describe your food item</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on" onClick={() => handleSelect('tags', 'Fresh / Hot')}>Fresh / Hot</button>
-                            <button className="sel_btn_off" onClick={() => handleSelect('tags', 'Canned')}>Canned</button>
+                            <button className="sel_btn_on">Fresh / Hot</button>
+                            <button className="sel_btn_off">Canned</button>
                         </div>
                     </div>
 
                     <div className="upload_format">
                         <p className="input_title">Please select all applicable allergens</p>
                         <div className="selection_form">
-                            <button className="sel_btn_on" onCClick={() => handleSelect('allergens', 'Milk')}>Milk</button>
-                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Eggs')}>Eggs</button>
-                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Fish')}>Fish</button>
-                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Shellfish')}>Shellfish</button>
-                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Peanuts')}>Peanuts</button>
-                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Tree Nuts')}>Tree Nuts</button>
-                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Soy')}>Soy</button>
-                            <button className="sel_btn_on" onClick={() => handleSelect('allergens', 'Dairy')}>Dairy</button>
-                            <button className="sel_btn_off" onClick={() => handleSelect('allergens', 'Wheat')}>Wheat</button>
+                            <button className="sel_btn_on">Milk</button>
+                            <button className="sel_btn_on">Eggs</button>
+                            <button className="sel_btn_on">Fish</button>
+                            <button className="sel_btn_on">Shellfish</button>
+                            <button className="sel_btn_on">Peanuts</button>
+                            <button className="sel_btn_on">Tree Nuts</button>
+                            <button className="sel_btn_on">Soy</button>
+                            <button className="sel_btn_on">Dairy</button>
+                            <button className="sel_btn_off">Wheat</button>
                         </div>
                     </div>
 
