@@ -4,7 +4,7 @@ import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
 
 import java.time.LocalDateTime;
 
-import com.codecraft.Food;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
 
 import jakarta.persistence.*;
@@ -55,6 +55,7 @@ public class User {
 
     // Links the Food entity to the User Entity creating a many-to-one relationship from food to user
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private java.util.List<Food> foodListings;
 
     @Column(name = "status")
