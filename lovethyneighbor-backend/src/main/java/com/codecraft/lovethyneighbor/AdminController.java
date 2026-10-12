@@ -19,6 +19,12 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private FoodRepository foodRepository;
+
+    @Autowired(required = false)
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @PostMapping("/auth/login")
     public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request) {
         if (request == null || request.getUsername() == null || request.getPassword() == null) {
@@ -34,7 +40,10 @@ public class AdminController {
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            if (user.getPassword().equals(request.getPassword())) {
+            boolean passwordMatches = (passwordEncoder != null && passwordEncoder.matches(request.getPassword(), user.getPassword()))
+                    || user.getPassword().equals(request.getPassword());
+
+            if (passwordMatches) {
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                     return ResponseEntity.ok(new LoginResponse("success", user.getName(), "ADMIN"));
                 } else {
@@ -59,7 +68,27 @@ public class AdminController {
     @GetMapping("/stats")
     public ResponseEntity<AdminStatsDTO> getStats() {
         long totalUsers = userRepository.count();
-        return ResponseEntity.ok(new AdminStatsDTO(totalUsers, 0L, 0L));
+        long activeListings = foodRepository.countByStatusIgnoreCase("ACTIVE");
+        return ResponseEntity.ok(new AdminStatsDTO(totalUsers, activeListings, 0L));
+    }
+
+    @GetMapping("/food/active")
+    public ResponseEntity<List<Food>> getActiveFoodListings() {
+        List<Food> activeListings = foodRepository.findByStatusIgnoreCase("ACTIVE");
+        return ResponseEntity.ok(activeListings);
+    }
+
+    @PatchMapping("/food/{id}/status")
+    public ResponseEntity<?> updateFoodStatus(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
+        Optional<Food> foodOpt = foodRepository.findById(id);
+        if (foodOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Food listing not found"));
+        }
+        Food food = foodOpt.get();
+        String newStatus = (body != null && body.containsKey("status")) ? body.get("status") : "REMOVED_BY_ADMIN";
+        food.setStatus(newStatus.toUpperCase());
+        foodRepository.save(food);
+        return ResponseEntity.ok(food);
     }
 
     @PatchMapping("/users/{id}/status")

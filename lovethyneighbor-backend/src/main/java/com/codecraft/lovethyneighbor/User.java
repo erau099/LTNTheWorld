@@ -4,7 +4,6 @@ import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
 
 import java.time.LocalDateTime;
 
-import com.codecraft.Food;
 import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
 
 import jakarta.persistence.*;
@@ -37,6 +36,9 @@ public class User {
     @Convert (converter = EncryptedStringConverter.class)
     private String phoneNumber;
 
+    @Column(name = "allergies")
+    private String allergies;
+
     @Column(nullable = false)
     private String role; // must be exactly "donor", "recipient", or "both" — lowercase, matches DB CHECK constraint
 
@@ -50,8 +52,8 @@ public class User {
     @Column(name = "reset_token_expiration")
     private LocalDateTime resetTokenExpiration;
 
-    // Links the Food entity to the User Entity creating a many-to-one relationship from food to user
-    @OneToMany(mappedBy = "user")
+    // Links the Food entity to the User Entity
+    @Transient
     private java.util.List<Food> foodListings;
 
     @Column(name = "status")
@@ -111,6 +113,8 @@ public class User {
     public void setDateOfBirth(java.time.LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getAllergies() { return allergies; }
+    public void setAllergies(String allergies) { this.allergies = allergies; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     public java.time.LocalDateTime getCreatedAt() { return createdAt; }

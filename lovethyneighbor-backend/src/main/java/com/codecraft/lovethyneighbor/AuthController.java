@@ -43,6 +43,11 @@ public class AuthController {
                 && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
 
             User user = userOpt.get();
+            if ("SUSPENDED".equalsIgnoreCase(user.getStatus())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Account is suspended. Please contact support.");
+            }
+
             String token = jwtService.generateToken(user.getId(), user.getRole());
 
             return ResponseEntity.ok(
@@ -50,7 +55,9 @@ public class AuthController {
                             "success",
                             user.getName(),
                             user.getRole(),
-                            token
+                            token,
+                            user.getCanPostListings(),
+                            user.getStatus()
                     )
             );
         } else {
@@ -319,6 +326,16 @@ class LoginResponse {
     private String name;
     private String role;
     private String token;
+    private Boolean canPostListings;
+    private String accountStatus;
+
+    public LoginResponse(
+            String status,
+            String name,
+            String role) {
+
+        this(status, name, role, null, true, "ACTIVE");
+    }
 
     public LoginResponse(
             String status,
@@ -326,16 +343,31 @@ class LoginResponse {
             String role,
             String token) {
 
+        this(status, name, role, token, true, "ACTIVE");
+    }
+
+    public LoginResponse(
+            String status,
+            String name,
+            String role,
+            String token,
+            Boolean canPostListings,
+            String accountStatus) {
+
         this.status = status;
         this.name = name;
         this.role = role;
         this.token = token;
+        this.canPostListings = canPostListings != null ? canPostListings : true;
+        this.accountStatus = accountStatus != null ? accountStatus : "ACTIVE";
     }
 
     public String getStatus() { return status; }
     public String getName() { return name; }
     public String getRole() { return role; }
     public String getToken() { return token; }
+    public Boolean getCanPostListings() { return canPostListings; }
+    public String getAccountStatus() { return accountStatus; }
 }
 
 class SignupRequest {
