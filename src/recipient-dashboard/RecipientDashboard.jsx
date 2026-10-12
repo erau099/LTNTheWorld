@@ -42,7 +42,7 @@ function RecipientDashboard() {
 					? item.allergens.split(",").map((value) => value.trim()).filter(Boolean)
 					: [],
 				description: item.description || "No description provided",
-				status: item.status || "ACTIVE",
+				status: item.status || "UNKNOWN",
 			};
 		};
 
@@ -54,7 +54,7 @@ function RecipientDashboard() {
 				if (useMockFood) {
 					food = [
 						{ id: 1, foodItem: "Donuts", description: "Assorted donuts", pickupTime: "2026-10-12T16:00:00", tags: "Fresh / Hot", allergens: "Milk, Wheat", status: "ACTIVE" },
-						{ id: 2, foodItem: "Canned Tuna", description: "Unopened cans", pickupTime: "2026-10-12T17:00:00", tags: "Canned", allergens: "Fish", status: "ACTIVE" },
+						{ id: 2, foodItem: "Canned Tuna", description: "Unopened cans", pickupTime: "2026-10-12T17:00:00", tags: "Canned", allergens: "Fish", status: "UNAVAILABLE" },
 					];
 				} else {
 					const response = await fetch("/api/food", { signal: controller.signal });
@@ -291,8 +291,8 @@ function RecipientDashboard() {
 								<div className="food-popup-content">
 									<div className="food-popup-hero">
 										<div className="food_popup_image" role="img" aria-label="Placeholder food photograph" />
-										<span className={`food-popup-status ${selectListing.status === "ACTIVE" ? "is-active" : "is-unavailable"}`}>
-											<span className="food-popup-status-dot" />{selectListing.status === "ACTIVE" ? "Available" : "Unavailable"}
+										<span className={`food-status-badge ${selectListing.status === "ACTIVE" ? "available" : selectListing.status === "UNAVAILABLE" ? "unavailable" : "unknown"}`}>
+											●{" "} {selectListing.status === "ACTIVE" ? "Available" : selectListing.status === "UNAVAILABLE" ? "Unavailable" : "Status unknown"}
 										</span>
 									</div>
 									<div className="food-popup-section food-popup-donor">

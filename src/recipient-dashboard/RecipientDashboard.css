@@ -186,6 +186,39 @@
     font-size: 18px;
 }
 
+.food-status-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: white;
+
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.food-status-badge.available {
+  color: #006b2d;
+}
+
+.food-status-badge.unavailable {
+  color: #b42318;
+}
+
+.food-status-badge.unknown {
+  color: #666666;
+  background-color: white;
+}
+
 /* Food listing details popup — scoped to the recipient dashboard */
 .recipient-dashboard .food_card_popup { padding: 20px; box-sizing: border-box; background: rgba(19, 35, 24, .28); overflow-y: auto; }
 .recipient-dashboard .food_popup_background { width: min(100%, 560px); max-height: min(92vh, 850px); overflow-y: auto; background: #fff; border-radius: 18px; box-shadow: 0 18px 65px rgba(19, 35, 24, .22); }
