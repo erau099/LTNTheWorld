@@ -21,6 +21,7 @@ import ForgotPassword from "./ForgotPassword.jsx"
 import ResetPassword from "./ResetPassword.jsx"
 import AdminLogin from "./admin/AdminLogin.jsx";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
+import AdminArchivedListings from "./admin/AdminArchivedListings.jsx";
 
 function App() {
   return (
@@ -50,6 +51,15 @@ function App() {
           element={
             <AdminProtectedRoute>
               <AdminDashboard />
+            </AdminProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-archived-listings"
+          element={
+            <AdminProtectedRoute>
+              <AdminArchivedListings />
             </AdminProtectedRoute>
           }
         />
