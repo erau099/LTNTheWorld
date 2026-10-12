@@ -4,6 +4,7 @@ import com.codecraft.lovethyneighbor.security.EncryptedStringConverter;
 
 import java.time.LocalDateTime;
 
+import com.codecraft.Food;
 import com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverter;
 
 import jakarta.persistence.*;
@@ -52,6 +53,15 @@ public class User {
     @Column(name = "reset_token_expiration")
     private LocalDateTime resetTokenExpiration;
 
+    // Links the Food entity to the User Entity creating a many-to-one relationship from food to user
+    @OneToMany(mappedBy = "user")
+    private java.util.List<Food> foodListings;
+
+    @Column(name = "status")
+    private String status = "ACTIVE";
+
+    @Column(name = "can_post_listings")
+    private Boolean canPostListings = true;
 
     // Default constructor
     public User() {}
@@ -65,6 +75,22 @@ public class User {
         this.dateOfBirth = dateOfBirth;
         this.phoneNumber = phoneNumber;
         this.role = role;
+        this.status = "ACTIVE";
+        this.canPostListings = true;
+    }
+
+    public User(String firstName, String lastName, String email, String password,
+                 java.time.LocalDate dateOfBirth, String phoneNumber, String role,
+                 String status, Boolean canPostListings) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.dateOfBirth = dateOfBirth;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.status = status != null ? status : "ACTIVE";
+        this.canPostListings = canPostListings != null ? canPostListings : true;
     }
     
     // Automatically sets the creation timestamp before the user is saved for the first time
@@ -97,6 +123,10 @@ public class User {
     public void setResetTokenHash(String resetTokenHash) { this.resetTokenHash = resetTokenHash; }
     public LocalDateTime getResetTokenExpiration() { return resetTokenExpiration; }
     public void setResetTokenExpiration(LocalDateTime resetTokenExpiration) { this.resetTokenExpiration = resetTokenExpiration; }
+    public String getStatus() { return status != null ? status : "ACTIVE"; }
+    public void setStatus(String status) { this.status = status; }
+    public Boolean getCanPostListings() { return canPostListings != null ? canPostListings : true; }
+    public void setCanPostListings(Boolean canPostListings) { this.canPostListings = canPostListings; }
 
     // Convenience method so existing AuthController code (getName()) doesn't break
     public String getName() { return firstName + " " + lastName; }

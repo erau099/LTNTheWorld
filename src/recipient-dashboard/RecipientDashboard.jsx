@@ -82,6 +82,12 @@ function RecipientDashboard() {
 	// Handles the cards to be able to be shown when clicked
 	const [selectListing, setSelectListing] = useState(false)
 
+	// Handles the filtering for the listings
+	const [selectFiltering, setSelectedFiltering] = useState("all")
+
+	const filteredListings = listings.filter((item) => {
+		return selectFiltering === "all" || item.category === selectFiltering;
+	})
 	// Stores the logged-in recipient's saved allergies
 	const [recipientAllergies, setRecipientAllergies] = useState([]);
 
@@ -197,16 +203,16 @@ function RecipientDashboard() {
 			<main className="recipient-main">
 				{/* Filter buttons for food categories */}
 				<div className="filter-row">
-					<button className="filter-button active">All</button>
-					<button className="filter-button">Fresh / Hot</button>
-					<button className="filter-button">Canned</button>
+					<button className={selectFiltering === "all" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("all")}>All</button>
+					<button className={selectFiltering === "Fresh / Hot" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
+					<button className={selectFiltering === "Canned" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Canned")}>Canned</button>
 				</div>
 
 				<h2>Top Picks:</h2>
 
 				{/* Food cards shown to recipients */}
 				<section className="top-picks-grid">
-					{listings.map((item, index) => (
+					{filteredListings.map((item, index) => (
 						<article className="food-card" 
 									key={index} 
 									onClick={() => handleListingClick(item)}>

@@ -1,4 +1,4 @@
-package com.codecraft.lovethyneighbor;
+package com.codecraft;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

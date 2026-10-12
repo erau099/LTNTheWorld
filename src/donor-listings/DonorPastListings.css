@@ -72,19 +72,28 @@
   cursor: pointer;
 }
 
+.filter-btn.off {
+  opacity: 0.5;
+}
+
 .filter-btn.pending {
   background: rgba(237, 194, 3, 0.5);
   color: rgb(118, 112, 0);
 }
 
-.filter-btn.approved {
-  background: rgba(1, 180, 39, 0.5);
-  color: rgb(0, 106, 22);
+.filter-btn.all {
+  background: rgba(126, 125, 121, 0.5);
+  color: rgb(0, 0, 0);
+}
+
+.filter-btn.cancelled {
+  background: rgba(255, 0, 0, 0.5);
+  color: rgb(0, 0, 0);
 }
 
 .filter-btn.completed {
-  background: rgba(0, 130, 174, 0.5);
-  color: rgb(2, 110, 146);
+  background: rgba(0, 255, 30, 0.5);
+  color: rgb(0, 0, 0);
 }
 
 .orders-table {
@@ -131,14 +140,14 @@
   color: #000;
 }
 
-.review-btn.approved {
-  background: rgba(1, 180, 39, 0.5);
-  color: rgb(0, 106, 22);
+.review-btn.cancelled {
+  background: rgba(255, 0, 0, 0.5);
+  color: rgb(0, 0, 0);
 }
 
 .review-btn.completed {
-  background: rgba(0, 130, 174, 0.5);
-  color: rgb(2, 110, 146);
+  background: rgba(0, 255, 30, 0.5);
+  color: rgb(0, 0, 0);
 }
 
 .no-orders {
