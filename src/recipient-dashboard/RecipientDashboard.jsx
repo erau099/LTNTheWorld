@@ -141,6 +141,11 @@ function RecipientDashboard() {
 		setSelectListing(item);
 	};
 
+	// Gets the food condition from either backend data or current mock listings
+	const getFoodCondition = (item) => {
+		return item.tags || item.category || "Not specified";
+	};
+
 	return (
 		<div className="recipient-dashboard">
 			{/* Header navigation for recipient pages */}
@@ -217,7 +222,7 @@ function RecipientDashboard() {
 									key={index} 
 									onClick={() => handleListingClick(item)}>
 							<div className="food-image">
-								<span className="category-tag">{item.category}</span>
+								<span className="category-tag">{getFoodCondition(item)}</span>
 							</div>
 
 							<div className="food-info">
@@ -255,7 +260,7 @@ function RecipientDashboard() {
 
 										<div className="food_popup_info">
 											<p className="donor_name_popup">Posted by: {selectListing.donor}</p>
-											<p className="category_popup">Category: {selectListing.category}</p>
+											<p className="category_popup">Condition: {getFoodCondition(selectListing)}</p>
 											<p className="pickup_popup">{selectListing.pickup}</p>
 											<p className="rating_popup">★ {selectListing.rating}</p>
 											<div className="allergies_popup">
