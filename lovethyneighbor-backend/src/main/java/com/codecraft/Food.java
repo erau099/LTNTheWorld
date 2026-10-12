@@ -27,9 +27,15 @@ public class Food {
 
     @Column(name = "allergens") private String allergens;
 
+    /*
     @Column (name = "id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+    */
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id1", foreignKey = @ForeignKey(name = "fk_user_id"))
     private User user;
 
     public Food() {}

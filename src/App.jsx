@@ -21,6 +21,7 @@ import ForgotPassword from "./ForgotPassword.jsx"
 import ResetPassword from "./ResetPassword.jsx"
 import AdminLogin from "./admin/AdminLogin.jsx";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
+import Review from "./Review.jsx"
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
         <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
         <Route path="/donor-dashboard" element={<DonorDashboard />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/reviews" element={<Review />} />
         <Route
           path="/admin-dashboard"
           element={
