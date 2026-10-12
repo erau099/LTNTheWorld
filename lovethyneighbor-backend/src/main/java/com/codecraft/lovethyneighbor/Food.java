@@ -1,3 +1,4 @@
+
 package com.codecraft.lovethyneighbor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -6,66 +7,84 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "food")
 public class Food {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
-    // Pickup day and window
-    @Column(name = "date") private LocalDate date;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "pickup_time") private LocalDateTime pickupTime;
+    @Column(name = "date")
+    private LocalDate date;
 
-    @Column(name = "pickup_end_time") private LocalDateTime pickupEndTime;
+    @Column(name = "pickup_time")
+    private LocalDateTime pickupTime;
 
-    @Column(name = "address") private String address;
+    @Column(name = "pickup_end_time")
+    private LocalDateTime pickupEndTime;
 
-    @Column(name = "\"foodItem\"") private String foodItem;
+    @Column(name = "address")
+    private String address;
 
-    @Column(name = "description") private String description;
+    @Column(name = "\"foodItem\"")
+    private String foodItem;
 
-    // Donor who posted the listing (logins.id). Always taken from the JWT, never from the request body.
-    @Column(name = "user_id") private UUID userId;
+    @Column(name = "description")
+    private String description;
 
-    // Same user_id column as a foreign key to logins, read-only so userId stays the one that gets saved
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_user_id"))
+    // Existing bigint column in the shared database
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    // UUID relationship to logins.id
     @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id1",
+        foreignKey = @ForeignKey(name = "fk_user_id")
+    )
     private User user;
 
-    // Comma-separated, e.g. "Fresh / Hot,Canned"
-    @Column(name = "tags") private String tags;
+    @Column(name = "tags")
+    private String tags;
 
-    // Comma-separated, e.g. "Milk,Eggs". Empty means no allergens.
-    @Column(name = "allergens") private String allergens;
+    @Column(name = "allergens")
+    private String allergens;
 
-    // "pending" when posted, then "approved" / "completed"
-    @Column(name = "status") private String status;
+    @Column(name = "status")
+    private String status;
 
-    @Column(name = "created_at", updatable = false) private LocalDateTime createdAt;
-
-    // Up to 3 photos, stored as base64 data URLs
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "food_photos", joinColumns = @JoinColumn(name = "food_id"))
-    @OrderColumn(name = "position")
-    @Column(name = "photo", columnDefinition = "TEXT")
-    private List<String> photos = new ArrayList<>();
-
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "removal_reason")
     private String removalReason;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "food_photos",
+        joinColumns = @JoinColumn(name = "food_id")
+    )
+    @OrderColumn(name = "position")
+    @Column(name = "photo", columnDefinition = "TEXT")
+    private List<String> photos = new ArrayList<>();
+
+    // Default constructor required by JPA
     public Food() {
     }
 
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-<<<<<<< HEAD
-        UUID userId, String tags, String allergens) {
-=======
-            Long userId, String tags, String allergens) {
->>>>>>> 05c8188 (Complete admin moderation features)
+    // Constructor for existing food listing functionality
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            Long userId,
+            String tags,
+            String allergens
+    ) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -75,17 +94,17 @@ public class Food {
         this.allergens = allergens;
     }
 
-<<<<<<< HEAD
-    // Sets the defaults before the listing is saved for the first time
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        if (status == null) {
-            status = "pending";
-        }
-=======
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-            Long userId, String tags, String allergens, String status) {
+    // Constructor retained for admin functionality and tests
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            long userId,
+            String tags,
+            String allergens,
+            String status
+    ) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -94,11 +113,26 @@ public class Food {
         this.tags = tags;
         this.allergens = allergens;
         this.status = status != null ? status : "ACTIVE";
->>>>>>> 05c8188 (Complete admin moderation features)
+    }
+
+    // Set defaults when the food listing is first saved
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (status == null) {
+            status = "pending";
+        }
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public LocalDate getDate() {
@@ -149,16 +183,20 @@ public class Food {
         this.description = description;
     }
 
-    public UUID getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(UUID userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
     public User getUser() {
         return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getTags() {
@@ -185,7 +223,6 @@ public class Food {
         this.status = status;
     }
 
-<<<<<<< HEAD
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -196,13 +233,13 @@ public class Food {
 
     public void setPhotos(List<String> photos) {
         this.photos = photos;
-=======
+    }
+
     public String getRemovalReason() {
         return removalReason;
     }
 
     public void setRemovalReason(String removalReason) {
         this.removalReason = removalReason;
->>>>>>> 05c8188 (Complete admin moderation features)
     }
 }

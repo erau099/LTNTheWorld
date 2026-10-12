@@ -34,6 +34,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/admin/**").permitAll()
+                .requestMatchers("/api/food/**").permitAll()
                 .requestMatchers("/api/hello").permitAll()
                 // Lets a 403 (wrong role) reach the client instead of turning into a 401 on the error page
                 .requestMatchers("/error").permitAll()

@@ -1,3 +1,4 @@
+
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,6 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
 
-<<<<<<< HEAD
-=======
     @Autowired
     private FoodRepository foodRepository;
 
@@ -30,7 +29,6 @@ public class AdminController {
     @Autowired(required = false)
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
->>>>>>> 05c8188 (Complete admin moderation features)
     @PostMapping("/auth/login")
     public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request) {
         if (request == null || request.getUsername() == null || request.getPassword() == null) {
@@ -44,22 +42,24 @@ public class AdminController {
         }
 
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-<<<<<<< HEAD
-            if (user.getPassword().equals(request.getPassword())) {
-=======
+
             boolean passwordMatches = (passwordEncoder != null
                     && passwordEncoder.matches(request.getPassword(), user.getPassword()))
                     || user.getPassword().equals(request.getPassword());
 
             if (passwordMatches) {
->>>>>>> 05c8188 (Complete admin moderation features)
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                    return ResponseEntity.ok(new LoginResponse("success", user.getName(), "ADMIN", null));
+                    return ResponseEntity.ok(
+                            new LoginResponse("success", user.getName(), "ADMIN", null)
+                    );
                 } else {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(new MessageResponse("Access denied: Administrator privileges required"));
+                            .body(new MessageResponse(
+                                    "Access denied: Administrator privileges required"
+                            ));
                 }
             }
         }
@@ -73,6 +73,7 @@ public class AdminController {
         List<UserSummaryDTO> users = userRepository.findAll().stream()
                 .map(UserSummaryDTO::new)
                 .collect(Collectors.toList());
+
         return ResponseEntity.ok(users);
     }
 
@@ -84,34 +85,43 @@ public class AdminController {
     @GetMapping("/stats")
     public ResponseEntity<AdminStatsDTO> getStats() {
         long totalUsers = userRepository.count();
-<<<<<<< HEAD
-        return ResponseEntity.ok(new AdminStatsDTO(totalUsers, 0L, 0L));
-=======
         long activeListings = foodRepository.countByStatusIgnoreCase("ACTIVE");
-        return ResponseEntity.ok(new AdminStatsDTO(totalUsers, activeListings, 0L));
+
+        return ResponseEntity.ok(
+                new AdminStatsDTO(totalUsers, activeListings, 0L)
+        );
     }
 
     @GetMapping("/food/active")
     public ResponseEntity<List<Food>> getActiveFoodListings() {
-        List<Food> activeListings = foodRepository.findByStatusIgnoreCase("ACTIVE");
+        List<Food> activeListings =
+                foodRepository.findByStatusIgnoreCase("ACTIVE");
+
         return ResponseEntity.ok(activeListings);
     }
 
     @GetMapping("/food/archived")
     public ResponseEntity<List<Food>> getArchivedFoodListings() {
-        List<Food> archivedListings = foodRepository.findByStatusIgnoreCase("ARCHIVED");
+        List<Food> archivedListings =
+                foodRepository.findByStatusIgnoreCase("ARCHIVED");
+
         return ResponseEntity.ok(archivedListings);
->>>>>>> 05c8188 (Complete admin moderation features)
     }
 
     @PatchMapping("/users/{id}/status")
-    public ResponseEntity<?> toggleUserStatus(@PathVariable UUID id,
+    public ResponseEntity<?> toggleUserStatus(
+            @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {
+
         Optional<User> userOpt = userRepository.findById(id);
+
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
         }
+
         User user = userOpt.get();
+
         if (body != null && body.containsKey("status")) {
             user.setStatus(body.get("status").toUpperCase());
         } else {
@@ -121,24 +131,36 @@ public class AdminController {
                 user.setStatus("SUSPENDED");
             }
         }
+
         userRepository.save(user);
+
         return ResponseEntity.ok(new UserSummaryDTO(user));
     }
 
     @PatchMapping("/users/{id}/restrictions")
-    public ResponseEntity<?> toggleUserRestrictions(@PathVariable UUID id,
+    public ResponseEntity<?> toggleUserRestrictions(
+            @PathVariable UUID id,
             @RequestBody(required = false) Map<String, Boolean> body) {
+
         Optional<User> userOpt = userRepository.findById(id);
+
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
         }
+
         User user = userOpt.get();
+
         if (body != null && body.containsKey("canPostListings")) {
             user.setCanPostListings(body.get("canPostListings"));
         } else {
-            user.setCanPostListings(!Boolean.TRUE.equals(user.getCanPostListings()));
+            user.setCanPostListings(
+                    !Boolean.TRUE.equals(user.getCanPostListings())
+            );
         }
+
         userRepository.save(user);
+
         return ResponseEntity.ok(new UserSummaryDTO(user));
     }
 

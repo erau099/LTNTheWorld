@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,9 @@ public class AdminControllerTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private FoodRepository foodRepository;
 
     @InjectMocks
     private AdminController adminController;
@@ -122,5 +126,63 @@ public class AdminControllerTest {
         mockMvc.perform(patch("/api/admin/users/" + userId + "/status"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SUSPENDED"));
+    }
+
+    @Test
+    void testToggleUserRestrictions() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User user = new User("Bob", "Donor", "bob@donor.com", "secret",
+                LocalDate.of(1995, 3, 10), "5551234567", "donor");
+        user.setId(userId);
+        user.setCanPostListings(true);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        mockMvc.perform(patch("/api/admin/users/" + userId + "/restrictions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"canPostListings\":false}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.canPostListings").value(false));
+    }
+
+    @Test
+    void testGetActiveFoodListings() throws Exception {
+        Food food1 = new Food(LocalDate.now(), LocalDateTime.now(), "Apples", "Fresh honeycrisp apples", 1L, "Produce", "None", "ACTIVE");
+        food1.setId(101L);
+
+        when(foodRepository.findByStatusIgnoreCase("ACTIVE")).thenReturn(List.of(food1));
+
+        mockMvc.perform(get("/api/admin/food/active"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].foodItem").value("Apples"))
+                .andExpect(jsonPath("$[0].status").value("ACTIVE"));
+    }
+
+    @Test
+    void testUpdateFoodStatus() throws Exception {
+        Food food = new Food(LocalDate.now(), LocalDateTime.now(), "Bread", "Whole wheat loaf", 1L, "Bakery", "Gluten", "ACTIVE");
+        food.setId(202L);
+
+        when(foodRepository.findById(202L)).thenReturn(Optional.of(food));
+        when(foodRepository.save(any(Food.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        mockMvc.perform(patch("/api/admin/food/202/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":\"REMOVED_BY_ADMIN\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("REMOVED_BY_ADMIN"));
+    }
+
+    @Test
+    void testGetAdminStats() throws Exception {
+        when(userRepository.count()).thenReturn(15L);
+        when(foodRepository.countByStatusIgnoreCase("ACTIVE")).thenReturn(8L);
+
+        mockMvc.perform(get("/api/admin/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalUsers").value(15))
+                .andExpect(jsonPath("$.activeListings").value(8));
     }
 }
