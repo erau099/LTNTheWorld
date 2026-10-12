@@ -1,3 +1,4 @@
+
 package com.codecraft.lovethyneighbor;
 
 import jakarta.persistence.*;
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "food")
 public class Food {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,6 +25,7 @@ public class Food {
     @Column(name = "description")
     private String description;
 
+    // Existing numeric user ID column
     @Column(name = "user_id")
     private Long userId;
 
@@ -35,22 +38,27 @@ public class Food {
     @Column(name = "status")
     private String status = "ACTIVE";
 
+    // UUID-based relationship to the User entity
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id1",
+        foreignKey = @ForeignKey(name = "fk_user_id")
+    )
+    private User user;
+
     public Food() {}
 
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
+    public Food(LocalDate date, LocalDateTime pickupTime,
+                String foodItem, String description,
                 Long userId, String tags, String allergens) {
-        this.date = date;
-        this.pickupTime = pickupTime;
-        this.foodItem = foodItem;
-        this.description = description;
-        this.userId = userId;
-        this.tags = tags;
-        this.allergens = allergens;
-        this.status = "ACTIVE";
+        this(date, pickupTime, foodItem, description,
+             userId, tags, allergens, "ACTIVE");
     }
 
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-                Long userId, String tags, String allergens, String status) {
+    public Food(LocalDate date, LocalDateTime pickupTime,
+                String foodItem, String description,
+                Long userId, String tags, String allergens,
+                String status) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -125,11 +133,19 @@ public class Food {
         this.allergens = allergens;
     }
 
-public String getStatus() {
-    return status;
-}
+    public String getStatus() {
+        return status;
+    }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -168,6 +168,11 @@ function RecipientDashboard() {
 		setSelectListing(item);
 	};
 
+	// Gets the food condition from either backend data or current mock listings
+	const getFoodCondition = (item) => {
+		return item.tags || item.category || "Not specified";
+	};
+
 	return (
 		<div className="recipient-dashboard">
 			{/* Header navigation for recipient pages */}
@@ -255,7 +260,7 @@ function RecipientDashboard() {
 									key={item.id} 
 									onClick={() => handleListingClick(item)}>
 							<div className="food-image">
-								<span className="category-tag">{item.category}</span>
+								<span className="category-tag">{getFoodCondition(item)}</span>
 							</div>
 
 							<div className="food-info">
@@ -277,57 +282,140 @@ function RecipientDashboard() {
 				</section>
 
 				
+				
 				<section>
 					{selectListing && (
-						<div className="food_card_popup" onClick={() => setSelectListing(false)}>
-							<div className="food_popup_background" role="dialog" aria-modal="true" aria-label={`${selectListing.food} details`} onClick={(e) => e.stopPropagation()}>
+						<div
+							className="food_card_popup"
+							onClick={() => setSelectListing(false)}
+						>
+							<div
+								className="food_popup_background"
+								role="dialog"
+								aria-modal="true"
+								aria-label={`${selectListing.food} details`}
+								onClick={(e) => e.stopPropagation()}
+							>
 								<div className="food-popup-heading">
 									<div>
-										<span className="food-popup-eyebrow">FOOD LISTING</span>
+										<span className="food-popup-eyebrow">
+											FOOD LISTING
+										</span>
 										<h2>{selectListing.food}</h2>
 									</div>
-									<button type="button" className="food-popup-close" aria-label="Close food details" onClick={() => setSelectListing(false)}>×</button>
+
+									<button
+										type="button"
+										className="food-popup-close"
+										aria-label="Close food details"
+										onClick={() => setSelectListing(false)}
+									>
+										×
+									</button>
 								</div>
+
 								<div className="food-popup-content">
 									<div className="food-popup-hero">
-										<div className="food_popup_image" role="img" aria-label="Placeholder food photograph" />
-										<span className={`food-status-badge ${selectListing.status === "ACTIVE" ? "available" : selectListing.status === "UNAVAILABLE" ? "unavailable" : "unknown"}`}>
-											●{" "} {selectListing.status === "ACTIVE" ? "Available" : selectListing.status === "UNAVAILABLE" ? "Unavailable" : "Status unknown"}
+										<div
+											className="food_popup_image"
+											role="img"
+											aria-label="Placeholder food photograph"
+										/>
+
+										<span
+											className={`food-status-badge ${
+												selectListing.status === "ACTIVE"
+													? "available"
+													: selectListing.status === "UNAVAILABLE"
+													? "unavailable"
+													: "unknown"
+											}`}
+										>
+											●{" "}
+											{selectListing.status === "ACTIVE"
+												? "Available"
+												: selectListing.status === "UNAVAILABLE"
+												? "Unavailable"
+												: "Status unknown"}
 										</span>
 									</div>
+
 									<div className="food-popup-section food-popup-donor">
-										<span className="food-popup-label">POSTED BY</span>
+										<span className="food-popup-label">
+											POSTED BY
+										</span>
 										<strong>{selectListing.donor}</strong>
 									</div>
+
 									<div className="food-popup-section">
 										<h3>About this food</h3>
-										<p className="food-popup-description">{selectListing.description || "No description provided."}</p>
+										<p className="food-popup-description">
+											{selectListing.description ||
+												"No description provided."}
+										</p>
 									</div>
+
 									<div className="food-popup-details-grid">
 										<div className="food-popup-section">
 											<h3>Category</h3>
-											<span className="food-popup-tag">{selectListing.category}</span>
+											<span className="food-popup-tag">
+												{selectListing.category}
+											</span>
 										</div>
+
 										<div className="food-popup-section">
 											<h3>Pickup time</h3>
-											<p className="food-popup-pickup">◷ {selectListing.pickup}</p>
+											<p className="food-popup-pickup">
+												◷ {selectListing.pickup}
+											</p>
 										</div>
 									</div>
+
 									<div className="food-popup-section">
 										<h3>Allergen information</h3>
+
 										<div className="food-popup-tags">
-											{selectListing.allergies?.length ? selectListing.allergies.map((allergy, index) => (
-												<span className="food-popup-allergen" key={`${allergy}-${index}`}>{allergy}</span>
-											)) : <span className="food-popup-muted">No allergens listed (not a guarantee of allergen-free food).</span>}
+											{selectListing.allergies?.length ? (
+												selectListing.allergies.map(
+													(allergy, index) => (
+														<span
+															className="food-popup-allergen"
+															key={`${allergy}-${index}`}
+														>
+															{allergy}
+														</span>
+													)
+												)
+											) : (
+												<span className="food-popup-muted">
+													No allergens listed (not a guarantee
+													of allergen-free food).
+												</span>
+											)}
 										</div>
 									</div>
 								</div>
+
 								<div className="food-popup-actions">
-									<button type="button" className="food-popup-back" onClick={() => setSelectListing(false)}>Back to listings</button>
-									<button type="button" className="food-popup-submit" disabled title="Food requests are not available yet">Request food (coming soon)</button>
+									<button
+										type="button"
+										className="food-popup-back"
+										onClick={() => setSelectListing(false)}
+									>
+										Back to listings
+									</button>
+
+									<button
+										type="button"
+										className="food-popup-submit"
+										disabled
+										title="Food requests are not available yet"
+									>
+										Request food (coming soon)
+									</button>
 								</div>
 							</div>
-					</div>
+						</div>
 					)}
 				</section>
 			</main>

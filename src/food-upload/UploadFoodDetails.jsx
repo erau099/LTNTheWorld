@@ -1,72 +1,109 @@
+
 import { useState } from "react";
-import "./UploadFood.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "./UploadFood.css";
 
 function UploadFoodDetails() {
     const { user } = useAuth();
     const isRestricted = user?.canPostListings === false;
     const navigate = useNavigate();
 
-    //Form data for the food details form
     const [formData, setFormData] = useState({
         listingTitle: "",
         description: "",
         tag: "",
         allergens: "",
     });
-    
-    const [error, setError] = useState(""); // State to hold and display error messages
 
-    // Generic handler to update form based on input names for food details form 
+    const [error, setError] = useState("");
+
+    // Update form fields
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData((prev => ({...prev, [name]: value})));
+        const { name, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
     };
-    //handling submission for food details form
-    const handleSubmitDetails = async (e) => {
+
+    // Select food category
+    const handleTagSelect = (tag) => {
+        if (isRestricted) return;
+
+        setFormData((prev) => ({
+            ...prev,
+            tag,
+        }));
+    };
+
+    // Add or remove allergens
+    const handleAllergenToggle = (allergen) => {
+        if (isRestricted) return;
+
+        const currentAllergens = formData.allergens
+            ? formData.allergens.split(",").map((item) => item.trim())
+            : [];
+
+        const updatedAllergens = currentAllergens.includes(allergen)
+            ? currentAllergens.filter((item) => item !== allergen)
+            : [...currentAllergens, allergen];
+
+        setFormData((prev) => ({
+            ...prev,
+            allergens: updatedAllergens.join(", "),
+        }));
+    };
+
+    const isAllergenSelected = (allergen) => {
+        return formData.allergens
+            .split(",")
+            .map((item) => item.trim())
+            .includes(allergen);
+    };
+
+    // Validate and continue to the next upload step
+    const handleSubmitDetails = (e) => {
         e.preventDefault();
         setError("");
 
         if (isRestricted) {
-            setError("Your ability to post listings has been restricted by an administrator.");
+            setError(
+                "Your ability to post listings has been restricted by an administrator."
+            );
             return;
         }
 
-        //checking if all required fields are filled before submission
-        if(
-            !formData.listingTitle ||
-            !formData.description ||
-            !formData.tag ||
-            !formData.allergens
-            
+        if (
+            !formData.listingTitle.trim() ||
+            !formData.description.trim() ||
+            !formData.tag
         ) {
-            setError("Please set up food details before proceeding."); 
+            setError("Please set up food details before proceeding.");
             return;
         }
-        try {
-            const response = await fetch('/api/food', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    foodItem: formData.listingTitle,
-                    description: formData.description,
-                    tags: formData.tag,
-                    allergens: formData.allergens,
-                    status: 'ACTIVE'
-                }),
-            });
-            if(response.ok){
-                alert("Food details submitted successfully!");
-                navigate("/DonorDashboard");
-            } else {
-                const message = await response.json();
-                setError(message);
-            }
-        } catch (error) {
-            console.error("Error submitting food details:", error);
-        }
-    }
+
+        // Save details for the next upload page
+        sessionStorage.setItem(
+            "foodListingDraft",
+            JSON.stringify(formData)
+        );
+
+        navigate("/UploadFoodLocation");
+    };
+
+    const allergens = [
+        "Milk",
+        "Eggs",
+        "Fish",
+        "Shellfish",
+        "Peanuts",
+        "Tree Nuts",
+        "Soy",
+        "Dairy",
+        "Wheat",
+    ];
 
     return (
         <div className="upload_food_details">
@@ -74,118 +111,170 @@ function UploadFoodDetails() {
             <nav className="nav">
                 <span className="header_title">Lighten The World</span>
                 <div className="header_links">
-                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+                    <Link to="/Signup">
+                        <button className="signupbtn">Sign Up</button>
+                    </Link>
                 </div>
             </nav>
 
-            {/*Upload Food Card*/}
             <div className="upload_card">
                 <div className="upload_banner">
-                <section className="upload_header">
-                    <p className="num_on">1</p>
-                    <p className="num_text_on">Food Details</p>
-                    <p className="num_off">2</p>
-                    <p className="num_text_off">Location & Time</p>
-                    <p className="num_off">3</p>
-                    <p className="num_text_off">Upload Photo</p>
-                </section>
+                    <section className="upload_header">
+                        <p className="num_on">1</p>
+                        <p className="num_text_on">Food Details</p>
+                        <p className="num_off">2</p>
+                        <p className="num_text_off">Location & Time</p>
+                        <p className="num_off">3</p>
+                        <p className="num_text_off">Upload Photo</p>
+                    </section>
 
-                <form className="upload_body">
-                    {isRestricted && (
-                        <div style={{
-                            backgroundColor: "#fee2e2",
-                            border: "1px solid #ef4444",
-                            color: "#991b1b",
-                            padding: "12px 16px",
-                            borderRadius: "8px",
-                            marginBottom: "16px",
-                            fontWeight: "600",
-                            textAlign: "center"
-                        }}>
-                            ⚠️ Your ability to post listings has been restricted by an administrator.
+                    <form
+                        className="upload_body"
+                        onSubmit={handleSubmitDetails}
+                    >
+                        {isRestricted && (
+                            <div
+                                style={{
+                                    backgroundColor: "#fee2e2",
+                                    border: "1px solid #ef4444",
+                                    color: "#991b1b",
+                                    padding: "12px 16px",
+                                    borderRadius: "8px",
+                                    marginBottom: "16px",
+                                    fontWeight: "600",
+                                    textAlign: "center",
+                                }}
+                            >
+                                ⚠️ Your ability to post listings has been
+                                restricted by an administrator.
+                            </div>
+                        )}
+
+                        {error && (
+                            <div
+                                style={{
+                                    backgroundColor: "#fef3c7",
+                                    border: "1px solid #f59e0b",
+                                    color: "#92400e",
+                                    padding: "10px 14px",
+                                    borderRadius: "6px",
+                                    marginBottom: "14px",
+                                    textAlign: "center",
+                                }}
+                            >
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="upload_format">
+                            <h2 className="page_title">Food Details</h2>
+                            <p className="input_title">Listing Title</p>
+                            <input
+                                type="text"
+                                name="listingTitle"
+                                className="user_input"
+                                value={formData.listingTitle}
+                                onChange={handleChange}
+                                disabled={isRestricted}
+                                required
+                            />
                         </div>
-                    )}
 
-                    {error && (
-                        <div style={{
-                            backgroundColor: "#fef3c7",
-                            border: "1px solid #f59e0b",
-                            color: "#92400e",
-                            padding: "10px 14px",
-                            borderRadius: "6px",
-                            marginBottom: "14px",
-                            textAlign: "center"
-                        }}>
-                            {error}
+                        <div className="upload_format">
+                            <p className="input_title">Description</p>
+                            <input
+                                type="text"
+                                name="description"
+                                className="user_input"
+                                value={formData.description}
+                                onChange={handleChange}
+                                disabled={isRestricted}
+                                required
+                            />
                         </div>
-                    )}
 
-                    <div className="upload_format">
-                        <h2 className="page_title">Food Details</h2>
-                        <p className="input_title">Listing Title</p>
-                        <input type="text" 
-                        name="listingTitle"
-                        className="user_input"
-                        value={formData.listingTitle}
-                        onChange={handleChange}
-                        disabled={isRestricted}
-                        required
-                        ></input>
-                    </div>
+                        <div className="upload_format">
+                            <p className="input_title">
+                                Select tags that describe your food item
+                            </p>
 
-                    <div className="upload_format">
-                        <p className="input_title">Description</p>
-                        <input type="text" 
-                        name="description"
-                        className="user_input"
-                        value={formData.description}
-                        onChange={handleChange}
-                        disabled={isRestricted}
-                        ></input>
-                    </div>
-
-                    <div className="upload_format">
-                        <p className="input_title">Select tags that describe your food item</p>
-                        <div className="selection_form">
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Fresh / Hot</button>
-                            <button type="button" className="sel_btn_off" disabled={isRestricted}>Canned</button>
+                            <div className="selection_form">
+                                {["Fresh / Hot", "Canned"].map((tag) => (
+                                    <button
+                                        key={tag}
+                                        type="button"
+                                        className={
+                                            formData.tag === tag
+                                                ? "sel_btn_on"
+                                                : "sel_btn_off"
+                                        }
+                                        onClick={() => handleTagSelect(tag)}
+                                        disabled={isRestricted}
+                                    >
+                                        {tag}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="upload_format">
-                        <p className="input_title">Please select all applicable allergens</p>
-                        <div className="selection_form">
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Milk</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Eggs</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Fish</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Shellfish</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Peanuts</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Tree Nuts</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Soy</button>
-                            <button type="button" className="sel_btn_on" disabled={isRestricted}>Diary</button>
-                            <button type="button" className="sel_btn_off" disabled={isRestricted}>Wheat</button>
+                        <div className="upload_format">
+                            <p className="input_title">
+                                Please select all applicable allergens
+                            </p>
+
+                            <div className="selection_form">
+                                {allergens.map((allergen) => (
+                                    <button
+                                        key={allergen}
+                                        type="button"
+                                        className={
+                                            isAllergenSelected(allergen)
+                                                ? "sel_btn_on"
+                                                : "sel_btn_off"
+                                        }
+                                        onClick={() =>
+                                            handleAllergenToggle(allergen)
+                                        }
+                                        disabled={isRestricted}
+                                    >
+                                        {allergen}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="upload_nav_btn">
-                        <button type="button" className="upload_cancel_btn" 
-                            onClick={() => navigate("/DonorDashboard")}>
+                        <div className="upload_nav_btn">
+                            <button
+                                type="button"
+                                className="upload_cancel_btn"
+                                onClick={() =>
+                                    navigate("/donor-dashboard")
+                                }
+                            >
                                 Cancel
-                        </button>
-                        <button type="button" className="upload_next_btn"
-                            disabled={isRestricted}
-                            style={isRestricted ? { opacity: 0.5, cursor: "not-allowed" } : {}}
-                            onClick={handleSubmitDetails}>
+                            </button>
+
+                            <button
+                                type="submit"
+                                className="upload_next_btn"
+                                disabled={isRestricted}
+                                style={
+                                    isRestricted
+                                        ? {
+                                              opacity: 0.5,
+                                              cursor: "not-allowed",
+                                          }
+                                        : {}
+                                }
+                            >
                                 Next: Location & Time
-                        </button>
-                    </div>
-                </form>
-            </div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-
-
     );
 }
 
-export default UploadFoodDetails
+export default UploadFoodDetails;
