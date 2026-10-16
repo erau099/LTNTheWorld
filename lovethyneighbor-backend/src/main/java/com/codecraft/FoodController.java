@@ -44,6 +44,7 @@ public class FoodController {
         foodListing.setTags(food.getTags());
         foodListing.setAllergens(food.getAllergens());
         foodListing.setUserId(user.getId());
+        
 
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.ok(savedFood);
@@ -55,5 +56,16 @@ public class FoodController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/logins/{user_id1}")
+    public ResponseEntity<?> getFoodByUserId(@PathVariable java.util.UUID user_id1) {
+        Optional<User> userOptional = userRepository.findById(user_id1);
+        if (!userOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        User user = userOptional.get();
+        return ResponseEntity.ok(foodRepository.findByUserId(user.getId()));
+    }
+
 
 }

@@ -29,7 +29,7 @@ public class Food {
 
     @Column (name = "id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id1", nullable = false)
     private User user;
 
     public Food() {}

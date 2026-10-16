@@ -5,5 +5,5 @@ import java.util.List;
 
 
 public interface FoodRepository extends JpaRepository<Food, Long> {
-    List<Food> findByUserId(long userId);
+    List<Food> findByUserId(java.util.UUID userId);
 }
