@@ -46,7 +46,7 @@ public class FoodController {
         foodListing.setUserId(user.getId());
         
 
-        Food savedFood = foodRepository.save(food);
+        Food savedFood = foodRepository.save(foodListing);
         return ResponseEntity.ok(savedFood);
     }
 
