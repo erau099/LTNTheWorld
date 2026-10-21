@@ -2,6 +2,9 @@ import "./UploadFood.css"
 import { Link } from "react-router-dom"
 
 function UploadFoodPhoto() {
+    //setting up the function to handle the photo upload
+    // Note: using the bytea data type to store the image in the database
+    
     return(
         <div className="upload_food_details">
 

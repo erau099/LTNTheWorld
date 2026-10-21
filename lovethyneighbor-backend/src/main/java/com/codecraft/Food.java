@@ -17,15 +17,29 @@ public class Food {
 
     @Column(name = "pickup_time") private LocalDateTime pickupTime;
 
-    @Column(name = "\"foodItem\"") private String foodItem;
+    @Column(name = "pickup_end_time") private LocalDateTime pickupEndTime;
+
+    @Column(name = "foodItem") private String foodItem;
 
     @Column(name = "description") private String description;
 
-    @Column(name = "user_id") private java.util.UUID userId;
+    @Column(name = "user_id1") private java.util.UUID user_id1;
 
     @Column(name = "tags") private String tags;
 
     @Column(name = "allergens") private String allergens;
+
+    @Column(name = "status") private String status;
+
+    @Column(name = "removal_reason") private String removalReason;
+
+    @Column(name = "address") private String address;
+
+    @Column(name = "created_at") private LocalDateTime createdAt;
+
+    @Column(name= "image") private byte[] image;
+
+    @Column(name = "user_id") private int user_id;
 
     @Column (name = "id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,14 +49,19 @@ public class Food {
     public Food() {}
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-        java.util.UUID userId, String tags, String allergens) {
+        java.util.UUID user_id1, String tags, String allergens, byte[] image, String status, String removalReason, String address, LocalDateTime createdAt  ) {
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
         this.description = description;
-        this.userId = userId;
+        this.user_id1 = user_id1;
         this.tags = tags;
         this.allergens = allergens;
+        this.image = image;
+        this.status = status;
+        this.removalReason = removalReason;
+        this.address = address;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -81,11 +100,11 @@ public class Food {
         this.description = description;
     }
     public java.util.UUID getUserId() {
-        return userId;
+        return user_id1;
     }
 
-    public void setUserId(java.util.UUID userId) {
-        this.userId = userId;
+    public void setUserId(java.util.UUID user_id1) {
+        this.user_id1 = user_id1;
     }
 
     public String getTags() {
