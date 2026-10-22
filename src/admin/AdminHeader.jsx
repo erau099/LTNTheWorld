@@ -32,6 +32,34 @@ function AdminHeader() {
           Dashboard
         </button>
 
+        <button
+          className="headerbtn"
+          onClick={() => navigate("/admin-archived-listings")}
+          >
+            Archived Listings
+          </button>
+
+        <button
+          className="headerbtn"
+          onClick={() => navigate("/admin-reports")}
+        >
+          Reports
+        </button>
+
+        <button
+          className="headerbtn"
+          onClick={() => navigate("/admin-flagged-users")}
+        >
+          Flagged Users
+        </button>
+
+        <button
+          className="headerbtn"
+          onClick={() => navigate("/admin-flagged-listings")}
+        >
+          Flagged Listings
+        </button>
+
         {user && (
           <span style={{ color: "white", fontSize: "0.9rem", alignSelf: "center", marginRight: "10px" }}>
             Admin: {user.name || "Administrator"}

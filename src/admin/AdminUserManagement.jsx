@@ -4,7 +4,9 @@ function AdminUserManagement({ onUserCountChange }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
+  const [updatingRestrictionId, setUpdatingRestrictionId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -39,7 +41,7 @@ function AdminUserManagement({ onUserCountChange }) {
 
     if (!window.confirm(confirmMessage)) return;
 
-    setUpdatingId(userId);
+    setUpdatingStatusId(userId);
     try {
       const response = await fetch(`/api/admin/users/${userId}/status`, {
         method: "PATCH",
@@ -59,9 +61,49 @@ function AdminUserManagement({ onUserCountChange }) {
       console.error("Error updating user status:", err);
       alert("Failed to update user status. Please check backend connection.");
     } finally {
-      setUpdatingId(null);
+      setUpdatingStatusId(null);
     }
   };
+
+  const handleRestrictionChange = async (userId, currentCanPost) => {
+    const nextCanPost = !currentCanPost;
+    const confirmMessage = !nextCanPost
+      ? "Are you sure you want to restrict this user from posting food listings?"
+      : "Are you sure you want to allow this user to post food listings again?";
+
+    if (!window.confirm(confirmMessage)) return;
+
+    setUpdatingRestrictionId(userId);
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/restrictions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canPostListings: nextCanPost }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Restriction update failed with HTTP ${response.status}`);
+      }
+
+      const updatedUser = await response.json();
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, canPostListings: updatedUser.canPostListings } : u))
+      );
+    } catch (err) {
+      console.error("Error updating user posting restriction:", err);
+      alert("Failed to update user posting permissions. Please check backend connection.");
+    } finally {
+      setUpdatingRestrictionId(null);
+    }
+  };
+
+  const filteredUsers = users.filter((user) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase().trim();
+    const name = (user.name || `${user.firstName || ""} ${user.lastName || ""}`).toLowerCase();
+    const email = (user.email || "").toLowerCase();
+    return name.includes(query) || email.includes(query);
+  });
 
   return (
     <section className="admin-user-management">
@@ -78,6 +120,32 @@ function AdminUserManagement({ onUserCountChange }) {
         >
           ↻ Refresh
         </button>
+      </div>
+
+      {/* DT-111: Search Input & Toolbar */}
+      <div className="admin-search-toolbar">
+        <div className="admin-search-wrapper">
+          <span className="admin-search-icon">🔍</span>
+          <input
+            type="text"
+            className="admin-search-input"
+            placeholder="Search users by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              className="admin-search-clear-btn"
+              onClick={() => setSearchQuery("")}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        <div className="admin-results-count">
+          Showing <strong>{filteredUsers.length}</strong> of {users.length} registered user{users.length === 1 ? "" : "s"}
+        </div>
       </div>
 
       {error && (
@@ -105,15 +173,27 @@ function AdminUserManagement({ onUserCountChange }) {
             <span>Role</span>
             <span>Account Status</span>
             <span>Posting Ability</span>
-            <span>Action</span>
+            <span>Actions</span>
           </div>
 
-          {users.length === 0 ? (
+          {filteredUsers.length === 0 ? (
             <div className="admin-empty-users">
-              <p>No registered users found in database.</p>
+              {searchQuery ? (
+                <>
+                  <p>No users found matching &ldquo;<strong>{searchQuery}</strong>&rdquo;.</p>
+                  <button
+                    className="admin-clear-search-btn"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear Search
+                  </button>
+                </>
+              ) : (
+                <p>No registered users found in database.</p>
+              )}
             </div>
           ) : (
-            users.map((user) => {
+            filteredUsers.map((user) => {
               const displayName =
                 user.name ||
                 `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
@@ -150,6 +230,7 @@ function AdminUserManagement({ onUserCountChange }) {
                   </span>
 
                   <span className="user-action-cell">
+                    {/* DT-113: Suspend / Reactivate User */}
                     <button
                       className={`admin-user-action ${
                         userStatus === "ACTIVE"
@@ -157,13 +238,32 @@ function AdminUserManagement({ onUserCountChange }) {
                           : "admin-action-activate"
                       }`}
                       onClick={() => handleStatusChange(user.id, userStatus)}
-                      disabled={updatingId === user.id}
+                      disabled={updatingStatusId === user.id}
+                      title={userStatus === "ACTIVE" ? "Suspend user account" : "Reactivate user account"}
                     >
-                      {updatingId === user.id
+                      {updatingStatusId === user.id
                         ? "Saving..."
                         : userStatus === "ACTIVE"
                         ? "Suspend"
                         : "Activate"}
+                    </button>
+
+                    {/* DT-114: Restrict / Allow Food Listings */}
+                    <button
+                      className={`admin-user-action ${
+                        canPost
+                          ? "admin-action-restrict"
+                          : "admin-action-allow"
+                      }`}
+                      onClick={() => handleRestrictionChange(user.id, canPost)}
+                      disabled={updatingRestrictionId === user.id}
+                      title={canPost ? "Restrict from posting listings" : "Allow posting listings"}
+                    >
+                      {updatingRestrictionId === user.id
+                        ? "Saving..."
+                        : canPost
+                        ? "Restrict"
+                        : "Allow"}
                     </button>
                   </span>
                 </div>

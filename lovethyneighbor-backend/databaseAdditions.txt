@@ -1,3 +1,7 @@
 Changes to postgreSQL lovethyneighbordb:
 Added tables "admins" and "food" into lovethyneighbor database
 Added foreign keys to "admins" table and "food" table
+Food posting (DT-24):
+Changed food.user_id to UUID to match logins.id, added pickup_end_time, address, status, created_at
+Added "food_photos" table (food_id, position, photo) for up to 3 photos per listing
+See src/main/resources/migrate_food_listings.sql

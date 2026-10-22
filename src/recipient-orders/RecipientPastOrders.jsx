@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./RecipientPastOrders.css";
 import "../index.css";
+import ReviewModal from "../ReviewModal.jsx"; 
 
 import searchIcon from "../assets/magnifying-glass.png";
 
@@ -10,43 +11,30 @@ import searchIcon from "../assets/magnifying-glass.png";
 const orders = [
 	{
 		id: 1,
-		donor: "Robin Roberts",
+		donor: "Robin Roberts 2",
 		date: "01/03/2026",
 		time: "1:30pm",
 		food: "Donuts",
-		status: "pending",
+		foodId: 2,
+		status: "completed",
 	},
 	{
 		id: 2,
-		donor: "Robin Roberts",
+		donor: "Robin Roberts 4",
 		date: "01/03/2026",
 		time: "1:30pm",
 		food: "Donuts",
-		status: "pending",
+		foodId: 4,
+		status: "completed",
 	},
 	{
 		id: 3,
-		donor: "Robin Roberts",
+		donor: "Robin Roberts 5",
 		date: "01/03/2026",
 		time: "1:30pm",
 		food: "Donuts",
+		foodId: 5,
 		status: "cancelled",
-	},
-	{
-		id: 4,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "cancelled",
-	},
-	{
-		id: 5,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "completed",
 	},
 ];
 
@@ -56,6 +44,7 @@ function RecipientPastOrders() {
 	// Controls the gear dropdown menu.
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const dropdownRef = useRef(null);
+	const [reviewOrder, setReviewOrder] = useState(null);
 
 	// Closes the dropdown when the user clicks outside of it.
 	useEffect(() => {
@@ -71,6 +60,37 @@ function RecipientPastOrders() {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
 	}, []);
+
+	// Review
+	const handleReviewSubmit = async ({ foodId, rating, comment }) => {
+		try {
+			const response = await fetch('/api/reviews', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${localStorage.getItem('token')}`,
+				},
+				body: JSON.stringify({
+					userId: '54336d41-7416-4484-a5fe-69c17933d229',
+					foodId,
+					rating,
+					comment,
+				}),
+			});
+
+			if (!response.ok) {
+				const message = await response.text();
+				throw new Error(message || `HTTP ${response.status}`);
+			}
+
+			alert('Review submitted successfully!');
+			setReviewOrder(null);
+		} catch (error) {
+			console.error('Failed to submit review:', error);
+			alert('Could not submit review. Check the console for details.');
+		}
+	};
+
 	
 	const [selectFiltering, setSelectedOrders] = useState("all")
 
@@ -163,7 +183,7 @@ function RecipientPastOrders() {
 						<span>Date</span>
 						<span>Time</span>
 						<span>Food Title</span>
-						<button className="review-btn header-review-btn">Review</button>
+						<button className="review-btn header-review-btn" type="button">Review</button>
 					</div>
 
 					{filteredOrders.length > 0 ? (
@@ -175,7 +195,13 @@ function RecipientPastOrders() {
 								<span>{order.time}</span>
 								<span>{order.food}</span>
 
-								<button className={`review-btn ${order.status}`}>Review</button>
+								<button
+									className={`review-btn ${order.status}`}
+									type="button"
+									disabled={order.status !== "completed"}
+									onClick={() => setReviewOrder(order)}>
+									Review
+								</button>
 							</div>
 						))
 					) : (
@@ -183,6 +209,15 @@ function RecipientPastOrders() {
 					)}
 				</div>
 			</main>
+			
+			{reviewOrder && (
+				<ReviewModal
+					foodId={reviewOrder.foodId}
+					onClose={() => setReviewOrder(null)}
+					onSubmit={handleReviewSubmit}
+				/>
+			)}
+
 		</div>
 	);
 }
