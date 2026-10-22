@@ -11,6 +11,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "food")
 public class Food {
+<<<<<<< HEAD
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,6 +48,83 @@ public class Food {
 
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
             Long userId, String tags, String allergens) {
+=======
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "date")
+    private LocalDate date;
+
+    @Column(name = "pickup_time")
+    private LocalDateTime pickupTime;
+
+    @Column(name = "pickup_end_time")
+    private LocalDateTime pickupEndTime;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "\"foodItem\"")
+    private String foodItem;
+
+    @Column(name = "description")
+    private String description;
+
+    // UUID of donor in logins.id
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
+
+    // UUID relationship to logins.id
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @ForeignKey(name = "fk_user_id")
+    )
+    private User user;
+
+    @Column(name = "tags")
+    private String tags;
+
+    @Column(name = "allergens")
+    private String allergens;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "removal_reason")
+    private String removalReason;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "food_photos",
+        joinColumns = @JoinColumn(name = "food_id")
+    )
+    @OrderColumn(name = "position")
+    @Column(name = "photo", columnDefinition = "TEXT")
+    private List<String> photos = new ArrayList<>();
+
+    // Default constructor required by JPA
+    public Food() {
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            UUID userId,
+            String tags,
+            String allergens
+    ) {
+>>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -57,6 +135,7 @@ public class Food {
         this.status = "ACTIVE";
     }
 
+<<<<<<< HEAD
     public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
             Long userId, String tags, String allergens, String status) {
         this.date = date;
@@ -67,10 +146,65 @@ public class Food {
         this.tags = tags;
         this.allergens = allergens;
         this.status = status != null ? status : "ACTIVE";
+=======
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            Long userId,
+            String tags,
+            String allergens
+    ) {
+        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens);
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            UUID userId,
+            String tags,
+            String allergens,
+            String status
+    ) {
+        this(date, pickupTime, foodItem, description, userId, tags, allergens);
+        this.status = status != null ? status : "ACTIVE";
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            long userId,
+            String tags,
+            String allergens,
+            String status
+    ) {
+        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status);
+    }
+
+    // Set defaults when the food listing is first saved
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (status == null) {
+            status = "pending";
+        }
+>>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public LocalDate getDate() {
@@ -129,8 +263,16 @@ public class Food {
         this.userId = userId;
     }
 
+    public void setUserId(Long userId) {
+        this.userId = userId != null ? new UUID(0L, userId) : null;
+    }
+
     public User getUser() {
         return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getTags() {
@@ -173,5 +315,13 @@ public class Food {
 
     public void setPhotos(List<String> photos) {
         this.photos = photos;
+    }
+
+    public String getRemovalReason() {
+        return removalReason;
+    }
+
+    public void setRemovalReason(String removalReason) {
+        this.removalReason = removalReason;
     }
 }
