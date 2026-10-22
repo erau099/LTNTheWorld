@@ -70,8 +70,9 @@ public class Food {
         joinColumns = @JoinColumn(name = "food_id")
     )
     @OrderColumn(name = "position")
-    @Column(name = "photo", columnDefinition = "TEXT")
+    @Column(name = "photos", columnDefinition = "TEXT")
     private List<String> photos = new ArrayList<>();
+
 
     // Default constructor required by JPA
     public Food() {
@@ -84,7 +85,8 @@ public class Food {
             String description,
             UUID userId,
             String tags,
-            String allergens
+            String allergens,
+            List<String> photos
     ) {
         this.date = date;
         this.pickupTime = pickupTime;
@@ -93,6 +95,7 @@ public class Food {
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
+        this.photos = photos;
     }
 
     public Food(
@@ -102,9 +105,10 @@ public class Food {
             String description,
             Long userId,
             String tags,
-            String allergens
+            String allergens,
+            List<String> photos
     ) {
-        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens);
+        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens,photos);
     }
 
     public Food(
@@ -115,9 +119,10 @@ public class Food {
             UUID userId,
             String tags,
             String allergens,
-            String status
+            String status,
+            List<String> photos
     ) {
-        this(date, pickupTime, foodItem, description, userId, tags, allergens);
+        this(date, pickupTime, foodItem, description, userId, tags, allergens, photos);
         this.status = status != null ? status : "ACTIVE";
     }
 
@@ -129,9 +134,10 @@ public class Food {
             long userId,
             String tags,
             String allergens,
-            String status
+            String status,
+            List<String> photos
     ) {
-        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status);
+        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status, photos);
     }
 
     // Set defaults when the food listing is first saved

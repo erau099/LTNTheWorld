@@ -51,6 +51,7 @@ public class FoodController {
         food.setPickupTime(request.getDate().atTime(request.getStartTime()));
         food.setPickupEndTime(request.getDate().atTime(request.getEndTime()));
         food.setPhotos(request.getPhotos() == null ? List.of() : request.getPhotos());
+        //food.setPhotos(request.getPhotos() == null ? new byte[0] : request.getPhotos());
 
         // The JWT subject is the user's UUID, so the donor can't post as someone else
         food.setUserId(UUID.fromString(authentication.getName()));
