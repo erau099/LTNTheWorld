@@ -1,10 +1,5 @@
 
 import { useState } from "react";
-<<<<<<< HEAD
-import "./UploadFood.css";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-=======
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import UploadLayout from "./UploadLayout.jsx";
@@ -16,13 +11,9 @@ import {
     FOOD_TAGS,
     ALLERGENS,
 } from "./foodDraft.js";
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
 
 function UploadFoodDetails() {
-    const { user } = useAuth();
-    const isRestricted = user?.canPostListings === false;
     const navigate = useNavigate();
-<<<<<<< HEAD
 
     //Form data for the food details form
     const [formData, setFormData] = useState({
@@ -32,10 +23,7 @@ function UploadFoodDetails() {
         allergens: "",
     });
     
-    const [error, setError] = useState(""); // State to hold and display error messages
-=======
     const { user } = useAuth();
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
 
     // Check whether an administrator has restricted posting.
     const isRestricted = user?.canPostListings === false;
@@ -62,57 +50,6 @@ function UploadFoodDetails() {
     // Validate details before proceeding.
     const handleNext = (e) => {
         e.preventDefault();
-<<<<<<< HEAD
-        setError("");
-
-        if (isRestricted) {
-            setError("Your ability to post listings has been restricted by an administrator.");
-            return;
-        }
-
-        //checking if all required fields are filled before submission
-        if(
-            !formData.listingTitle ||
-            !formData.description ||
-            !formData.tag ||
-            !formData.allergens
-            
-        ) {
-            setError("Please set up food details before proceeding."); 
-            return;
-        }
-        try {
-            const response = await fetch('/api/food', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    foodItem: formData.listingTitle,
-                    description: formData.description,
-                    tags: formData.tag,
-                    allergens: formData.allergens,
-                    status: 'ACTIVE'
-                }),
-            });
-            if(response.ok){
-                alert("Food details submitted successfully!");
-                navigate("/DonorDashboard");
-            } else {
-                const message = await response.json();
-                setError(message);
-            }
-        } catch (error) {
-            console.error("Error submitting food details:", error);
-        }
-    }
-
-    return (
-        <div className="upload_food_details">
-            {/* Header */}
-            <nav className="nav">
-                <span className="header_title">Lighten The World</span>
-                <div className="header_links">
-                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
-=======
 
         if (isRestricted) {
             setError(
@@ -152,6 +89,8 @@ function UploadFoodDetails() {
                         restricted by an administrator.
                     </div>
                 )}
+                </form>
+
 
                 <div className="upload_format">
                     <h2 className="page_title">Food Details</h2>
@@ -174,7 +113,6 @@ function UploadFoodDetails() {
                         disabled={isRestricted}
                         required
                     />
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
                 </div>
 
             {/*Upload Food Card*/}
@@ -204,6 +142,7 @@ function UploadFoodDetails() {
                             ⚠️ Your ability to post listings has been restricted by an administrator.
                         </div>
                     )}
+                    </form>
 
                     {error && (
                         <div style={{
@@ -369,9 +308,9 @@ function UploadFoodDetails() {
                         Next: Location & Time
                     </button>
                 </div>
-
-            </form>
-        </UploadLayout>
+            </div>
+            </div>
+    </UploadLayout>
     );
 }
 

@@ -26,10 +26,6 @@ import AdminReports from "./admin/AdminReports.jsx";
 import AdminFlaggedUsers from "./admin/AdminFlaggedUsers.jsx";
 import AdminFlaggedListings from "./admin/AdminFlaggedListings.jsx";
 import Review from "./Review.jsx"
-import AdminArchivedListings from "./admin/AdminArchivedListings.jsx";
-import AdminReports from "./admin/AdminReports.jsx";
-import AdminFlaggedUsers from "./admin/AdminFlaggedUsers.jsx";
-import AdminFlaggedListings from "./admin/AdminFlaggedListings.jsx";
 
 function App() {
   return (
