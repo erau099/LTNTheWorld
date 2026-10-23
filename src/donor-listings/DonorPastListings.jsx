@@ -15,7 +15,6 @@ function DonorPastListings() {
 	// Listings posted by the logged-in donor, loaded from the backend.
 	const [listings, setListings] = useState([]);
 	const [loadError, setLoadError] = useState("");
-	const [filter, setFilter] = useState("all");
 
 	useEffect(() => {
 		apiFetch("/api/food/mine")
@@ -23,10 +22,6 @@ function DonorPastListings() {
 			.then(setListings)
 			.catch(() => setLoadError("Could not load your listings."));
 	}, []);
-
-	const visibleListings = listings.filter(
-		(listing) => filter === "all" || listing.status === filter
-	);
 
 	// Controls the gear dropdown menu.
 	const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -49,9 +44,9 @@ function DonorPastListings() {
 
 	const[selectFiltering, setSelectedListings] = useState("all")
 
-	//const filteredListings = listings.filter((listing) => {
-	//	return selectFiltering === "all" || listing.status === selectFiltering;
-	//})
+	const filteredListings = listings.filter((listing) => {
+		return selectFiltering === "all" || listing.status === selectFiltering;
+	})
 
 	return (
 		<div className="orders-page">
@@ -141,8 +136,8 @@ function DonorPastListings() {
 						<button className="review-btn header-review-btn">Review</button>
 					</div>
 
-					{visibleListings.length > 0 ? (
-						visibleListings.map((listing) => (
+					{filteredListings.length > 0 ? (
+						filteredListings.map((listing) => (
 							<div className="orders-row" 
 							key={listing.id}>
 								<span>{listing.userId}</span>
