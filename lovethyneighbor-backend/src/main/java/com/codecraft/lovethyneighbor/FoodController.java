@@ -40,10 +40,6 @@ public class FoodController {
         if (error != null) {
             return ResponseEntity.badRequest().body(error);
         }
-        
-        if (food.getStatus() == null || food.getStatus().trim().isEmpty()) {
-        food.setStatus("ACTIVE");
-        }
 
         Food food = new Food();
         food.setFoodItem(request.getFoodItem().trim());

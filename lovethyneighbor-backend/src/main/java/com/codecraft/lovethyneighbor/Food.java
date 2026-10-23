@@ -11,44 +11,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "food")
 public class Food {
-<<<<<<< HEAD
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "date")
-    private LocalDate date;
-
-    @Column(name = "pickup_time")
-    private LocalDateTime pickupTime;
-
-    @Column(name = "\"foodItem\"")
-    private String foodItem;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "user_id")
-    private Long userId;
-
-    @Column(name = "tags")
-    private String tags;
-
-    @Column(name = "allergens")
-    private String allergens;
-
-    @Column(name = "status")
-    private String status = "ACTIVE";
-
-    @Column(name = "removal_reason")
-    private String removalReason;
-
-    public Food() {
-    }
-
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-            Long userId, String tags, String allergens) {
-=======
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -124,7 +86,6 @@ public class Food {
             String tags,
             String allergens
     ) {
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
         this.date = date;
         this.pickupTime = pickupTime;
         this.foodItem = foodItem;
@@ -135,18 +96,6 @@ public class Food {
         this.status = "ACTIVE";
     }
 
-<<<<<<< HEAD
-    public Food(LocalDate date, LocalDateTime pickupTime, String foodItem, String description,
-            Long userId, String tags, String allergens, String status) {
-        this.date = date;
-        this.pickupTime = pickupTime;
-        this.foodItem = foodItem;
-        this.description = description;
-        this.userId = userId;
-        this.tags = tags;
-        this.allergens = allergens;
-        this.status = status != null ? status : "ACTIVE";
-=======
     public Food(
             LocalDate date,
             LocalDateTime pickupTime,
@@ -196,7 +145,6 @@ public class Food {
         if (status == null) {
             status = "pending";
         }
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
     }
 
     public Long getId() {
@@ -305,6 +253,8 @@ public class Food {
 
     public void setRemovalReason(String removalReason) {
         this.removalReason = removalReason;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -315,13 +265,5 @@ public class Food {
 
     public void setPhotos(List<String> photos) {
         this.photos = photos;
-    }
-
-    public String getRemovalReason() {
-        return removalReason;
-    }
-
-    public void setRemovalReason(String removalReason) {
-        this.removalReason = removalReason;
     }
 }

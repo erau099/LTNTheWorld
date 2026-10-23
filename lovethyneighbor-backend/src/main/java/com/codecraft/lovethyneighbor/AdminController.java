@@ -45,10 +45,6 @@ public class AdminController {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-<<<<<<< HEAD
-=======
-
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
             boolean passwordMatches = (passwordEncoder != null
                     && passwordEncoder.matches(request.getPassword(), user.getPassword()))
                     || user.getPassword().equals(request.getPassword());
@@ -89,50 +85,33 @@ public class AdminController {
     public ResponseEntity<AdminStatsDTO> getStats() {
         long totalUsers = userRepository.count();
         long activeListings = foodRepository.countByStatusIgnoreCase("ACTIVE");
-<<<<<<< HEAD
-        return ResponseEntity.ok(new AdminStatsDTO(totalUsers, activeListings, 0L));
-=======
 
         return ResponseEntity.ok(
                 new AdminStatsDTO(totalUsers, activeListings, 0L)
         );
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
     }
 
     @GetMapping("/food/active")
     public ResponseEntity<List<Food>> getActiveFoodListings() {
-<<<<<<< HEAD
-        List<Food> activeListings = foodRepository.findByStatusIgnoreCase("ACTIVE");
-=======
         List<Food> activeListings =
                 foodRepository.findByStatusIgnoreCase("ACTIVE");
 
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
         return ResponseEntity.ok(activeListings);
     }
 
     @GetMapping("/food/archived")
     public ResponseEntity<List<Food>> getArchivedFoodListings() {
-<<<<<<< HEAD
-        List<Food> archivedListings = foodRepository.findByStatusIgnoreCase("ARCHIVED");
-=======
         List<Food> archivedListings =
                 foodRepository.findByStatusIgnoreCase("ARCHIVED");
 
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
         return ResponseEntity.ok(archivedListings);
     }
 
     @PatchMapping("/users/{id}/status")
-<<<<<<< HEAD
-    public ResponseEntity<?> toggleUserStatus(@PathVariable UUID id,
-            @RequestBody(required = false) Map<String, String> body) {
-=======
     public ResponseEntity<?> toggleUserStatus(
             @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {
 
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
@@ -158,15 +137,10 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{id}/restrictions")
-<<<<<<< HEAD
-    public ResponseEntity<?> toggleUserRestrictions(@PathVariable UUID id,
-            @RequestBody(required = false) Map<String, Boolean> body) {
-=======
     public ResponseEntity<?> toggleUserRestrictions(
             @PathVariable UUID id,
             @RequestBody(required = false) Map<String, Boolean> body) {
 
->>>>>>> 218bdc58a0b9e38dfb39eecda574b15b21176d03
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
