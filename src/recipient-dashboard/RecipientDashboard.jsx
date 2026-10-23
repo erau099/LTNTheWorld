@@ -19,6 +19,9 @@ function RecipientDashboard() {
 	// Set VITE_USE_MOCK_FOOD=true in a local .env.local to test without PostgreSQL.
 	// Mock mode is explicit; API failures never masquerade as successful data.
 	const useMockFood = import.meta.env.VITE_USE_MOCK_FOOD === "true";
+	const demoMode =
+		import.meta.env.DEV &&
+		import.meta.env.VITE_DEMO_MODE === "true";
 	const [listings, setListings] = useState([]);
 	const [listingsLoading, setListingsLoading] = useState(true);
 	const [listingsError, setListingsError] = useState("");
@@ -55,6 +58,10 @@ function RecipientDashboard() {
 					food = [
 						{ id: 1, foodItem: "Donuts", description: "Assorted donuts", pickupTime: "2026-10-12T16:00:00", tags: "Fresh / Hot", allergens: "Milk, Wheat", status: "ACTIVE" },
 						{ id: 2, foodItem: "Canned Tuna", description: "Unopened cans", pickupTime: "2026-10-12T17:00:00", tags: "Canned", allergens: "Fish", status: "UNAVAILABLE" },
+				        { id: 3, foodItem: "Fresh Bread", description: "Freshly baked loaves of sourdough bread", pickupTime: "2026-10-23T10:30:00", tags: "Fresh / Hot", allergens: "Wheat", status: "ACTIVE" },
+						{ id: 4, foodItem: "Canned Green Beans", description: "Eight unopened cans of green beans", pickupTime: "2026-10-23T14:00:00", tags: "Canned", allergens: "", status: "UNAVAILABLE" },
+						{ id: 5, foodItem: "Chicken Sandwiches", description: "Five freshly prepared chicken sandwiches", pickupTime: "2026-10-23T12:30:00", tags: "Fresh / Hot", allergens: "Wheat, Eggs", status: "ACTIVE" },
+						{ id: 6, foodItem: "Canned Soup", description: "Assorted unopened cans of vegetable soup", pickupTime: "2026-10-23T15:00:00", tags: "Canned", allergens: "Soy", status: "ACTIVE" },
 					];
 				} else {
 					const response = await fetch("/api/food", { signal: controller.signal });
@@ -116,10 +123,15 @@ function RecipientDashboard() {
 		return selectFiltering === "all" || item.category === selectFiltering;
 	})
 	// Stores the logged-in recipient's saved allergies
-	const [recipientAllergies, setRecipientAllergies] = useState([]);
+	const [recipientAllergies, setRecipientAllergies] = useState(
+		demoMode ? ["Milk", "Peanuts"] : []
+		);
 
 	// Loads the logged-in recipient's allergies from the backend
 	useEffect(() => {
+		
+		if (demoMode) return;
+
 		const token = localStorage.getItem("token");
 
 		if (!token) return;
