@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.transaction.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -26,6 +28,7 @@ public class FoodController {
 
     // Create a new food listing
     @PostMapping
+    @Transactional 
     public ResponseEntity<?> createFoodListing(
             @RequestBody FoodRequest request,
             Authentication authentication) {
