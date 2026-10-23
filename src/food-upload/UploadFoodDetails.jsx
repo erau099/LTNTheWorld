@@ -30,7 +30,7 @@ function UploadFoodDetails() {
         navigate("/donor-dashboard");
     };
 
-    const handleNext = (e) => {
+    const handleNext = async (e) => {
         e.preventDefault();
         setError("");
 
@@ -82,6 +82,7 @@ function UploadFoodDetails() {
                 <div className="header_links">
                     <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
                 </div>
+            </nav>
 
             {/*Upload Food Card*/}
             <div className="upload_card">
@@ -201,8 +202,10 @@ function UploadFoodDetails() {
                     <button type="submit" className="upload_next_btn">Next: Location & Time</button>
                 </div>
             </form>
-        </UploadLayout>
+        </div>
+    </div>
+</div>
     );
 }
 
-export default UploadFoodDetails
+export default UploadFoodDetails;
