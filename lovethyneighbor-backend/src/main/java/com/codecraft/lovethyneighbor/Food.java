@@ -1,4 +1,3 @@
-
 package com.codecraft.lovethyneighbor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "food")
@@ -34,15 +34,17 @@ public class Food {
     @Column(name = "description")
     private String description;
 
-    // Existing bigint column in the shared database
+    // UUID of donor in logins.id
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private UUID userId;
 
     // UUID relationship to logins.id
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-        name = "user_id1",
+        name = "user_id",
+        insertable = false,
+        updatable = false,
         foreignKey = @ForeignKey(name = "fk_user_id")
     )
     private User user;
@@ -75,13 +77,12 @@ public class Food {
     public Food() {
     }
 
-    // Constructor for existing food listing functionality
     public Food(
             LocalDate date,
             LocalDateTime pickupTime,
             String foodItem,
             String description,
-            Long userId,
+            UUID userId,
             String tags,
             String allergens
     ) {
@@ -92,9 +93,35 @@ public class Food {
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
+        this.status = "ACTIVE";
     }
 
-    // Constructor retained for admin functionality and tests
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            Long userId,
+            String tags,
+            String allergens
+    ) {
+        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens);
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            UUID userId,
+            String tags,
+            String allergens,
+            String status
+    ) {
+        this(date, pickupTime, foodItem, description, userId, tags, allergens);
+        this.status = status != null ? status : "ACTIVE";
+    }
+
     public Food(
             LocalDate date,
             LocalDateTime pickupTime,
@@ -105,14 +132,7 @@ public class Food {
             String allergens,
             String status
     ) {
-        this.date = date;
-        this.pickupTime = pickupTime;
-        this.foodItem = foodItem;
-        this.description = description;
-        this.userId = userId;
-        this.tags = tags;
-        this.allergens = allergens;
-        this.status = status != null ? status : "ACTIVE";
+        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status);
     }
 
     // Set defaults when the food listing is first saved
@@ -183,12 +203,16 @@ public class Food {
         this.description = description;
     }
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId != null ? new UUID(0L, userId) : null;
     }
 
     public User getUser() {
@@ -216,11 +240,19 @@ public class Food {
     }
 
     public String getStatus() {
-        return status;
+        return status != null ? status : "ACTIVE";
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getRemovalReason() {
+        return removalReason;
+    }
+
+    public void setRemovalReason(String removalReason) {
+        this.removalReason = removalReason;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -233,13 +265,5 @@ public class Food {
 
     public void setPhotos(List<String> photos) {
         this.photos = photos;
-    }
-
-    public String getRemovalReason() {
-        return removalReason;
-    }
-
-    public void setRemovalReason(String removalReason) {
-        this.removalReason = removalReason;
     }
 }

@@ -1,4 +1,3 @@
-
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,8 +7,8 @@ import java.util.UUID;
 
 public interface FoodRepository extends JpaRepository<Food, Long> {
 
-    // Retrieve food listings by the existing numeric user ID
-    List<Food> findByUserId(Long userId);
+    // Retrieve food listings by user UUID
+    List<Food> findByUserId(UUID userId);
 
     // Retrieve listings for a donor using their UUID,
     // sorted by creation date (newest first)
