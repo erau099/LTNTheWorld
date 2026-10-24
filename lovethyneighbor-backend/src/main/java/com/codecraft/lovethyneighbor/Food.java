@@ -65,13 +65,25 @@ public class Food {
     private String removalReason;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable (
+        name = "food_photos",
+        joinColumns = @JoinColumn(name = "food_id")
+    )
+    @OrderColumn(name = "position")
+    @Column(name = "photos", nullable = false, columnDefinition = "BYTEA")
+    private List<byte[]> photos = new ArrayList<>();
+
+/* 
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "food_photos",
         joinColumns = @JoinColumn(name = "food_id")
     )
     @OrderColumn(name = "position")
-    @Column(name = "photo", columnDefinition = "TEXT")
+    @Column(name = "photos", columnDefinition = "TEXT")
     private List<String> photos = new ArrayList<>();
+*/
+
 
     // Default constructor required by JPA
     public Food() {
@@ -84,7 +96,8 @@ public class Food {
             String description,
             UUID userId,
             String tags,
-            String allergens
+            String allergens,
+            List<byte[]> photos
     ) {
         this.date = date;
         this.pickupTime = pickupTime;
@@ -93,6 +106,7 @@ public class Food {
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
+        this.photos = photos;
     }
 
     public Food(
@@ -102,9 +116,10 @@ public class Food {
             String description,
             Long userId,
             String tags,
-            String allergens
+            String allergens,
+            List<byte[]> photos
     ) {
-        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens);
+        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens,photos);
     }
 
     public Food(
@@ -115,9 +130,10 @@ public class Food {
             UUID userId,
             String tags,
             String allergens,
-            String status
+            String status,
+            List<byte[]> photos
     ) {
-        this(date, pickupTime, foodItem, description, userId, tags, allergens);
+        this(date, pickupTime, foodItem, description, userId, tags, allergens, photos);
         this.status = status != null ? status : "ACTIVE";
     }
 
@@ -129,9 +145,10 @@ public class Food {
             long userId,
             String tags,
             String allergens,
-            String status
+            String status,
+            List<byte[]> photos
     ) {
-        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status);
+        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status, photos);
     }
 
     // Set defaults when the food listing is first saved
@@ -250,11 +267,11 @@ public class Food {
         return createdAt;
     }
 
-    public List<String> getPhotos() {
+    public List<byte[]> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(List<String> photos) {
+    public void setPhotos(List<byte[]> photos) {
         this.photos = photos;
     }
 
@@ -265,4 +282,5 @@ public class Food {
     public void setRemovalReason(String removalReason) {
         this.removalReason = removalReason;
     }
+
 }
