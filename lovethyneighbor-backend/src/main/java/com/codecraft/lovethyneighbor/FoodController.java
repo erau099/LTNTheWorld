@@ -30,7 +30,6 @@ public class FoodController {
     }
 
     // Create a new food listing
-    @Transactional 
     @PostMapping
     @Transactional 
     public ResponseEntity<?> createFoodListing(
