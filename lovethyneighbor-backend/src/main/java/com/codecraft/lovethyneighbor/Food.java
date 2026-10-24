@@ -1,4 +1,3 @@
-
 package com.codecraft.lovethyneighbor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "food")
@@ -34,15 +34,17 @@ public class Food {
     @Column(name = "description")
     private String description;
 
-    // Existing bigint column in the shared database
+    // UUID of donor in logins.id
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private UUID userId;
 
     // UUID relationship to logins.id
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-        name = "user_id1",
+        name = "user_id",
+        insertable = false,
+        updatable = false,
         foreignKey = @ForeignKey(name = "fk_user_id")
     )
     private User user;
@@ -63,27 +65,39 @@ public class Food {
     private String removalReason;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable (
+        name = "food_photos",
+        joinColumns = @JoinColumn(name = "food_id")
+    )
+    @OrderColumn(name = "position")
+    @Column(name = "photos", nullable = false, columnDefinition = "BYTEA")
+    private List<byte[]> photos = new ArrayList<>();
+
+/* 
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "food_photos",
         joinColumns = @JoinColumn(name = "food_id")
     )
     @OrderColumn(name = "position")
-    @Column(name = "photo", columnDefinition = "TEXT")
+    @Column(name = "photos", columnDefinition = "TEXT")
     private List<String> photos = new ArrayList<>();
+*/
+
 
     // Default constructor required by JPA
     public Food() {
     }
 
-    // Constructor for existing food listing functionality
     public Food(
             LocalDate date,
             LocalDateTime pickupTime,
             String foodItem,
             String description,
-            Long userId,
+            UUID userId,
             String tags,
-            String allergens
+            String allergens,
+            List<byte[]> photos
     ) {
         this.date = date;
         this.pickupTime = pickupTime;
@@ -92,9 +106,37 @@ public class Food {
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
+        this.photos = photos;
     }
 
-    // Constructor retained for admin functionality and tests
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            Long userId,
+            String tags,
+            String allergens,
+            List<byte[]> photos
+    ) {
+        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens,photos);
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            UUID userId,
+            String tags,
+            String allergens,
+            String status,
+            List<byte[]> photos
+    ) {
+        this(date, pickupTime, foodItem, description, userId, tags, allergens, photos);
+        this.status = status != null ? status : "ACTIVE";
+    }
+
     public Food(
             LocalDate date,
             LocalDateTime pickupTime,
@@ -103,16 +145,10 @@ public class Food {
             long userId,
             String tags,
             String allergens,
-            String status
+            String status,
+            List<byte[]> photos
     ) {
-        this.date = date;
-        this.pickupTime = pickupTime;
-        this.foodItem = foodItem;
-        this.description = description;
-        this.userId = userId;
-        this.tags = tags;
-        this.allergens = allergens;
-        this.status = status != null ? status : "ACTIVE";
+        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status, photos);
     }
 
     // Set defaults when the food listing is first saved
@@ -183,12 +219,16 @@ public class Food {
         this.description = description;
     }
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId != null ? new UUID(0L, userId) : null;
     }
 
     public User getUser() {
@@ -227,11 +267,11 @@ public class Food {
         return createdAt;
     }
 
-    public List<String> getPhotos() {
+    public List<byte[]> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(List<String> photos) {
+    public void setPhotos(List<byte[]> photos) {
         this.photos = photos;
     }
 
@@ -242,4 +282,5 @@ public class Food {
     public void setRemovalReason(String removalReason) {
         this.removalReason = removalReason;
     }
+
 }

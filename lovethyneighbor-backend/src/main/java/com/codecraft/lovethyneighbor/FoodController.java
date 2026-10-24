@@ -5,10 +5,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.transaction.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.Base64;
+import java.util.ArrayList;
+
 
 @RestController
 @RequestMapping("/api/food")
@@ -26,9 +31,12 @@ public class FoodController {
 
     // Create a new food listing
     @PostMapping
+    @Transactional 
     public ResponseEntity<?> createFoodListing(
             @RequestBody FoodRequest request,
             Authentication authentication) {
+        
+        List<byte[]> decodedPhotos = new ArrayList<>();
 
         if (authentication == null) {
             return ResponseEntity.status(401)
@@ -41,17 +49,33 @@ public class FoodController {
             return ResponseEntity.badRequest().body(error);
         }
 
-        // The JWT identifies the donor using a UUID.
-        // The existing food.user_id column requires a bigint.
-        //
-        // We cannot safely save a new listing until the
-        // database schema and user ID mapping are reconciled.
+        Food food = new Food();
+        food.setFoodItem(request.getFoodItem().trim());
+        food.setDescription(request.getDescription().trim());
+        food.setTags(String.join(",", request.getTags()));
+        food.setAllergens(request.getAllergens() == null ? "" : String.join(",", request.getAllergens()));
+        food.setAddress(request.getAddress().trim());
+        food.setDate(request.getDate());
+        food.setPickupTime(request.getDate().atTime(request.getStartTime()));
+        food.setPickupEndTime(request.getDate().atTime(request.getEndTime()));
+    //    food.setPhotos(request.getPhotos() == null ? List.of() : request.getPhotos());
+        try{
+            if(request.getPhotos() != null) {
+                for (String photo : request.getPhotos()) {
+                    decodedPhotos.add(decodePhoto(photo));
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Image failed upload. Please ensure the image is in a valid format and under 2.8 MB.");
+        }
+        food.setPhotos(decodedPhotos);
+        // The JWT subject is the user's UUID, so the donor can't post as someone else
+        food.setUserId(UUID.fromString(authentication.getName()));
 
-        return ResponseEntity.status(503).body(
-            "Food uploads are temporarily unavailable " +
-            "while the database user ID mapping is updated."
-        );
+        Food savedFood = foodRepository.save(food);
+        return ResponseEntity.ok(savedFood);
     }
+   
 
     // Recipient Dashboard: retrieve active listings
     @GetMapping
@@ -61,6 +85,26 @@ public class FoodController {
         );
     }
 
+    private byte[] decodePhoto(String base64Photo) {
+        if (base64Photo == null || !base64Photo.startsWith("data:image/")) {
+            throw new IllegalArgumentException("Invalid base64 photo format.");
+        }
+
+        int commaIndex = base64Photo.indexOf(',');
+        if (commaIndex < 0) {
+            throw new IllegalArgumentException("Invalid base64 photo format.");
+        }
+        String newData = base64Photo.substring(0, commaIndex);
+        if(!newData.matches("data:image/(png|jpeg|jpg|gif);base64")) {
+            throw new IllegalArgumentException("Invalid base64 photo format.");
+        }
+        String base64Data = base64Photo.substring(commaIndex + 1);
+        try {
+            return Base64.getDecoder().decode(base64Data);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid base64 photo data.");
+        }
+    }
     // Donor Dashboard: retrieve own listings
     @GetMapping("/mine")
     public ResponseEntity<?> getMyListings(
