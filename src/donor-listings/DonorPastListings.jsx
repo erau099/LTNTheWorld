@@ -129,7 +129,7 @@ function DonorPastListings() {
 				{/* Listings table */}
 				<div className="orders-table">
 					<div className="orders-header-row">
-						<span>Donor Name</span>
+						<span>Recipient Name</span>
 						<span>Date</span>
 						<span>Time</span>
 						<span>Food Title</span>
@@ -141,8 +141,10 @@ function DonorPastListings() {
 							<div className="orders-row" 
 							key={listing.id}>
 								<span>{listing.userId}</span>
-								<span>{listing.date}</span>
-								<span>{listing.pickupTime}</span>
+								<span>{new Date(listing.date + "T00:00:00").toLocaleDateString()}</span>
+								<span>{new Date(listing.pickupTime).toLocaleTimeString([], {
+									hour: "numeric", minute: "2-digit",
+								})}</span>
 								<span>{listing.foodItem}</span>
 
 								<button className={`review-btn ${listing.status}`}>
