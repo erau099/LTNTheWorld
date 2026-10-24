@@ -20,9 +20,6 @@ function UploadFoodPhoto() {
         return <Navigate to="/UploadFoodLocation" replace />;
     }
 
-    const photoConvertToBase64 = (file) => {
-            return photo.includes(",") && photo.startswith("data:") ? photo.substring(photo.indexOf(",") + 1) : photo;
-        }
 
     const handleFiles = async (e) => {
         const files = Array.from(e.target.files || []).filter((f) => f.type.startsWith("image/"));
@@ -67,7 +64,7 @@ function UploadFoodPhoto() {
                     date: draft.date,
                     startTime: draft.startTime,
                     endTime: draft.endTime,
-                    photos: draft.photos.map(photoConvertToBase64),
+                    photos: draft.photos
                 }),
             });
 

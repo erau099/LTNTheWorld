@@ -65,6 +65,16 @@ public class Food {
     private String removalReason;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable (
+        name = "food_photos",
+        joinColumns = @JoinColumn(name = "food_id")
+    )
+    @OrderColumn(name = "position")
+    @Column(name = "photos", columnDefinition = "BYTEA")
+    private List<byte[]> photos = new ArrayList<>();
+
+/* 
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "food_photos",
         joinColumns = @JoinColumn(name = "food_id")
@@ -72,6 +82,7 @@ public class Food {
     @OrderColumn(name = "position")
     @Column(name = "photos", columnDefinition = "TEXT")
     private List<String> photos = new ArrayList<>();
+*/
 
 
     // Default constructor required by JPA
@@ -86,7 +97,7 @@ public class Food {
             UUID userId,
             String tags,
             String allergens,
-            List<String> photos
+            List<byte[]> photos
     ) {
         this.date = date;
         this.pickupTime = pickupTime;
@@ -106,7 +117,7 @@ public class Food {
             Long userId,
             String tags,
             String allergens,
-            List<String> photos
+            List<byte[]> photos
     ) {
         this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens,photos);
     }
@@ -120,7 +131,7 @@ public class Food {
             String tags,
             String allergens,
             String status,
-            List<String> photos
+            List<byte[]> photos
     ) {
         this(date, pickupTime, foodItem, description, userId, tags, allergens, photos);
         this.status = status != null ? status : "ACTIVE";
@@ -135,7 +146,7 @@ public class Food {
             String tags,
             String allergens,
             String status,
-            List<String> photos
+            List<byte[]> photos
     ) {
         this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status, photos);
     }
@@ -256,11 +267,11 @@ public class Food {
         return createdAt;
     }
 
-    public List<String> getPhotos() {
+    public List<byte[]> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(List<String> photos) {
+    public void setPhotos(List<byte[]> photos) {
         this.photos = photos;
     }
 
@@ -271,4 +282,5 @@ public class Food {
     public void setRemovalReason(String removalReason) {
         this.removalReason = removalReason;
     }
+
 }
