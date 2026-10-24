@@ -70,7 +70,7 @@ public class Food {
         joinColumns = @JoinColumn(name = "food_id")
     )
     @OrderColumn(name = "position")
-    @Column(name = "photos", columnDefinition = "BYTEA")
+    @Column(name = "photos", nullable = false, columnDefinition = "BYTEA")
     private List<byte[]> photos = new ArrayList<>();
 
 /* 

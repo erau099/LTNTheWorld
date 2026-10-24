@@ -62,11 +62,7 @@ public class FoodController {
         try{
             if(request.getPhotos() != null) {
                 for (String photo : request.getPhotos()) {
-                    byte[] bytes = decodePhoto(photo);
-                    if(bytes.length > MAX_PHOTO_LENGTH) {
-                        return ResponseEntity.badRequest().body("Each photo must be an image under 2.8 MB.");
-                    }
-                    decodedPhotos.add(bytes);
+                    decodedPhotos.add(decodePhoto(photo));
                 }
             }
         } catch (IllegalArgumentException e) {
