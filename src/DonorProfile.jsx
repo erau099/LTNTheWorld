@@ -133,13 +133,14 @@ export default function DonorProfile() {
     };
   }, [navigate]);
 
-  const handleAction = (item) => {
-    if (item === "Sign Out") {
-      logout();
+  const handleAction = async (item) => {
+    if (item === 'Sign Out') {
+      await logout();
       navigate("/");
     } else {
       console.log(item);
     }
+
     setDropdownOpen(false);
   };
 

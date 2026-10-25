@@ -21,6 +21,7 @@ function Login({}) {
         const response = await fetch ('/api/auth/login',{
             method: 'POST',
             headers: { 'Content-Type' : 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({username, password})
         })
 
@@ -28,9 +29,11 @@ function Login({}) {
             const result = await response.json()
             // result contains status, name, role
             if(result.status === 'success'){
-                // Store the jwt token in localStorage
-                localStorage.setItem('token', result.token)
-                setUser({ name: result.name, role: result.role, canPostListings: result.canPostListings })
+                setUser({
+                    name: result.name,
+                    role: result.role,
+                    canPostListings: result.canPostListings
+                })
                 setPopup('success')
 
                 // Determine destination based on role

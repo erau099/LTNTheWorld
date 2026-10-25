@@ -92,13 +92,14 @@ export default function ReceiverProfile() {
     };
   }, [navigate]);
 
-  const handleAction = (item) => {
-    if (item === "Sign Out") {
-      logout();
+  const handleAction = async (item) => {
+    if (item === 'Sign Out') {
+      await logout();
       navigate("/");
     } else {
       console.log(item);
     }
+
     setDropdownOpen(false);
   };
 
@@ -127,14 +128,9 @@ export default function ReceiverProfile() {
 
   // Loads the logged-in recipient's saved allergies from the backend
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) return;
 
     fetch("/api/users/me/allergies", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+        credentials: "include",
     })
       .then((response) => {
         if (!response.ok) {
@@ -168,15 +164,13 @@ export default function ReceiverProfile() {
   async function handleSave(e) {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
-
     if (token) {
       try {
         const response = await fetch("/api/users/me/allergies", {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             allergies: form.allergies,

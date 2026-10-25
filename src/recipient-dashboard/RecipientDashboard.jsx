@@ -96,7 +96,6 @@ function RecipientDashboard() {
     	}
     	setRequestLoading(true);
     	try {
-        	const token = localStorage.getItem("token");
 			console.log("Token exists:", !!token);
 
         	const response = await apiFetch(`/api/orders/${selectListing.id}`, {
@@ -198,12 +197,9 @@ function RecipientDashboard() {
 
 	// Loads the logged-in recipient's allergies from the backend
 	useEffect(() => {
-		const token = localStorage.getItem("token");
 		if (!token) return;
 		fetch("/api/users/me/allergies", {
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
+			credentials: "include",
 		})
 			.then((response) => {
 				if (!response.ok) {
