@@ -2,9 +2,6 @@ package com.codecraft.lovethyneighbor;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,13 +14,16 @@ public class FoodOrderController {
 
     private final FoodOrderRepository foodOrderRepository;
     private final FoodRepository foodRepository;
+    private final NotificationRepository notificationRepository;
 
     public FoodOrderController(
             FoodOrderRepository foodOrderRepository,
-            FoodRepository foodRepository) {
+            FoodRepository foodRepository,
+            NotificationRepository notificationRepository) {
 
         this.foodOrderRepository = foodOrderRepository;
         this.foodRepository = foodRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     // Recipient Past Orders: retrieve the logged-in user's orders
@@ -107,6 +107,21 @@ public class FoodOrderController {
         order.setStatus("pending");
 
         FoodOrder savedOrder = foodOrderRepository.save(order);
+
+        // Update food status to CLAIMED and assign claimedByUserId (DT-96)
+        food.setStatus("CLAIMED");
+        food.setClaimedByUserId(recipientId);
+        foodRepository.save(food);
+
+        // Notify donor (DT-73)
+        Notification notification = new Notification(
+                food.getUserId(),
+                food.getId(),
+                "REQUEST_RECEIVED",
+                "New Request for " + food.getFoodItem(),
+                "A recipient has requested your listing '" + food.getFoodItem() + "'. Click to coordinate pickup."
+        );
+        notificationRepository.save(notification);
 
         return ResponseEntity.ok(savedOrder);
     }

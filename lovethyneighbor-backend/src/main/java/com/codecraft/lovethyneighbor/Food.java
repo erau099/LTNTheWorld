@@ -64,6 +64,9 @@ public class Food {
     @Column(name = "removal_reason")
     private String removalReason;
 
+    @Column(name = "claimed_by_user_id")
+    private UUID claimedByUserId;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "food_photos",
@@ -133,6 +136,62 @@ public class Food {
             String status
     ) {
         this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status);
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            UUID userId,
+            String tags,
+            String allergens,
+            List<String> photos
+    ) {
+        this(date, pickupTime, foodItem, description, userId, tags, allergens);
+        this.photos = photos != null ? photos : new ArrayList<>();
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            Long userId,
+            String tags,
+            String allergens,
+            List<String> photos
+    ) {
+        this(date, pickupTime, foodItem, description, userId != null ? new UUID(0L, userId) : null, tags, allergens, photos);
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            UUID userId,
+            String tags,
+            String allergens,
+            String status,
+            List<String> photos
+    ) {
+        this(date, pickupTime, foodItem, description, userId, tags, allergens, status);
+        this.photos = photos != null ? photos : new ArrayList<>();
+    }
+
+    public Food(
+            LocalDate date,
+            LocalDateTime pickupTime,
+            String foodItem,
+            String description,
+            long userId,
+            String tags,
+            String allergens,
+            String status,
+            List<String> photos
+    ) {
+        this(date, pickupTime, foodItem, description, new UUID(0L, userId), tags, allergens, status, photos);
     }
 
     // Set defaults when the food listing is first saved
@@ -265,5 +324,12 @@ public class Food {
 
     public void setPhotos(List<String> photos) {
         this.photos = photos;
+    }
+    public UUID getClaimedByUserId() {
+        return claimedByUserId;
+    }
+
+    public void setClaimedByUserId(UUID claimedByUserId) {
+        this.claimedByUserId = claimedByUserId;
     }
 }

@@ -46,6 +46,7 @@ function RecipientDashboard() {
 					: [],
 				description: item.description || "No description provided",
 				status: item.status || "UNKNOWN",
+				photos: Array.isArray(item.photos) ? item.photos : [],
 			};
 		};
 
@@ -65,7 +66,8 @@ function RecipientDashboard() {
 					food = await response.json();
 				}
 				if (!Array.isArray(food)) throw new Error("Food API did not return a list");
-				if (!controller.signal.aborted) setListings(food.map(mapFood));
+				const activeFood = food.filter((item) => (item.status || "ACTIVE").toUpperCase() === "ACTIVE");
+				if (!controller.signal.aborted) setListings(activeFood.map(mapFood));
 			} catch (error) {
 				if (!controller.signal.aborted) {
 					console.error("Error loading food listings:", error);
@@ -107,6 +109,7 @@ function RecipientDashboard() {
         	alert("Food requested successfully!");
 
         	// Close the popup
+        	setListings((prev) => prev.filter((item) => item.id !== selectListing.id));
         	setSelectListing(false);
 
     	} catch (error) {
@@ -147,7 +150,41 @@ function RecipientDashboard() {
 	};
 
 	// Handles the cards to be able to be shown when clicked
-	const [selectListing, setSelectListing] = useState(false)
+	const [selectListing, setSelectListing] = useState(false);
+	const [requesting, setRequesting] = useState(false);
+	const [requestError, setRequestError] = useState("");
+
+	const handleRequestFood = async (foodItem) => {
+		if (!foodItem) return;
+		setRequesting(true);
+		setRequestError("");
+		const token = localStorage.getItem("token");
+
+		try {
+			const res = await fetch(`/api/food/${foodItem.id}/request`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					...(token ? { Authorization: `Bearer ${token}` } : {}),
+				},
+			});
+
+			if (!res.ok) {
+				const errorText = await res.text();
+				throw new Error(errorText || "Failed to request food item");
+			}
+
+			setListings((prev) => prev.filter((item) => item.id !== foodItem.id));
+			setSelectListing(false);
+			alert("Success! Your request has been sent to the donor. They will coordinate pickup with you.");
+		} catch (err) {
+			console.error("Error requesting food:", err);
+			setRequestError(err.message || "Failed to request food.");
+		} finally {
+			setRequesting(false);
+		}
+	};
+
 
 	// Handles the filtering for the listings
 	const [selectFiltering, setSelectedFiltering] = useState("all")
@@ -296,7 +333,13 @@ function RecipientDashboard() {
 						<article className="food-card" 
 									key={item.id} 
 									onClick={() => handleListingClick(item)}>
-							<div className="food-image">
+							<div className="food-image"
+								style={item.photos?.length ? {
+									backgroundImage: `url(${item.photos[0]})`,
+									backgroundSize: "cover",
+									backgroundPosition: "center",
+								} : undefined}
+							>
 								<span className="category-tag">{getFoodCondition(item)}</span>
 							</div>
 
@@ -356,7 +399,12 @@ function RecipientDashboard() {
 										<div
 											className="food_popup_image"
 											role="img"
-											aria-label="Placeholder food photograph"
+											aria-label={selectListing.photos?.length ? `${selectListing.food} photograph` : "Placeholder food photograph"}
+											style={selectListing.photos?.length ? {
+												backgroundImage: `url(${selectListing.photos[0]})`,
+												backgroundSize: "cover",
+												backgroundPosition: "center",
+											} : undefined}
 										/>
 
 										<span

@@ -163,6 +163,23 @@ public class AdminController {
         return ResponseEntity.ok(new UserSummaryDTO(user));
     }
 
+    // DT-112: Admin view user full profile and activity history
+    @GetMapping("/users/{id}/activity")
+    public ResponseEntity<?> getUserActivity(@PathVariable UUID id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
+        }
+
+        User user = userOpt.get();
+        UserSummaryDTO summary = new UserSummaryDTO(user);
+        List<Food> listings = foodRepository.findByUser_IdOrderByCreatedAtDesc(id);
+
+        UserActivityDTO activity = new UserActivityDTO(summary, listings);
+        return ResponseEntity.ok(activity);
+    }
+
     @PatchMapping("/food/{id}/status")
     public ResponseEntity<?> updateFoodStatus(
             @PathVariable Long id,
