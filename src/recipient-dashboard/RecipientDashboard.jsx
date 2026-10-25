@@ -43,6 +43,7 @@ function RecipientDashboard() {
 					: [],
 				description: item.description || "No description provided",
 				status: item.status || "UNKNOWN",
+				photos: Array.isArray(item.photos) ? item.photos : [],
 			};
 		};
 
@@ -259,7 +260,13 @@ function RecipientDashboard() {
 						<article className="food-card" 
 									key={item.id} 
 									onClick={() => handleListingClick(item)}>
-							<div className="food-image">
+							<div className="food-image"
+								style={item.photos?.length ? {
+									backgroundImage: `url(${item.photos[0]})`,
+									backgroundSize: "cover",
+									backgroundPosition: "center",
+								} : undefined}
+							>
 								<span className="category-tag">{getFoodCondition(item)}</span>
 							</div>
 
@@ -319,7 +326,12 @@ function RecipientDashboard() {
 										<div
 											className="food_popup_image"
 											role="img"
-											aria-label="Placeholder food photograph"
+											aria-label={selectListing.photos?.length ? `${selectListing.food} photograph` : "Placeholder food photograph"}
+											style={selectListing.photos?.length ? {
+												backgroundImage: `url(${selectListing.photos[0]})`,
+												backgroundSize: "cover",
+												backgroundPosition: "center",
+											} : undefined}
 										/>
 
 										<span
