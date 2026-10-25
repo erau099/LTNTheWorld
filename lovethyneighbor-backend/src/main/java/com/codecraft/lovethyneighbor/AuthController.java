@@ -2,6 +2,8 @@ package com.codecraft.lovethyneighbor;
 
 import com.codecraft.lovethyneighbor.security.JwtService;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,31 +40,70 @@ public class AuthController {
 
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
 
-        // Check if user exists and password matches
         if (userOpt.isPresent()
-                && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
+                && passwordEncoder.matches(
+                        request.getPassword(),
+                        userOpt.get().getPassword())) {
 
             User user = userOpt.get();
+
             if ("SUSPENDED".equalsIgnoreCase(user.getStatus())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Account is suspended. Please contact support.");
             }
 
-            String token = jwtService.generateToken(user.getId(), user.getRole());
+            String token = jwtService.generateToken(
+                    user.getId(),
+                    user.getRole());
 
-            return ResponseEntity.ok(
-                    new LoginResponse(
-                            "success",
-                            user.getName(),
-                            user.getRole(),
-                            token,
-                            user.getCanPostListings(),
-                            user.getStatus()
-                    )
-            );
+            ResponseCookie authCookie = ResponseCookie.from(
+                    "authToken",
+                    token)
+                    .httpOnly(true)
+                    .secure(false)
+                    .sameSite("Lax")
+                    .path("/")
+                    .maxAge(60 * 60 * 24)
+                    .build();
+
+            LoginResponse response = new LoginResponse(
+                    "success",
+                    user.getName(),
+                    user.getRole(),
+                    null,
+                    user.getCanPostListings(),
+                    user.getStatus());
+
+            return ResponseEntity.ok()
+                    .header(
+                            HttpHeaders.SET_COOKIE,
+                            authCookie.toString())
+                    .body(response);
+
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("error");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("error");
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+
+        ResponseCookie authCookie = ResponseCookie.from(
+                "authToken",
+                "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        authCookie.toString())
+                .body("Logged out");
     }
 
     @PostMapping("/signup")
@@ -92,8 +133,7 @@ public class AuthController {
                 passwordEncoder.encode(request.getPassword()),
                 request.getDateOfBirth(),
                 request.getPhoneNumber(),
-                request.getRole()
-        );
+                request.getRole());
 
         userRepository.save(newUser);
 
@@ -104,8 +144,7 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(
             @RequestBody ForgotPasswordRequest request) {
 
-        Optional<User> userOpt =
-                userRepository.findByEmail(request.getEmail());
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
 
         if (userOpt.isPresent()) {
 
@@ -116,24 +155,20 @@ public class AuthController {
 
             user.setResetTokenHash(tokenHash);
             user.setResetTokenExpiration(
-                    LocalDateTime.now().plusMinutes(30)
-            );
+                    LocalDateTime.now().plusMinutes(30));
 
             userRepository.save(user);
 
-            String resetLink =
-                    "http://localhost:5173/#/reset-password?token="
-                            + rawToken;
+            String resetLink = "http://localhost:5173/#/reset-password?token="
+                    + rawToken;
 
             emailService.sendPasswordResetEmail(
                     user.getEmail(),
-                    resetLink
-            );
+                    resetLink);
         }
 
         return ResponseEntity.ok(
-                "If that email exists, a reset link has been sent."
-        );
+                "If that email exists, a reset link has been sent.");
     }
 
     @PostMapping("/reset-password")
@@ -149,8 +184,7 @@ public class AuthController {
 
         String tokenHash = hashToken(request.getToken());
 
-        Optional<User> userOpt =
-                userRepository.findByResetTokenHash(tokenHash);
+        Optional<User> userOpt = userRepository.findByResetTokenHash(tokenHash);
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -161,7 +195,7 @@ public class AuthController {
 
         if (user.getResetTokenExpiration() == null
                 || user.getResetTokenExpiration()
-                .isBefore(LocalDateTime.now())) {
+                        .isBefore(LocalDateTime.now())) {
 
             user.setResetTokenHash(null);
             user.setResetTokenExpiration(null);
@@ -174,7 +208,7 @@ public class AuthController {
 
         if (request.getNewPassword() == null
                 || !request.getNewPassword()
-                .equals(request.getConfirmPassword())) {
+                        .equals(request.getConfirmPassword())) {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Passwords do not match");
@@ -185,13 +219,11 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(
                             "Password must be at least 8 characters and include "
-                                    + "uppercase, lowercase, a number, and a special character."
-                    );
+                                    + "uppercase, lowercase, a number, and a special character.");
         }
 
         user.setPassword(
-                passwordEncoder.encode(request.getNewPassword())
-        );
+                passwordEncoder.encode(request.getNewPassword()));
 
         // Invalidate token immediately after use
         user.setResetTokenHash(null);
@@ -200,8 +232,7 @@ public class AuthController {
         userRepository.save(user);
 
         emailService.sendPasswordResetNotification(
-                user.getEmail()
-        );
+                user.getEmail());
 
         return ResponseEntity.ok("success");
     }
@@ -210,8 +241,7 @@ public class AuthController {
     public ResponseEntity<?> changeEmail(
             @RequestBody ChangeEmailRequest request) {
 
-        Optional<User> userOpt =
-                userRepository.findByEmail(request.getCurrentEmail());
+        Optional<User> userOpt = userRepository.findByEmail(request.getCurrentEmail());
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -231,8 +261,7 @@ public class AuthController {
 
         emailService.sendEmailChangeNotification(
                 oldEmail,
-                request.getNewEmail()
-        );
+                request.getNewEmail());
 
         return ResponseEntity.ok("success");
     }
@@ -250,20 +279,16 @@ public class AuthController {
 
     private String hashToken(String token) {
         try {
-            MessageDigest digest =
-                    MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-            byte[] hashBytes =
-                    digest.digest(
-                            token.getBytes(StandardCharsets.UTF_8)
-                    );
+            byte[] hashBytes = digest.digest(
+                    token.getBytes(StandardCharsets.UTF_8));
 
             StringBuilder hexString = new StringBuilder();
 
             for (byte b : hashBytes) {
                 hexString.append(
-                        String.format("%02x", b)
-                );
+                        String.format("%02x", b));
             }
 
             return hexString.toString();
@@ -271,8 +296,7 @@ public class AuthController {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(
                     "Could not hash reset token",
-                    e
-            );
+                    e);
         }
     }
 
@@ -314,11 +338,21 @@ class LoginRequest {
     private String username;
     private String password;
 
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
+    public String getUsername() {
+        return username;
+    }
 
-    public void setUsername(String username) { this.username = username; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPassword() {
+        return password;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
 
 class LoginResponse {
@@ -362,12 +396,29 @@ class LoginResponse {
         this.accountStatus = accountStatus != null ? accountStatus : "ACTIVE";
     }
 
-    public String getStatus() { return status; }
-    public String getName() { return name; }
-    public String getRole() { return role; }
-    public String getToken() { return token; }
-    public Boolean getCanPostListings() { return canPostListings; }
-    public String getAccountStatus() { return accountStatus; }
+    public String getStatus() {
+        return status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public Boolean getCanPostListings() {
+        return canPostListings;
+    }
+
+    public String getAccountStatus() {
+        return accountStatus;
+    }
 }
 
 class SignupRequest {
@@ -379,28 +430,73 @@ class SignupRequest {
     private String phoneNumber;
     private String role;
 
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
-    public String getEmail() { return email; }
-    public String getPassword() { return password; }
-    public java.time.LocalDate getDateOfBirth() { return dateOfBirth; }
-    public String getPhoneNumber() { return phoneNumber; }
-    public String getRole() { return role; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-    public void setEmail(String email) { this.email = email; }
-    public void setPassword(String password) { this.password = password; }
-    public void setDateOfBirth(java.time.LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-    public void setRole(String role) { this.role = role; }
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public java.time.LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setDateOfBirth(java.time.LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
 
 class ForgotPasswordRequest {
     private String email;
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
 
 class ResetPasswordRequest {
@@ -408,22 +504,48 @@ class ResetPasswordRequest {
     private String newPassword;
     private String confirmPassword;
 
-    public String getToken() { return token; }
-    public String getNewPassword() { return newPassword; }
-    public String getConfirmPassword() { return confirmPassword; }
+    public String getToken() {
+        return token;
+    }
 
-    public void setToken(String token) { this.token = token; }
-    public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
-    public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
 }
 
 class ChangeEmailRequest {
     private String currentEmail;
     private String newEmail;
 
-    public String getCurrentEmail() { return currentEmail; }
-    public String getNewEmail() { return newEmail; }
+    public String getCurrentEmail() {
+        return currentEmail;
+    }
 
-    public void setCurrentEmail(String currentEmail) { this.currentEmail = currentEmail; }
-    public void setNewEmail(String newEmail) { this.newEmail = newEmail; }
+    public String getNewEmail() {
+        return newEmail;
+    }
+
+    public void setCurrentEmail(String currentEmail) {
+        this.currentEmail = currentEmail;
+    }
+
+    public void setNewEmail(String newEmail) {
+        this.newEmail = newEmail;
+    }
 }

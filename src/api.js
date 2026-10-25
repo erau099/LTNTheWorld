@@ -1,21 +1,19 @@
-// Use this instead of fetch() for any call to a protected endpoint.
-// It attaches the JWT and handles an invalid or expired token.
-export async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem('token')
+// Use this instead of fetch() for protected endpoints.
+// The browser automatically sends the HttpOnly authentication cookie.
 
+export async function apiFetch(url, options = {}) {
     const response = await fetch(url, {
         ...options,
+        credentials: 'include',
         headers: {
-            ...options.headers,
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
+            ...options.headers
         }
     })
 
-    // 401 = missing, expired, or tampered token
+    // 401 = missing, expired, or invalid authentication cookie
     if (response.status === 401) {
-        localStorage.removeItem('token')
-        window.location.hash = '#/Login'   // HashRouter, so set the hash instead of the path
-        window.location.reload()           // wipes the in-memory user state too
+        window.location.hash = '#/Login'
+        window.location.reload()
     }
 
     return response

@@ -8,7 +8,7 @@ function Review() {
   useEffect(() => {
     fetch('/api/reviews/my-reviews', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        credentials: "include",
       },
     })
       .then(res => {

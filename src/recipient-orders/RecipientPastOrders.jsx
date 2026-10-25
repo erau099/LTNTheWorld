@@ -129,7 +129,6 @@ function RecipientPastOrders() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${localStorage.getItem('token')}`,
 				},
 				body: JSON.stringify({
 					userId: '54336d41-7416-4484-a5fe-69c17933d229',
