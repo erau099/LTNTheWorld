@@ -1,13 +1,12 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, logout } from "./utils/auth";
+import { logout } from "./utils/auth";
 import "./index.css";
 import "./App.css";
 import "./CDashboard.css";
 import "./ReceiverProfile.css";
 import WaiverText from "./Waivers/WaiverText.jsx";
 
-const NAV_LINKS = ["Discover", "Orders"];
 const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
 
 function PencilIcon(props) {
@@ -28,6 +27,7 @@ function EditableInput({
   editable,
   onToggleEdit,
   ariaLabel,
+  canEdit = true,
 }) {
   return (
     <div className={`rp-inputWrap ${editable ? "is-editing" : ""}`}>
@@ -38,81 +38,46 @@ function EditableInput({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        disabled={!editable}
+        disabled={!editable || !canEdit}
         aria-label={ariaLabel || name}
         autoComplete="off"
       />
-      <button
-        type="button"
-        className="rp-editBtn"
-        onClick={() => onToggleEdit(name)}
-        aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
-        title={editable ? "Lock" : "Edit"}
-      >
-        <PencilIcon className="rp-pencil" />
-      </button>
+
+      {canEdit && (
+        <button
+          type="button"
+          className="rp-editBtn"
+          onClick={() => onToggleEdit(name)}
+          aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
+          title={editable ? "Lock" : "Edit"}
+        >
+          <PencilIcon className="rp-pencil" />
+        </button>
+      )}
     </div>
   );
 }
 
 export default function ReceiverProfile() {
-  //  header state (copied from CDashboard)
   const navigate = useNavigate();
+
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const [user, setUser] = useState({ firstName: "Test" });
+
+  const [user, setUser] = useState({
+    firstName: "User",
+  });
 
   const [showSignedWaiver, setShowSignedWaiver] = useState(false);
 
-  useEffect(() => {
-
-    // keep this commented out otherwise you'll route straight to login page if you try accessing receipient profile page
-    /*
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate("/Login"); // matches your App.jsx route
-    } else {
-      setUser(currentUser);
-    }
-    */
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-
-    function handleClickOut(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOut);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOut);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [navigate]);
-
-  const handleAction = async (item) => {
-    if (item === 'Sign Out') {
-      await logout();
-      navigate("/");
-    } else {
-      console.log(item);
-    }
-
-    setDropdownOpen(false);
-  };
-
-  //if (!user) return null;
-
-  //  profile form state 
   const [form, setForm] = useState({
-    firstName: "Joe",
-    lastName: "Shmoe",
-    email: "jshmoe24@gmail.com",
+    firstName: "",
+    lastName: "",
+    email: "",
     password: "******",
-    dob: "01/01/2001",
-    phone: "(916)-111-1111",
+    dob: "",
+    phone: "",
     allergies: "",
   });
 
@@ -126,89 +91,211 @@ export default function ReceiverProfile() {
     allergies: false,
   });
 
-  // Loads the logged-in recipient's saved allergies from the backend
   useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
 
-    fetch("/api/users/me/allergies", {
-        credentials: "include",
+    window.addEventListener("scroll", onScroll);
+
+    function handleClickOut(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOut);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOut);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/users/me", {
+      credentials: "include",
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Unable to load allergies");
+          throw new Error("Unable to load profile");
         }
 
-        return response.text();
+        return response.json();
       })
-      .then((allergies) => {
+      .then((data) => {
         setForm((prev) => ({
           ...prev,
-          allergies: allergies || "",
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          dob: data.dateOfBirth || "",
+          phone: data.phoneNumber || "",
+          allergies: data.allergies || "",
+        }));
+
+        setUser((prev) => ({
+          ...prev,
+          firstName: data.firstName || "User",
         }));
       })
       .catch((error) => {
-        console.error("Error loading allergies:", error);
+        console.error("Error loading receiver profile:", error);
       });
   }, []);
 
-  const canSave = useMemo(() => true, []);
+  const handleAction = async (item) => {
+    if (item === "Sign Out") {
+      await logout();
+      navigate("/");
+    } else {
+      console.log(item);
+    }
+
+    setDropdownOpen(false);
+  };
+
+  const canSave = useMemo(() => {
+    return (
+      form.firstName.trim() !== "" &&
+      form.lastName.trim() !== "" &&
+      form.email.trim() !== "" &&
+      form.dob !== "" &&
+      form.phone.trim() !== ""
+    );
+  }, [form]);
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   function toggleEdit(field) {
-    setEditing((prev) => ({ ...prev, [field]: !prev[field] }));
+    setEditing((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
   }
 
   async function handleSave(e) {
     e.preventDefault();
 
-    if (token) {
-      try {
-        const response = await fetch("/api/users/me/allergies", {
-          method: "PATCH",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            allergies: form.allergies,
-          }),
-        });
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!response.ok) {
-          throw new Error("Unable to save allergies");
-        }
-      } catch (error) {
-        console.error("Error saving allergies:", error);
-      }
+    if (!form.firstName.trim()) {
+      alert("First name is required.");
+      return;
     }
 
-    console.log("Saving receiver profile:", form);
+    if (!form.lastName.trim()) {
+      alert("Last name is required.");
+      return;
+    }
 
-    setEditing((prev) => {
-      const next = { ...prev };
-      Object.keys(next).forEach((k) => (next[k] = false));
-      return next;
-    });
+    if (!emailPattern.test(form.email.trim())) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (!form.dob) {
+      alert("Date of birth is required.");
+      return;
+    }
+
+    const selectedDob = new Date(`${form.dob}T00:00:00`);
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDob > today) {
+      alert("Date of birth cannot be in the future.");
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      alert("Phone number is required.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          email: form.email.trim(),
+          dateOfBirth: form.dob,
+          phoneNumber: form.phone.trim(),
+          allergies: form.allergies,
+        }),
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "Unable to save profile");
+      }
+
+      const updatedUser = await response.json();
+
+      setForm((prev) => ({
+        ...prev,
+        firstName: updatedUser.firstName || "",
+        lastName: updatedUser.lastName || "",
+        email: updatedUser.email || "",
+        dob: updatedUser.dateOfBirth || "",
+        phone: updatedUser.phoneNumber || "",
+        allergies: updatedUser.allergies || "",
+      }));
+
+      setUser((prev) => ({
+        ...prev,
+        firstName: updatedUser.firstName || "User",
+      }));
+
+      setEditing((prev) => {
+        const next = { ...prev };
+
+        Object.keys(next).forEach((key) => {
+          next[key] = false;
+        });
+
+        return next;
+      });
+
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error saving receiver profile:", error);
+      alert(error.message || "Unable to update profile.");
+    }
   }
 
   return (
     <div className="rp-page">
-      {/* Header */}
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <span className="header_title">Hello, {user.firstName}</span>
+
         <div className="header_links">
           <button className="headerbtn" onClick={() => navigate("/")}>
             Home
           </button>
 
-          <button className="headerbtn" onClick={() => navigate("/recipient-dashboard")}>
+          <button
+            className="headerbtn"
+            onClick={() => navigate("/recipient-dashboard")}
+          >
             Dashboard
           </button>
 
-          <button className="headerbtn" onClick={() => navigate("/recipient-past-orders")}>
+          <button
+            className="headerbtn"
+            onClick={() => navigate("/recipient-past-orders")}
+          >
             Orders
           </button>
 
@@ -220,6 +307,7 @@ export default function ReceiverProfile() {
             >
               ⚙
             </button>
+
             {dropdownOpen && (
               <div className="dropdown">
                 {DROPDOWN.map((item) => (
@@ -238,7 +326,6 @@ export default function ReceiverProfile() {
         </div>
       </nav>
 
-      {/* Content */}
       <div className="rp-card">
         <div className="rp-header">
           <div className="rp-subtitle">Your Information</div>
@@ -257,6 +344,7 @@ export default function ReceiverProfile() {
                 onToggleEdit={toggleEdit}
                 ariaLabel="First name"
               />
+
               <EditableInput
                 name="lastName"
                 value={form.lastName}
@@ -285,21 +373,24 @@ export default function ReceiverProfile() {
               value={form.password}
               onChange={handleChange}
               placeholder="Password"
-              editable={editing.password}
+              editable={false}
               onToggleEdit={toggleEdit}
               ariaLabel="Password"
+              canEdit={false}
             />
 
             <div className="rp-twoCol">
               <EditableInput
                 name="dob"
+                type="date"
                 value={form.dob}
                 onChange={handleChange}
-                placeholder="DOB: mm/dd/yyyy"
+                placeholder="Date of Birth"
                 editable={editing.dob}
                 onToggleEdit={toggleEdit}
                 ariaLabel="Date of birth"
               />
+
               <EditableInput
                 name="phone"
                 value={form.phone}
@@ -322,16 +413,17 @@ export default function ReceiverProfile() {
             />
           </div>
 
-          <button className="rp-saveBtn" type="submit" disabled={!canSave}>
+          <button
+            className="rp-saveBtn"
+            type="submit"
+            disabled={!canSave}
+          >
             Save Changes
           </button>
         </form>
 
-        {/* Read-only waiver status shown on the user's profile */}
         <div className="waiver_signed_info">
-          <span className="waiver_signed_title">
-            Waiver Signed
-          </span>
+          <span className="waiver_signed_title">Waiver Signed</span>
 
           <p className="waiver_signed_date">
             {user?.waiver?.acceptedAt
@@ -349,7 +441,6 @@ export default function ReceiverProfile() {
         </div>
       </div>
 
-      {/* Read-only signed waiver modal */}
       {showSignedWaiver && (
         <div className="waiver_modal">
           <div className="waiver_content">
