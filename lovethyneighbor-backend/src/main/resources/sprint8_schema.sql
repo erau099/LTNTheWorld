@@ -17,3 +17,7 @@ CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
 
 -- 2. Add claimed_by_user_id column to food table if it doesn't exist
 ALTER TABLE food ADD COLUMN IF NOT EXISTS claimed_by_user_id UUID;
+
+-- 3. Ensure food_photos column 'photo' is TEXT to support full-resolution base64 images
+ALTER TABLE food_photos ALTER COLUMN photo TYPE TEXT;
+ALTER TABLE food_photos DROP COLUMN IF EXISTS photos;
