@@ -96,7 +96,6 @@ function RecipientDashboard() {
     	}
     	setRequestLoading(true);
     	try {
-			console.log("Token exists:", !!token);
 
         	const response = await apiFetch(`/api/orders/${selectListing.id}`, {
             	method: "POST",
@@ -197,7 +196,6 @@ function RecipientDashboard() {
 
 	// Loads the logged-in recipient's allergies from the backend
 	useEffect(() => {
-		if (!token) return;
 		fetch("/api/users/me/allergies", {
 			credentials: "include",
 		})
