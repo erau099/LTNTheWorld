@@ -154,7 +154,6 @@ function AdminFoodListings({ onListingCountChange }) {
       <div className="admin-search-toolbar">
         <div className="admin-search-wrapper">
           <span className="admin-search-icon">🔍</span>
-
           <input
             type="text"
             className="admin-search-input"
@@ -162,7 +161,6 @@ function AdminFoodListings({ onListingCountChange }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-
           {searchQuery && (
             <button
               className="admin-search-clear-btn"

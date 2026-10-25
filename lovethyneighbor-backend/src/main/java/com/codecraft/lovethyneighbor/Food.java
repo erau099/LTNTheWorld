@@ -96,6 +96,7 @@ public class Food {
         this.userId = userId;
         this.tags = tags;
         this.allergens = allergens;
+        this.status = "ACTIVE";
     }
 
     public Food(
@@ -298,11 +299,19 @@ public class Food {
     }
 
     public String getStatus() {
-        return status;
+        return status != null ? status : "ACTIVE";
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getRemovalReason() {
+        return removalReason;
+    }
+
+    public void setRemovalReason(String removalReason) {
+        this.removalReason = removalReason;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -316,15 +325,6 @@ public class Food {
     public void setPhotos(List<String> photos) {
         this.photos = photos;
     }
-
-    public String getRemovalReason() {
-        return removalReason;
-    }
-
-    public void setRemovalReason(String removalReason) {
-        this.removalReason = removalReason;
-    }
-
     public UUID getClaimedByUserId() {
         return claimedByUserId;
     }

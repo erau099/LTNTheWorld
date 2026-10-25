@@ -6,6 +6,9 @@ import "../App.css";
 import "../CDashboard.css";
 import "./RecipientDashboard.css";
 
+import { apiFetch } from "../api";
+
+
 function RecipientDashboard() {
 	const navigate = useNavigate();
 
@@ -79,6 +82,44 @@ function RecipientDashboard() {
 		return () => controller.abort();
 	}, [useMockFood, retryCount]);
 
+
+	// Handles the action to request a food listing
+	const [requestLoading, setRequestLoading] = useState(false);
+	const handleFoodRequest = async () => {
+    	if (!selectListing?.id) {
+     		alert("Please select a food listing.");
+        	return;
+    	}
+    	if (useMockFood) {
+        	alert("Food requests are unavailable in mock mode.");
+        	return;
+    	}
+    	setRequestLoading(true);
+    	try {
+        	const token = localStorage.getItem("token");
+			console.log("Token exists:", !!token);
+
+        	const response = await apiFetch(`/api/orders/${selectListing.id}`, {
+            	method: "POST",
+        	});
+        	if (!response.ok) {
+            	const message = await response.text();
+            	throw new Error(message || "Failed to request food.");
+        	}
+        	alert("Food requested successfully!");
+
+        	// Close the popup
+        	setListings((prev) => prev.filter((item) => item.id !== selectListing.id));
+        	setSelectListing(false);
+
+    	} catch (error) {
+        	console.error("Error requesting food:", error);
+        	alert(error.message);
+    	} finally {
+        	setRequestLoading(false);
+    	}
+	};
+
 	useEffect(() => {
 		const onScroll = () => setScrolled(window.scrollY > 10);
 
@@ -151,15 +192,14 @@ function RecipientDashboard() {
 	const filteredListings = listings.filter((item) => {
 		return selectFiltering === "all" || item.category === selectFiltering;
 	})
+
 	// Stores the logged-in recipient's saved allergies
 	const [recipientAllergies, setRecipientAllergies] = useState([]);
 
 	// Loads the logged-in recipient's allergies from the backend
 	useEffect(() => {
 		const token = localStorage.getItem("token");
-
 		if (!token) return;
-
 		fetch("/api/users/me/allergies", {
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -169,14 +209,12 @@ function RecipientDashboard() {
 				if (!response.ok) {
 					throw new Error("Unable to load allergies");
 				}
-
 				return response.text();
 			})
 			.then((allergies) => {
 				const allergyList = allergies
 					? allergies.split(",").map((allergy) => allergy.trim()).filter(Boolean)
 					: [];
-
 				setRecipientAllergies(allergyList);
 			})
 			.catch((error) => {
@@ -455,10 +493,9 @@ function RecipientDashboard() {
 									<button
 										type="button"
 										className="food-popup-submit"
-										disabled
-										title="Food requests are not available yet"
-									>
-										Request food (coming soon)
+										onClick={handleFoodRequest}
+										disabled={requestLoading || useMockFood}>
+										{requestLoading ? "Submitting..." : "Request Food"}
 									</button>
 								</div>
 							</div>

@@ -6,6 +6,7 @@ import "../index.css";
 import ReviewModal from "../ReviewModal.jsx"; 
 
 import searchIcon from "../assets/magnifying-glass.png";
+import { apiFetch } from "../api";
 
 // Temporary mock data for recipient past orders.
 const orders = [
@@ -36,6 +37,51 @@ const orders = [
 		foodId: 5,
 		status: "cancelled",
 	},
+	{
+		id: 4,
+		donor: "Robin Roberts 6",
+		date: "01/03/2026",
+		time: "1:30pm",
+		food: "Donuts",
+		foodId: 5,
+		status: "completed",
+	},
+	{
+		id: 4,
+		donor: "Robin Roberts 7",
+		date: "01/03/2026",
+		time: "1:30pm",
+		food: "Donuts",
+		foodId: 5,
+		status: "cancelled",
+	},
+	{
+		id: 5,
+		donor: "Robin Roberts 8",
+		date: "01/03/2026",
+		time: "1:30pm",
+		food: "Donuts",
+		foodId: 3,
+		status: "pending",
+	},
+	{
+		id: 6,
+		donor: "Robin Roberts 9",
+		date: "01/03/2026",
+		time: "1:30pm",
+		food: "Donuts",
+		foodId: 3,
+		status: "pending",
+	},
+	{
+		id: 7,
+		donor: "Robin Roberts 10",
+		date: "01/03/2026",
+		time: "1:30pm",
+		food: "Donuts",
+		foodId: 2,
+		status: "pending",
+	},
 ];
 
 function RecipientPastOrders() {
@@ -59,6 +105,21 @@ function RecipientPastOrders() {
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
+	}, []);
+
+	// Retrieve orders from the backend
+	const [orders, setOrders] = useState([]);
+	const[ordersError, setOrdersError] = useState("");
+	
+	useEffect(() => {
+		apiFetch("/api/orders/mine")
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			//.then(setOrders)
+			.then((data) => {
+				console.log("ORDERS FROM DATABASE:", data);
+				setOrders(data);
+			})
+			.catch(() => setOrdersError("Could not load your orders."));
 	}, []);
 
 	// Review
@@ -95,7 +156,7 @@ function RecipientPastOrders() {
 	const [selectFiltering, setSelectedOrders] = useState("all")
 
 	const filteredOrders = orders.filter((order) => {
-		return selectFiltering === "all" || order.status === selectFiltering;
+		return selectFiltering === "all" || order.status?.toLowerCase() === selectFiltering.toLowerCase();
 	})
 
 	return (
@@ -191,12 +252,14 @@ function RecipientPastOrders() {
 							<div className="orders-row"
 							key={id}>
 								<span>{order.donor}</span>
-								<span>{order.date}</span>
-								<span>{order.time}</span>
-								<span>{order.food}</span>
+								<span>{order.food?.date ? new Date(order.food.date + "T00:00:00").toLocaleDateString() : ""}</span>
+								<span>{order.food?.pickupTime ? new Date(order.food.pickupTime).toLocaleTimeString([], {
+									hour: "numeric", minute: "2-digit",
+								}) :""}</span>
+								<span>{order.food?.foodItem}</span>
 
 								<button
-									className={`review-btn ${order.status}`}
+									className={`review-btn ${order.status?.toLowerCase()}`}
 									type="button"
 									disabled={order.status !== "completed"}
 									onClick={() => setReviewOrder(order)}>

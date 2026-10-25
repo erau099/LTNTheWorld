@@ -45,7 +45,6 @@ public class AdminController {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-
             boolean passwordMatches = (passwordEncoder != null
                     && passwordEncoder.matches(request.getPassword(), user.getPassword()))
                     || user.getPassword().equals(request.getPassword());
