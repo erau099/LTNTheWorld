@@ -250,6 +250,28 @@ export default function DonorProfile() {
       });
   }, []);
 
+  // DT-129: Load the saved donor address separately from profile information.
+  useEffect(() => {
+    fetch("/api/addresses/me", { credentials: "include" })
+      .then((response) => {
+        if (response.status === 404) return null;
+        if (!response.ok) throw new Error("Unable to load address");
+        return response.json();
+      })
+      .then((address) => {
+        if (!address) return;
+        setForm((prev) => ({
+          ...prev,
+          address: address.streetAddress || "",
+          zip: address.zipCode || "",
+          city: address.city || "",
+          state: address.state || "California",
+          country: address.country || "United States",
+        }));
+      })
+      .catch((error) => console.error("Error loading address:", error));
+  }, []);
+
   const handleAction = async (item) => {
     if (item === "Sign Out") {
       await logout();
@@ -329,6 +351,19 @@ export default function DonorProfile() {
       return;
     }
 
+    // DT-129: An address is optional, but entered addresses must be complete.
+    const hasAddress = Boolean(
+      form.address.trim() || form.city.trim() || form.zip.trim()
+    );
+
+    if (
+      hasAddress &&
+      (!form.address.trim() || !form.city.trim() || !form.zip.trim())
+    ) {
+      alert("Street address, city, and ZIP code are required to save an address.");
+      return;
+    }
+
     try {
       const response = await fetch("/api/users/me", {
         method: "PATCH",
@@ -365,6 +400,28 @@ export default function DonorProfile() {
         ...prev,
         firstName: updatedUser.firstName || "User",
       }));
+
+      // DT-129: Save address after the existing profile update succeeds.
+      if (hasAddress) {
+        const addressResponse = await fetch("/api/addresses/me", {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            streetAddress: form.address.trim(),
+            zipCode: form.zip.trim(),
+            city: form.city.trim(),
+            state: form.state,
+            country: form.country,
+          }),
+        });
+
+        if (!addressResponse.ok) {
+          throw new Error("Profile saved, but the address could not be saved.");
+        }
+      }
 
       setEditing((prev) => {
         const next = { ...prev };
@@ -521,7 +578,6 @@ export default function DonorProfile() {
                 editable={editing.address}
                 onToggleEdit={toggleEdit}
                 ariaLabel="Street address"
-                canEdit={false}
               />
 
               <EditableInput
@@ -532,7 +588,6 @@ export default function DonorProfile() {
                 editable={editing.zip}
                 onToggleEdit={toggleEdit}
                 ariaLabel="Zip code"
-                canEdit={false}
               />
             </div>
 
@@ -544,7 +599,6 @@ export default function DonorProfile() {
               editable={editing.city}
               onToggleEdit={toggleEdit}
               ariaLabel="City"
-              canEdit={false}
             />
 
             <div className="dp-twoCol">
@@ -556,7 +610,6 @@ export default function DonorProfile() {
                 onToggleEdit={toggleEdit}
                 options={STATES}
                 ariaLabel="State"
-                canEdit={false}
               />
 
               <EditableSelect
@@ -567,7 +620,6 @@ export default function DonorProfile() {
                 onToggleEdit={toggleEdit}
                 options={COUNTRIES}
                 ariaLabel="Country"
-                canEdit={false}
               />
             </div>
           </div>
