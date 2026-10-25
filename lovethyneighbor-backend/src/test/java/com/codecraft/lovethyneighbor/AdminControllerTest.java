@@ -185,4 +185,26 @@ public class AdminControllerTest {
                 .andExpect(jsonPath("$.totalUsers").value(15))
                 .andExpect(jsonPath("$.activeListings").value(8));
     }
+
+    @Test
+    void testGetUserActivity() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User user = new User("Jane", "Donor", "jane@example.com", "pass123", LocalDate.of(1995, 5, 20), "555-1234", "DONOR");
+        user.setId(userId);
+        user.setStatus("ACTIVE");
+        user.setCanPostListings(true);
+
+        Food food = new Food(LocalDate.now(), LocalDateTime.now(), "Carrots", "Fresh organic carrots", userId, "Produce", "None", "ACTIVE");
+        food.setId(301L);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(foodRepository.findByUser_IdOrderByCreatedAtDesc(userId)).thenReturn(List.of(food));
+
+        mockMvc.perform(get("/api/admin/users/" + userId + "/activity"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.email").value("jane@example.com"))
+                .andExpect(jsonPath("$.totalListings").value(1))
+                .andExpect(jsonPath("$.activeListings").value(1))
+                .andExpect(jsonPath("$.listings[0].foodItem").value("Carrots"));
+    }
 }

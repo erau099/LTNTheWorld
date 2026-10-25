@@ -64,6 +64,9 @@ public class Food {
     @Column(name = "removal_reason")
     private String removalReason;
 
+    @Column(name = "claimed_by_user_id")
+    private UUID claimedByUserId;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "food_photos",
@@ -322,4 +325,11 @@ public class Food {
         this.removalReason = removalReason;
     }
 
+    public UUID getClaimedByUserId() {
+        return claimedByUserId;
+    }
+
+    public void setClaimedByUserId(UUID claimedByUserId) {
+        this.claimedByUserId = claimedByUserId;
+    }
 }

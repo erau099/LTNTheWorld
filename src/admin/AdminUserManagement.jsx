@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import AdminUserProfileModal from "./AdminUserProfileModal";
 
 function AdminUserManagement({ onUserCountChange }) {
   const [users, setUsers] = useState([]);
@@ -7,6 +8,7 @@ function AdminUserManagement({ onUserCountChange }) {
   const [updatingStatusId, setUpdatingStatusId] = useState(null);
   const [updatingRestrictionId, setUpdatingRestrictionId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUserIdForModal, setSelectedUserIdForModal] = useState(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -230,6 +232,16 @@ function AdminUserManagement({ onUserCountChange }) {
                   </span>
 
                   <span className="user-action-cell">
+                    {/* DT-112: View Full Profile & Activity History */}
+                    <button
+                      className="admin-user-action"
+                      style={{ backgroundColor: "#3b82f6", color: "#ffffff" }}
+                      onClick={() => setSelectedUserIdForModal(user.id)}
+                      title="View full profile and activity history"
+                    >
+                      Profile
+                    </button>
+
                     {/* DT-113: Suspend / Reactivate User */}
                     <button
                       className={`admin-user-action ${
@@ -271,6 +283,19 @@ function AdminUserManagement({ onUserCountChange }) {
             })
           )}
         </div>
+      )}
+
+      {/* DT-112: Full Profile & Activity History Modal */}
+      {selectedUserIdForModal && (
+        <AdminUserProfileModal
+          userId={selectedUserIdForModal}
+          onClose={() => setSelectedUserIdForModal(null)}
+          onUserUpdated={(updatedUser) =>
+            setUsers((prev) =>
+              prev.map((u) => (u.id === updatedUser.id ? { ...u, ...updatedUser } : u))
+            )
+          }
+        />
       )}
     </section>
   );

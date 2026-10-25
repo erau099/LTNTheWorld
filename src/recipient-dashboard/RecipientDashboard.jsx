@@ -63,7 +63,8 @@ function RecipientDashboard() {
 					food = await response.json();
 				}
 				if (!Array.isArray(food)) throw new Error("Food API did not return a list");
-				if (!controller.signal.aborted) setListings(food.map(mapFood));
+				const activeFood = food.filter((item) => (item.status || "ACTIVE").toUpperCase() === "ACTIVE");
+				if (!controller.signal.aborted) setListings(activeFood.map(mapFood));
 			} catch (error) {
 				if (!controller.signal.aborted) {
 					console.error("Error loading food listings:", error);
@@ -108,7 +109,41 @@ function RecipientDashboard() {
 	};
 
 	// Handles the cards to be able to be shown when clicked
-	const [selectListing, setSelectListing] = useState(false)
+	const [selectListing, setSelectListing] = useState(false);
+	const [requesting, setRequesting] = useState(false);
+	const [requestError, setRequestError] = useState("");
+
+	const handleRequestFood = async (foodItem) => {
+		if (!foodItem) return;
+		setRequesting(true);
+		setRequestError("");
+		const token = localStorage.getItem("token");
+
+		try {
+			const res = await fetch(`/api/food/${foodItem.id}/request`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					...(token ? { Authorization: `Bearer ${token}` } : {}),
+				},
+			});
+
+			if (!res.ok) {
+				const errorText = await res.text();
+				throw new Error(errorText || "Failed to request food item");
+			}
+
+			setListings((prev) => prev.filter((item) => item.id !== foodItem.id));
+			setSelectListing(false);
+			alert("Success! Your request has been sent to the donor. They will coordinate pickup with you.");
+		} catch (err) {
+			console.error("Error requesting food:", err);
+			setRequestError(err.message || "Failed to request food.");
+		} finally {
+			setRequesting(false);
+		}
+	};
+
 
 	// Handles the filtering for the listings
 	const [selectFiltering, setSelectedFiltering] = useState("all")

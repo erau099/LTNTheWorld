@@ -1,5 +1,6 @@
 package com.codecraft.lovethyneighbor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -21,9 +23,11 @@ public class FoodController {
     static final int MAX_PHOTO_LENGTH = 2_800_000;
 
     private final FoodRepository foodRepository;
+    private final NotificationRepository notificationRepository;
 
-    public FoodController(FoodRepository foodRepository) {
+    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository) {
         this.foodRepository = foodRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     // Create a new food listing
@@ -102,6 +106,138 @@ public class FoodController {
                 .orElseGet(() ->
                     ResponseEntity.notFound().build()
                 );
+    }
+
+    // DT-73 & DT-96: Recipient requests food listing, moving it to CLAIMED and notifying the donor
+    @PostMapping("/{id}/request")
+    @Transactional
+    public ResponseEntity<?> requestFoodListing(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You must be logged in to request food.");
+        }
+
+        UUID recipientId;
+        try {
+            recipientId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
+        }
+
+        Optional<Food> foodOpt = foodRepository.findById(id);
+        if (foodOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
+        }
+
+        Food food = foodOpt.get();
+        if (!"ACTIVE".equalsIgnoreCase(food.getStatus())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This food listing is no longer available.");
+        }
+
+        // Donor cannot claim their own listing
+        if (food.getUserId() != null && food.getUserId().equals(recipientId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You cannot request your own food listing.");
+        }
+
+        food.setStatus("CLAIMED");
+        food.setClaimedByUserId(recipientId);
+        Food updated = foodRepository.save(food);
+
+        // Notify donor (DT-73)
+        Notification notification = new Notification(
+                food.getUserId(),
+                food.getId(),
+                "REQUEST_RECEIVED",
+                "New Request for " + food.getFoodItem(),
+                "A recipient has requested your listing '" + food.getFoodItem() + "'. Click to coordinate pickup."
+        );
+        notificationRepository.save(notification);
+
+        return ResponseEntity.ok(updated);
+    }
+
+    // DT-78: Donor confirms pickup request and schedules it
+    @PatchMapping("/{id}/confirm-pickup")
+    @Transactional
+    public ResponseEntity<?> confirmPickup(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You must be logged in.");
+        }
+
+        UUID userId;
+        try {
+            userId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
+        }
+
+        Optional<Food> foodOpt = foodRepository.findById(id);
+        if (foodOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
+        }
+
+        Food food = foodOpt.get();
+        if (food.getUserId() == null || !food.getUserId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the listing donor can confirm this pickup.");
+        }
+
+        food.setStatus("SCHEDULED");
+        Food updated = foodRepository.save(food);
+
+        // Notify donor (DT-78)
+        Notification notification = new Notification(
+                food.getUserId(),
+                food.getId(),
+                "PICKUP_SCHEDULED",
+                "Pickup Scheduled: " + food.getFoodItem(),
+                "Pickup for '" + food.getFoodItem() + "' has been confirmed and scheduled."
+        );
+        notificationRepository.save(notification);
+
+        return ResponseEntity.ok(updated);
+    }
+
+    // DT-85: Mark pickup as completed
+    @PatchMapping("/{id}/complete-pickup")
+    @Transactional
+    public ResponseEntity<?> completePickup(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You must be logged in.");
+        }
+
+        UUID userId;
+        try {
+            userId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
+        }
+
+        Optional<Food> foodOpt = foodRepository.findById(id);
+        if (foodOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
+        }
+
+        Food food = foodOpt.get();
+        boolean isDonor = food.getUserId() != null && food.getUserId().equals(userId);
+        boolean isRecipient = food.getClaimedByUserId() != null && food.getClaimedByUserId().equals(userId);
+
+        if (!isDonor && !isRecipient) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the donor or recipient can mark this pickup as completed.");
+        }
+
+        food.setStatus("COMPLETED");
+        Food updated = foodRepository.save(food);
+
+        // Notify donor (DT-85)
+        Notification notification = new Notification(
+                food.getUserId(),
+                food.getId(),
+                "PICKUP_COMPLETED",
+                "Pickup Completed: " + food.getFoodItem(),
+                "'" + food.getFoodItem() + "' pickup has been completed. Thank you for your donation!"
+        );
+        notificationRepository.save(notification);
+
+        return ResponseEntity.ok(updated);
     }
 
     // Validate food upload information
