@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-// DT-76: mock repositories keep these tests independent of the shared database.
+// Tests for DT-76,75,74. Mock repositories to keep tests indepdent of shared database.
 @ExtendWith(MockitoExtension.class)
 class RecipientDeclineNotificationTest {
 
