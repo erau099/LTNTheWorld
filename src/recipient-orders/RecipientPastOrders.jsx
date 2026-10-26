@@ -110,14 +110,36 @@ function RecipientPastOrders() {
 	// Retrieve orders from the backend
 	const [orders, setOrders] = useState([]);
 	const[ordersError, setOrdersError] = useState("");
+
+	const [donorName, setDonorName] = useState({});
+
 	
 	useEffect(() => {
 		apiFetch("/api/orders/mine")
 			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-			//.then(setOrders)
 			.then((data) => {
-				console.log("ORDERS FROM DATABASE:", data);
 				setOrders(data);
+				
+				// Retrieve donor name for the orders
+				data.forEach((order) => {
+					const donorId = order.food?.userId;
+
+					if(donorId) {
+						fetch('/api/users/' + donorId, {
+							credentials: "include"
+						})
+							.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+							.then((user) => {
+								setDonorName((prev) => ({
+									...prev,
+									[donorId]: user.firstName + " " + user.lastName
+								}));
+								})
+								.catch((error) => {
+									console.error("Could not load donor name:", error)
+							});
+					}
+				})
 			})
 			.catch(() => setOrdersError("Could not load your orders."));
 	}, []);
@@ -250,7 +272,7 @@ function RecipientPastOrders() {
 						filteredOrders.map((order, id) => (
 							<div className="orders-row"
 							key={id}>
-								<span>{order.donor}</span>
+								<span>{donorName[order.food?.userId] || "Unknown"}</span>
 								<span>{order.food?.date ? new Date(order.food.date + "T00:00:00").toLocaleDateString() : ""}</span>
 								<span>{order.food?.pickupTime ? new Date(order.food.pickupTime).toLocaleTimeString([], {
 									hour: "numeric", minute: "2-digit",

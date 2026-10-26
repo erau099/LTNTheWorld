@@ -16,11 +16,36 @@ function DonorPastListings() {
 	const [listings, setListings] = useState([]);
 	const [loadError, setLoadError] = useState("");
 
+	const [recipientName, setRecipientName] = useState([]);
+
 	useEffect(() => {
 		apiFetch("/api/food/mine")
 			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-			.then(setListings)
-			.catch(() => setLoadError("Could not load your listings."));
+			.then((data) => {
+				setListings(data)
+
+			// Retrieve the recipient name for each listing
+			data.forEach((listing) => {
+				const recipientId = listing.claimedByUserId;
+
+				if (recipientId) {
+					fetch('/api/users/' + recipientId, {
+						credentials: "include"
+					})
+						.then((res) => (res.ok ? res.json(): Promise.reject(res.status)))
+						.then((user) => {
+							setRecipientName((prev) => ({
+								...prev,
+								[recipientId]: user.firstName + " " + user.lastName
+							}));
+						})
+						.catch((error) => {
+							console.error("Could not load recipient name:", error)
+						});
+					}
+			});
+		})
+		.catch(() => setLoadError("Could not load your listings."));
 	}, []);
 
 	// Controls the gear dropdown menu.
@@ -45,7 +70,7 @@ function DonorPastListings() {
 	const[selectFiltering, setSelectedListings] = useState("all")
 
 	const filteredListings = listings.filter((listing) => {
-		return selectFiltering === "all" || listing.status === selectFiltering;
+		return selectFiltering === "all" || listing.status?.toLowerCase() === selectFiltering.toLowerCase();
 	})
 
 	return (
@@ -140,7 +165,7 @@ function DonorPastListings() {
 						filteredListings.map((listing) => (
 							<div className="orders-row" 
 							key={listing.id}>
-								<span>{listing.userId}</span>
+								<span>{recipientName[listing.claimedByUserId]}</span>
 								<span>{new Date(listing.date + "T00:00:00").toLocaleDateString()}</span>
 								<span>{new Date(listing.pickupTime).toLocaleTimeString([], {
 									hour: "numeric", minute: "2-digit",
