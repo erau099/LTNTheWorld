@@ -245,6 +245,16 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the donor or recipient can mark this pickup as completed.");
         }
 
+        // DT-74: notify only when a scheduled pickup actually becomes completed.
+        if (!"SCHEDULED".equalsIgnoreCase(food.getStatus())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Only a scheduled pickup can be marked as completed.");
+        }
+        if (food.getClaimedByUserId() == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("This pickup has no requesting recipient.");
+        }
+
         food.setStatus("COMPLETED");
         Food updated = foodRepository.save(food);
 
@@ -257,6 +267,17 @@ public class FoodController {
                 "'" + food.getFoodItem() + "' pickup has been completed. Thank you for your donation!"
         );
         notificationRepository.save(notification);
+
+        // DT-74: the recipient also needs to know that pickup is complete.
+        Notification recipientNotification = new Notification(
+                food.getClaimedByUserId(),
+                food.getId(),
+                "PICKUP_COMPLETED",
+                "Pickup Completed: " + food.getFoodItem(),
+                "Your pickup for '" + food.getFoodItem()
+                        + "' has been marked as completed. Thank you for helping reduce food waste!"
+        );
+        notificationRepository.save(recipientNotification);
 
         return ResponseEntity.ok(updated);
     }
