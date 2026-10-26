@@ -46,10 +46,10 @@ public class AuthController {
                         userOpt.get().getPassword())) {
 
             User user = userOpt.get();
-
-            if ("SUSPENDED".equalsIgnoreCase(user.getStatus())) {
+            // DT-134: Only active accounts are allowed to log in.
+            if  (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Account is suspended. Please contact support.");
+                        .body("Account is not active. Please contact support.");
             }
 
             String token = jwtService.generateToken(

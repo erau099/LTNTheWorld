@@ -1,12 +1,18 @@
 
 package com.codecraft.lovethyneighbor;
 
+import com.codecraft.lovethyneighbor.security.JwtService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,45 +32,68 @@ public class AdminController {
     @Autowired
     private ReportRepository reportRepository;
 
-    @Autowired(required = false)
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // DT-134: Use the existing signed JWT authentication.
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request) {
-        if (request == null || request.getUsername() == null || request.getPassword() == null) {
+        if (request == null
+                || request.getUsername() == null
+                || request.getPassword() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Username and password are required"));
         }
 
-        // Test admin fallback credentials
-        if ("admin".equals(request.getUsername()) && "1234".equals(request.getPassword())) {
-            return ResponseEntity.ok(new LoginResponse("success", "Admin", "ADMIN", null));
+        Optional<User> userOpt =
+                userRepository.findByEmail(request.getUsername());
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid credentials"));
         }
 
-        Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
+        User user = userOpt.get();
 
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            boolean passwordMatches = (passwordEncoder != null
-                    && passwordEncoder.matches(request.getPassword(), user.getPassword()))
-                    || user.getPassword().equals(request.getPassword());
-
-            if (passwordMatches) {
-                if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                    return ResponseEntity.ok(
-                            new LoginResponse("success", user.getName(), "ADMIN", null)
-                    );
-                } else {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(new MessageResponse(
-                                    "Access denied: Administrator privileges required"
-                            ));
-                }
-            }
+        // DT-134: Verify the password using the existing encoder.
+        if (!passwordEncoder.matches(
+                request.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid credentials"));
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new MessageResponse("Invalid credentials"));
+        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse(
+                            "Access denied: Administrator privileges required"));
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse(
+                            "Account is not active. Please contact support."));
+        }
+
+        String token = jwtService.generateToken(
+                user.getId(), user.getRole());
+
+        // Match the 30-minute lifetime in JwtService.
+        ResponseCookie authCookie = ResponseCookie.from(
+                "authToken", token)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(60 * 30)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, authCookie.toString())
+                .body(new LoginResponse(
+                        "success", user.getName(), "ADMIN", null));
     }
 
     @GetMapping("/users")
@@ -121,9 +150,22 @@ public class AdminController {
 
         User user = userOpt.get();
 
+        // DT-134: Only allow supported account statuses.
         if (body != null && body.containsKey("status")) {
-            user.setStatus(body.get("status").toUpperCase());
+            String requestedStatus = body.get("status");
+
+            if (requestedStatus == null
+                    || (!requestedStatus.equalsIgnoreCase("ACTIVE")
+                    && !requestedStatus.equalsIgnoreCase("SUSPENDED")
+                    && !requestedStatus.equalsIgnoreCase("INACTIVE"))) {
+
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse("Invalid account status"));
+            }
+
+            user.setStatus(requestedStatus.toUpperCase(Locale.ROOT));
         } else {
+            // Preserve existing suspend/reactivate behavior.
             if ("SUSPENDED".equalsIgnoreCase(user.getStatus())) {
                 user.setStatus("ACTIVE");
             } else {
@@ -174,7 +216,8 @@ public class AdminController {
 
         User user = userOpt.get();
         UserSummaryDTO summary = new UserSummaryDTO(user);
-        List<Food> listings = foodRepository.findByUser_IdOrderByCreatedAtDesc(id);
+        List<Food> listings =
+                foodRepository.findByUser_IdOrderByCreatedAtDesc(id);
 
         UserActivityDTO activity = new UserActivityDTO(summary, listings);
         return ResponseEntity.ok(activity);

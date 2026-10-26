@@ -1,3 +1,4 @@
+
 package com.codecraft.lovethyneighbor.security;
 
 import org.springframework.context.annotation.Bean;
@@ -34,23 +35,39 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/admin/**").permitAll()
+
+                // DT-134: Admin login is public; admin operations require ADMIN.
+                .requestMatchers(HttpMethod.POST, "/api/admin/auth/login")
+                    .permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                 .requestMatchers("/api/food/**").permitAll()
                 .requestMatchers("/api/hello").permitAll()
-                // Lets a 403 (wrong role) reach the client instead of turning into a 401 on the error page
+
+                // Lets a 403 (wrong role) reach the client instead
+                // of turning into a 401 on the error page.
                 .requestMatchers("/error").permitAll()
+
                 .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                 .requestMatchers("/api/donor/**").hasAnyRole("DONOR", "BOTH")
                 .requestMatchers("/api/recipient/**").hasAnyRole("RECIPIENT", "BOTH")
-                // Only donors can post food or view their own listings
-                .requestMatchers(HttpMethod.POST, "/api/food").hasAnyRole("DONOR", "BOTH")
-                .requestMatchers("/api/food/mine").hasAnyRole("DONOR", "BOTH")
+
+                // Preserve existing food rules.
+                .requestMatchers(HttpMethod.POST, "/api/food")
+                    .hasAnyRole("DONOR", "BOTH")
+                .requestMatchers("/api/food/mine")
+                    .hasAnyRole("DONOR", "BOTH")
+
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .authenticationEntryPoint(
+                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                jwtAuthFilter,
+                UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
