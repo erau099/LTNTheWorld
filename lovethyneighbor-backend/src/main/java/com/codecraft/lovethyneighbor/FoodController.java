@@ -114,7 +114,7 @@ public class FoodController {
         LocalDateTime now = LocalDateTime.now();
 
         for (Food food : listings) {
-            if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && food.getPickupEndTime().isAfter(now)) {
+            if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && !food.getPickupEndTime().isAfter(now)) {
                 food.setStatus("UNAVAILABLE");
             }
         }
