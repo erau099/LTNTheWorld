@@ -1,6 +1,8 @@
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +16,9 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
 
     // Retrieve food listings by availability status
     List<Food> findByStatusIgnoreCase(String status);
+
+    // DT-87: listings in a status whose pickup window ended before the given time
+    List<Food> findByStatusIgnoreCaseAndPickupEndTimeBefore(String status, LocalDateTime time);
 
     // Count food listings by availability status
     long countByStatusIgnoreCase(String status);

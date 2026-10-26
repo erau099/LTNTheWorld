@@ -84,6 +84,26 @@ function RecipientDashboard() {
 	}, [useMockFood, retryCount]);
 
 
+	// DT-51: recipients can request food once per cooldown window
+	const [cooldown, setCooldown] = useState(null);
+	const loadCooldown = () => {
+		if (useMockFood) return;
+		apiFetch("/api/orders/cooldown")
+			.then((res) => (res.ok ? res.json() : null))
+			.then(setCooldown)
+			.catch(() => setCooldown(null));
+	};
+	useEffect(loadCooldown, [useMockFood]);
+
+	const coolingDown = cooldown && !cooldown.canRequest;
+	const nextRequestText = coolingDown
+		? new Date(cooldown.nextRequestAt).toLocaleString([], {
+				weekday: "short",
+				hour: "numeric",
+				minute: "2-digit",
+			})
+		: "";
+
 	// Handles the action to request a food listing
 	const [requestLoading, setRequestLoading] = useState(false);
 	const handleFoodRequest = async () => {
@@ -97,7 +117,6 @@ function RecipientDashboard() {
     	}
     	setRequestLoading(true);
     	try {
-
         	const response = await apiFetch(`/api/orders/${selectListing.id}`, {
             	method: "POST",
         	});
@@ -106,6 +125,7 @@ function RecipientDashboard() {
             	throw new Error(message || "Failed to request food.");
         	}
         	alert("Food requested successfully!");
+        	loadCooldown();
 
         	// Close the popup
         	setListings((prev) => prev.filter((item) => item.id !== selectListing.id));
@@ -150,41 +170,6 @@ function RecipientDashboard() {
 
 	// Handles the cards to be able to be shown when clicked
 	const [selectListing, setSelectListing] = useState(false);
-	const [requesting, setRequesting] = useState(false);
-	const [requestError, setRequestError] = useState("");
-
-	const handleRequestFood = async (foodItem) => {
-		if (!foodItem) return;
-		setRequesting(true);
-		setRequestError("");
-		const token = localStorage.getItem("token");
-
-		try {
-			const res = await fetch(`/api/food/${foodItem.id}/request`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					...(token ? { Authorization: `Bearer ${token}` } : {}),
-				},
-			});
-
-			if (!res.ok) {
-				const errorText = await res.text();
-				throw new Error(errorText || "Failed to request food item");
-			}
-
-			setListings((prev) => prev.filter((item) => item.id !== foodItem.id));
-			setSelectListing(false);
-			alert("Success! Your request has been sent to the donor. They will coordinate pickup with you.");
-		} catch (err) {
-			console.error("Error requesting food:", err);
-			setRequestError(err.message || "Failed to request food.");
-		} finally {
-			setRequesting(false);
-		}
-	};
-
-
 	// Handles the filtering for the listings
 	const [selectFiltering, setSelectedFiltering] = useState("all")
 
@@ -312,6 +297,13 @@ function RecipientDashboard() {
 				</div>
 
 				<h2>Top Picks:</h2>
+
+				{coolingDown && (
+					<p className="cooldown-notice" role="status">
+						To keep things fair, you can request food once every {cooldown.cooldownHours} hours.
+						You can request again on <strong>{nextRequestText}</strong>.
+					</p>
+				)}
 
 				{/* Food cards shown to recipients */}
 				{useMockFood && <p role="status">Demo food listings (mock mode)</p>}
@@ -491,8 +483,13 @@ function RecipientDashboard() {
 										type="button"
 										className="food-popup-submit"
 										onClick={handleFoodRequest}
-										disabled={requestLoading || useMockFood}>
-										{requestLoading ? "Submitting..." : "Request Food"}
+										disabled={requestLoading || useMockFood || coolingDown}
+										title={coolingDown ? `You can request again on ${nextRequestText}` : undefined}>
+										{requestLoading
+											? "Submitting..."
+											: coolingDown
+												? `Available ${nextRequestText}`
+												: "Request Food"}
 									</button>
 								</div>
 							</div>

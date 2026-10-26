@@ -2,6 +2,7 @@ package com.codecraft.lovethyneighbor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class DonorListingResponse {
@@ -18,6 +19,11 @@ public class DonorListingResponse {
     // Review info (null if unreviewed)
     private Integer reviewRating;
     private String reviewComment;
+
+    // Shown on the donor dashboard cards: pickup window end, category tag and photo
+    private LocalDateTime pickupEndTime;
+    private String tags;
+    private List<String> photos = List.of();
 
     public DonorListingResponse() {}
 
@@ -44,4 +50,14 @@ public class DonorListingResponse {
     public String getRecipientName() { return recipientName; }
     public Integer getReviewRating() { return reviewRating; }
     public String getReviewComment() { return reviewComment; }
+    public LocalDateTime getPickupEndTime() { return pickupEndTime; }
+    public String getTags() { return tags; }
+    public List<String> getPhotos() { return photos; }
+
+    public DonorListingResponse withListingDetails(LocalDateTime pickupEndTime, String tags, List<String> photos) {
+        this.pickupEndTime = pickupEndTime;
+        this.tags = tags;
+        this.photos = photos == null ? List.of() : List.copyOf(photos);
+        return this;
+    }
 }

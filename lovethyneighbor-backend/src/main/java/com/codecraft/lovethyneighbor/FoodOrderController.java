@@ -1,6 +1,8 @@
 package com.codecraft.lovethyneighbor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -16,15 +18,18 @@ public class FoodOrderController {
     private final FoodOrderRepository foodOrderRepository;
     private final FoodRepository foodRepository;
     private final NotificationRepository notificationRepository;
+    private final FoodClaimService foodClaimService;
 
     public FoodOrderController(
             FoodOrderRepository foodOrderRepository,
             FoodRepository foodRepository,
-            NotificationRepository notificationRepository) {
+            NotificationRepository notificationRepository,
+            FoodClaimService foodClaimService) {
 
         this.foodOrderRepository = foodOrderRepository;
         this.foodRepository = foodRepository;
         this.notificationRepository = notificationRepository;
+        this.foodClaimService = foodClaimService;
     }
 
     // Recipient Past Orders: retrieve the logged-in user's orders
@@ -51,7 +56,6 @@ public class FoodOrderController {
 
     // Recipient Dashboard: request a food listing
     @PostMapping("/{foodId}")
-    @Transactional
     public ResponseEntity<?> createOrder(
             @PathVariable Long foodId,
             Authentication authentication) {
@@ -70,61 +74,36 @@ public class FoodOrderController {
                     .body("Invalid user ID.");
         }
 
-        // Find the food listing
-        var optionalFood = foodRepository.findById(foodId);
+        try {
+            return ResponseEntity.ok(foodClaimService.claim(foodId, recipientId).order());
+        } catch (FoodClaimService.ClaimException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+        }
+    }
 
-        if (optionalFood.isEmpty()) {
-            return ResponseEntity.status(404)
-                    .body("Food listing not found.");
+    // DT-51: tells the recipient dashboard whether they can request food right now
+    @GetMapping("/cooldown")
+    public ResponseEntity<?> getCooldown(Authentication authentication) {
+
+        if (authentication == null) {
+            return ResponseEntity.status(401).body("You must be logged in.");
         }
 
-        Food food = optionalFood.get();
+        UUID recipientId;
 
-        // Only available food can be requested
-        if (!"ACTIVE".equalsIgnoreCase(food.getStatus())) {
-            return ResponseEntity.badRequest()
-                    .body("This food is no longer available.");
+        try {
+            recipientId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401)
+                    .body("Invalid user ID.");
         }
 
-        // Prevent donors from requesting their own food
-        if (recipientId.equals(food.getUserId())) {
-            return ResponseEntity.badRequest()
-                    .body("You cannot request your own listing.");
-        }
-
-        // Prevent duplicate requests
-        if (foodOrderRepository.existsByFoodIdAndRecipientId(
-                foodId, recipientId)) {
-
-            return ResponseEntity.badRequest()
-                    .body("You already requested this food.");
-        }
-
-        // Create the order
-        FoodOrder order = new FoodOrder();
-
-        order.setFoodId(foodId);
-        order.setRecipientId(recipientId);
-        order.setStatus("pending");
-
-        FoodOrder savedOrder = foodOrderRepository.save(order);
-
-        // Update food status to CLAIMED and assign claimedByUserId (DT-96)
-        food.setStatus("CLAIMED");
-        food.setClaimedByUserId(recipientId);
-        foodRepository.save(food);
-
-        // Notify donor (DT-73)
-        Notification notification = new Notification(
-                food.getUserId(),
-                food.getId(),
-                "REQUEST_RECEIVED",
-                "New Request for " + food.getFoodItem(),
-                "A recipient has requested your listing '" + food.getFoodItem() + "'. Click to coordinate pickup."
-        );
-        notificationRepository.save(notification);
-
-        return ResponseEntity.ok(savedOrder);
+        Map<String, Object> body = new HashMap<>();
+        var nextAllowed = foodClaimService.nextClaimAllowedAt(recipientId);
+        body.put("canRequest", nextAllowed.isEmpty());
+        body.put("nextRequestAt", nextAllowed.orElse(null));
+        body.put("cooldownHours", foodClaimService.getCooldown().toHours());
+        return ResponseEntity.ok(body);
     }
 
     // Only the listing's donor can decline its pending request. (DT-76)
@@ -162,8 +141,7 @@ public class FoodOrderController {
                     .body("This food listing has no requesting recipient.");
         }
 
-        // The project has two request endpoints. Update history when an order
-        // exists; requests through /api/food/{id}/request may have no order row.
+        // Mark the recipient's order for this listing as cancelled in their history (DT-261)
         for (FoodOrder order : foodOrderRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId)) {
             if (order.getFoodId() == id.longValue() && "pending".equalsIgnoreCase(order.getStatus())) {
                 order.setStatus("cancelled");

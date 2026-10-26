@@ -24,6 +24,7 @@ class RecipientDeclineNotificationTest {
     @Mock private FoodRepository foodRepository;
     @Mock private FoodOrderRepository foodOrderRepository;
     @Mock private NotificationRepository notificationRepository;
+    @Mock private FoodClaimService foodClaimService;
     @InjectMocks private FoodOrderController controller;
 
     private Food food;

@@ -3,13 +3,14 @@ package com.codecraft.lovethyneighbor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -34,7 +35,12 @@ public class FoodLifecycleTest {
     @Mock
     private NotificationRepository notificationRepository;
 
-    @InjectMocks
+    @Mock
+    private FoodOrderRepository foodOrderRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
     private FoodController foodController;
 
     private UUID donorId;
@@ -42,6 +48,9 @@ public class FoodLifecycleTest {
 
     @BeforeEach
     void setUp() {
+        FoodClaimService claimService = new FoodClaimService(foodRepository, foodOrderRepository,
+                notificationRepository, Duration.ofHours(24), Clock.systemDefaultZone());
+        foodController = new FoodController(foodRepository, notificationRepository, reviewRepository, claimService);
         mockMvc = MockMvcBuilders.standaloneSetup(foodController).build();
         donorId = UUID.randomUUID();
         recipientId = UUID.randomUUID();
