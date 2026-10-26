@@ -1,61 +1,75 @@
-import "./UploadFood.css"
-import { Link } from "react-router-dom"
+import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import UploadLayout from "./UploadLayout.jsx"
+import { useFoodDraft, detailsError, locationError, todayString } from "./foodDraft.js"
 
-function UploadFoodLocation({}) {
-    return(
-        <div className="upload_food_details">
+function UploadFoodLocation() {
+    const navigate = useNavigate();
+    const [draft, updateDraft] = useFoodDraft();
+    const [error, setError] = useState("");
 
-            {/*Header*/}
-            <nav className="nav">
-                <span className="header_title">Lighten The World</span>
+    // Details must be filled in first
+    if (detailsError(draft)) {
+        return <Navigate to="/UploadFoodDetails" replace />;
+    }
 
-                <div className="header_links">
-                    <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        updateDraft({ [name]: value });
+        setError("");
+    };
+
+    const handleNext = (e) => {
+        e.preventDefault();
+        const message = locationError(draft);
+        if (message) {
+            setError(message);
+            return;
+        }
+        navigate("/UploadFoodPhoto");
+    };
+
+    return (
+        <UploadLayout step={2}>
+            <form className="upload_body" onSubmit={handleNext}>
+                <div className="upload_format">
+                    <h2 className="page_title">Location</h2>
+                    <label className="input_title" htmlFor="address">Pickup Address</label>
+                    <input type="text" id="address" name="address" className="user_input"
+                        maxLength={255} value={draft.address} onChange={handleChange} />
                 </div>
-            </nav>
 
-            {/*Upload Food Card*/}
-            <div className="upload_card">
-                <div className="upload_banner">
-                <section className="upload_header">
-                    <p className="num_off">1</p>
-                    <p className="num_text_off">Food Details</p>
-                    <p className="num_on">2</p>
-                    <p className="num_text_on">Location & Time</p>
-                    <p className="num_off">3</p>
-                    <p className="num_text_off">Upload Photo</p>
-                </section>
+                <div className="upload_format">
+                    <label className="input_title" htmlFor="date">Date</label>
+                    <input type="date" id="date" name="date" className="user_input"
+                        min={todayString()} value={draft.date} onChange={handleChange} />
+                </div>
 
-                <form className="upload_body">
-                    <div className="upload_format">
-                        <h2 className="page_title">Location</h2>
-                        <p className="input_title">Address</p>
-                        <input type="text" className="user_input"></input>
+                <div className="time_format">
+                    <div>
+                        <label className="input_title" htmlFor="startTime">Time Start</label>
+                        <input type="time" id="startTime" name="startTime" className="user_input"
+                            value={draft.startTime} onChange={handleChange} />
                     </div>
-
-                    <div className="upload_format">
-                        <p className="input_title>">Date</p>
-                        <input type="text" className="user_input"></input>
+                    <div>
+                        <label className="input_title" htmlFor="endTime">Time End</label>
+                        <input type="time" id="endTime" name="endTime" className="user_input"
+                            value={draft.endTime} onChange={handleChange} />
                     </div>
+                </div>
 
-                    <div className="time_format">
-                        <p className="input_title">Time Start</p>
-                        <p className="input_title">Time End</p>
-                        <input type="time" id="meeting_start" name="meeting_end" required/>
-                        <input type="time" id="meeting_end" name="meeting_end" required/>
-                    </div>
+                {error && <p className="upload_error">{error}</p>}
 
-
-                    <div className="upload_nav_btn">
-                        <button className="upload_cancel_btn">Back</button>
-                        <Link to="/UploadFoodLocation"><button className="upload_next_btn">Upload Photo</button></Link>
-                    </div>
-                </form>
-            </div>
-            </div>
-        </div>
-    )
-
+                <div className="upload_nav_btn">
+                    <button type="button" className="upload_cancel_btn"
+                        onClick={() => navigate("/UploadFoodDetails")}>
+                        Back
+                    </button>
+                    <button type="submit" className="upload_next_btn">Next: Upload Photo</button>
+                </div>
+            </form>
+        </UploadLayout>
+    );
 }
 
 export default UploadFoodLocation

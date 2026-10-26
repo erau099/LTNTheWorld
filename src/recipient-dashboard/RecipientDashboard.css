@@ -157,3 +157,97 @@
 .rating span {
   color: #00851e;
 }
+
+.food_card_popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(7px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.food_popup_image {
+  height: 350px;
+  width: 500px;
+
+  background-image: url("/src/assets/donut.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.food_popup_info {
+    padding: 30px;
+    font-size: 18px;
+}
+
+.food-status-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: white;
+
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.food-status-badge.available {
+  color: #006b2d;
+}
+
+.food-status-badge.unavailable {
+  color: #b42318;
+}
+
+.food-status-badge.unknown {
+  color: #666666;
+  background-color: white;
+}
+
+/* Food listing details popup — scoped to the recipient dashboard */
+.recipient-dashboard .food_card_popup { padding: 20px; box-sizing: border-box; background: rgba(19, 35, 24, .28); overflow-y: auto; }
+.recipient-dashboard .food_popup_background { width: min(100%, 560px); max-height: min(92vh, 850px); overflow-y: auto; background: #fff; border-radius: 18px; box-shadow: 0 18px 65px rgba(19, 35, 24, .22); }
+.recipient-dashboard .food-popup-heading { background: #f0f5ef; padding: 20px 24px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.recipient-dashboard .food-popup-heading h2 { margin: 5px 0 0; font-size: 24px; line-height: 1.2; color: #172d1c; }
+.recipient-dashboard .food-popup-eyebrow, .recipient-dashboard .food-popup-label { font-size: 10px; font-weight: 800; letter-spacing: .11em; color: #6d8271; }
+.recipient-dashboard .food-popup-close { border: 0; background: #fff; color: #3c5741; border-radius: 50%; width: 32px; height: 32px; font-size: 25px; line-height: 1; cursor: pointer; }
+.recipient-dashboard .food-popup-content { padding: 22px 24px 10px; }
+.recipient-dashboard .food-popup-hero { position: relative; border-radius: 12px; overflow: hidden; }
+.recipient-dashboard .food_popup_image { height: 190px; width: 100%; background-size: cover; background-position: center; }
+.recipient-dashboard .food-popup-status { position: absolute; bottom: 12px; left: 12px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 999px; background: #fff; font-size: 12px; font-weight: 700; }
+.recipient-dashboard .food-popup-status.is-active { color: #12612b; }
+.recipient-dashboard .food-popup-status.is-unavailable { color: #a33a2d; }
+.recipient-dashboard .food-popup-status-dot { width: 7px; height: 7px; background: currentColor; border-radius: 50%; }
+.recipient-dashboard .food-popup-section { margin-top: 20px; }
+.recipient-dashboard .food-popup-section h3 { margin: 0 0 9px; font-size: 14px; color: #213d29; }
+.recipient-dashboard .food-popup-donor { display: flex; flex-direction: column; gap: 5px; }
+.recipient-dashboard .food-popup-donor strong { font-size: 14px; }
+.recipient-dashboard .food-popup-description { margin: 0; color: #536156; line-height: 1.55; font-size: 14px; }
+.recipient-dashboard .food-popup-details-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; }
+.recipient-dashboard .food-popup-tag, .recipient-dashboard .food-popup-allergen { display: inline-block; border-radius: 7px; padding: 7px 11px; font-size: 12px; font-weight: 600; }
+.recipient-dashboard .food-popup-tag { background: #e8f3e8; color: #17652e; }
+.recipient-dashboard .food-popup-allergen { background: #fff2e9; color: #955323; }
+.recipient-dashboard .food-popup-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.recipient-dashboard .food-popup-pickup { margin: 0; font-size: 13px; line-height: 1.5; color: #536156; }
+.recipient-dashboard .food-popup-muted { font-size: 12px; color: #66736a; }
+.recipient-dashboard .food-popup-actions { border-top: 1px solid #e8ece8; padding: 17px 24px 20px; display: flex; justify-content: space-between; gap: 12px; }
+.recipient-dashboard .food-popup-back, .recipient-dashboard .food-popup-submit { padding: 11px 15px; border-radius: 8px; border: 0; font-size: 13px; font-weight: 700; }
+.recipient-dashboard .food-popup-back { background: #eef0ee; color: #3c5140; cursor: pointer; }
+.recipient-dashboard .food-popup-submit { background: #2d7a3a; color: white; }
+.recipient-dashboard .food-popup-submit:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 560px) { .recipient-dashboard .food-popup-details-grid { grid-template-columns: 1fr; gap: 0; } .recipient-dashboard .food-popup-heading, .recipient-dashboard .food-popup-content { padding-left: 16px; padding-right: 16px; } .recipient-dashboard .food-popup-actions { padding-left: 16px; padding-right: 16px; } }

@@ -12,7 +12,7 @@
     width:100%;
     max-width: 720px;
     background: rgba(255, 255, 255, 0.45);
-    border: 1px solid rgba(160, 140. 150, 0.45);
+    border: 1px solid rgba(160, 140, 150, 0.45);
     border-radius: 18px;
     overflow: hidden;
 }
@@ -21,6 +21,7 @@
     height: 56px;
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 18px 34px;
     gap: 50px;
     background-color: #d9d9d9;
@@ -86,6 +87,13 @@
     font-size: 14px;
     background-color: white;
     outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.user_input:focus {
+    border-color: #2d7a3a;
 }
 
 .selection_form {
@@ -105,6 +113,12 @@
     font-weight: 400;
     cursor: pointer;
     line-height: 1;
+}
+
+/* Selected tag / allergen */
+.sel_btn_on {
+    background: #2d7a3a;
+    color: #ffffff;
 }
 
 .upload_nav_btn {
@@ -159,6 +173,141 @@
     transform: translateY(1px);
 }
 
+.upload_next_btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
 
+.upload_square_box {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 300px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    gap: 24px;
+    box-sizing: border-box;
+}
 
+.upload_photo_btn {
+    display: flex;
+    gap: 16px;
+}
 
+.submission_format {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+}
+
+.circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #2d7a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.check_logo {
+    width: 40px;
+    height: 40px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.submission_description {
+    gap: 16px;
+    padding-bottom: 40px;
+    padding-top: 20px;
+}
+
+/* Step number + label pair in the upload header */
+.upload_step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.time_format {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.time_format .input_title {
+    display: block;
+}
+
+.upload_format .input_title {
+    display: block;
+}
+
+.upload_error {
+    color: #b3261e;
+    font-size: 14px;
+    margin: 0 0 12px;
+}
+
+.photo_previews {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.photo_preview {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.photo_preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.photo_remove_btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: #4f4f4f;
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .upload_header {
+        height: auto;
+        gap: 16px;
+        padding: 14px 16px;
+    }
+
+    .time_format {
+        grid-template-columns: 1fr;
+    }
+
+    .upload_nav_btn {
+        margin-top: 40px;
+        gap: 12px;
+    }
+}

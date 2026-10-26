@@ -3,55 +3,25 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./DonorPastListings.css";
 import "../index.css";
+import "../App.css";
+import "../CDashboard.css";
 
 import searchIcon from "../assets/magnifying-glass.png";
-
-// Temporary mock data for donor past listings.
-const listings = [
-	{
-		id: 1,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "pending",
-	},
-	{
-		id: 2,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "pending",
-	},
-	{
-		id: 3,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "approved",
-	},
-	{
-		id: 4,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "approved",
-	},
-	{
-		id: 5,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "completed",
-	},
-];
+import { apiFetch } from "../api";
 
 function DonorPastListings() {
 	const navigate = useNavigate();
+
+	// Listings posted by the logged-in donor, loaded from the backend.
+	const [listings, setListings] = useState([]);
+	const [loadError, setLoadError] = useState("");
+
+	useEffect(() => {
+		apiFetch("/api/food/mine")
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			.then(setListings)
+			.catch(() => setLoadError("Could not load your listings."));
+	}, []);
 
 	// Controls the gear dropdown menu.
 	const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -71,6 +41,12 @@ function DonorPastListings() {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
 	}, []);
+
+	const[selectFiltering, setSelectedListings] = useState("all")
+
+	const filteredListings = listings.filter((listing) => {
+		return selectFiltering === "all" || listing.status === selectFiltering;
+	})
 
 	return (
 		<div className="orders-page">
@@ -142,9 +118,10 @@ function DonorPastListings() {
 						</div>
 
 						<div className="orders-filters">
-							<button className="filter-btn pending">Pending</button>
-							<button className="filter-btn approved">Approved</button>
-							<button className="filter-btn completed">Completed</button>
+							<button className={selectFiltering === "all" ? "filter-btn all" : "filter-btn all off"} onClick={() => setSelectedListings("all")}>All</button>
+							<button className={selectFiltering === "pending" ? "filter-btn pending" : "filter-btn pending off"} onClick={() => setSelectedListings("pending")}>Pending</button>
+							<button className={selectFiltering === "cancelled" ? "filter-btn cancelled" : "filter-btn cancelled off"} onClick={() => setSelectedListings("cancelled")}>Cancelled</button>
+							<button className={selectFiltering === "completed" ? "filter-btn completed": "filter-btn completed off"} onClick={() => setSelectedListings("completed")}>Completed</button>
 						</div>
 					</div>
 				</div>
@@ -152,20 +129,23 @@ function DonorPastListings() {
 				{/* Listings table */}
 				<div className="orders-table">
 					<div className="orders-header-row">
-						<span>Donor Name</span>
+						<span>Recipient Name</span>
 						<span>Date</span>
 						<span>Time</span>
 						<span>Food Title</span>
 						<button className="review-btn header-review-btn">Review</button>
 					</div>
 
-					{listings.length > 0 ? (
-						listings.map((listing) => (
-							<div className="orders-row" key={listing.id}>
-								<span>{listing.donor}</span>
-								<span>{listing.date}</span>
-								<span>{listing.time}</span>
-								<span>{listing.food}</span>
+					{filteredListings.length > 0 ? (
+						filteredListings.map((listing) => (
+							<div className="orders-row" 
+							key={listing.id}>
+								<span>{listing.userId}</span>
+								<span>{new Date(listing.date + "T00:00:00").toLocaleDateString()}</span>
+								<span>{new Date(listing.pickupTime).toLocaleTimeString([], {
+									hour: "numeric", minute: "2-digit",
+								})}</span>
+								<span>{listing.foodItem}</span>
 
 								<button className={`review-btn ${listing.status}`}>
 									Review

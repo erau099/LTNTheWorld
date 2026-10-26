@@ -5,12 +5,19 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
-    // Logout clears the global state
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+
         setUser(null);
     };
 
-    // Note: No localStorage or Cookies here as per requirement
     // Volatility: Refreshing the page clears the state because it's only in memory (useState)
 
     return (
