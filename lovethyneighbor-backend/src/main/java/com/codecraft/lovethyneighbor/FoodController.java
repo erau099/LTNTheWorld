@@ -116,10 +116,9 @@ public class FoodController {
         for (Food food : listings) {
             if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && !food.getPickupEndTime().isAfter(now)) {
                 food.setStatus("UNAVAILABLE");
+                foodRepository.save(food);
             }
         }
-
-        foodRepository.saveAll(listings);
     }
 
     // DT-73 & DT-96: Recipient requests food listing, moving it to CLAIMED and notifying the donor
