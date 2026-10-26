@@ -24,6 +24,7 @@ class RecipientApprovalNotificationTest {
     // Mockito replaces the database repositories with controllable test objects
     @Mock private FoodRepository foodRepository;
     @Mock private NotificationRepository notificationRepository;
+    @Mock private FoodClaimService foodClaimService;
     @InjectMocks private FoodController controller;
 
     private Food food;

@@ -169,7 +169,7 @@ function DonorDashboard() {
 
 				{/* Filter buttons for listing status */}
 				<div className="filter-row">
-					{["all", "active", "claimed", "scheduled", "completed"].map((status) => (
+					{["all", "active", "claimed", "scheduled", "completed", "expired"].map((status) => (
 						<button
 							key={status}
 							className={`filter-button ${filter === status ? "active" : ""}`}

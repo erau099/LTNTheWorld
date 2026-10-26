@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 class RecipientStatusNotificationTest {
     @Mock private FoodRepository foodRepository;
     @Mock private NotificationRepository notificationRepository;
+    @Mock private FoodClaimService foodClaimService;
     @InjectMocks private FoodController controller;
 
     private Food food;

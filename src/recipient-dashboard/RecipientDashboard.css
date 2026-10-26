@@ -251,3 +251,14 @@
 .recipient-dashboard .food-popup-submit { background: #2d7a3a; color: white; }
 .recipient-dashboard .food-popup-submit:disabled { opacity: .55; cursor: not-allowed; }
 @media (max-width: 560px) { .recipient-dashboard .food-popup-details-grid { grid-template-columns: 1fr; gap: 0; } .recipient-dashboard .food-popup-heading, .recipient-dashboard .food-popup-content { padding-left: 16px; padding-right: 16px; } .recipient-dashboard .food-popup-actions { padding-left: 16px; padding-right: 16px; } }
+
+/* DT-51: shown while the recipient is waiting out the request cooldown */
+.recipient-dashboard .cooldown-notice {
+  background: #fff7e0;
+  border: 1px solid #e8c766;
+  color: #6b5200;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  margin: 0 0 16px;
+}

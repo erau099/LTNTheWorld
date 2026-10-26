@@ -25,14 +25,17 @@ public class FoodController {
     private final FoodRepository foodRepository;
     private final NotificationRepository notificationRepository;
     private final ReviewRepository reviewRepository;
+    private final FoodClaimService foodClaimService;
 
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
 
-    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository, ReviewRepository reviewRepository) {
+    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository,
+            ReviewRepository reviewRepository, FoodClaimService foodClaimService) {
         this.foodRepository = foodRepository;
         this.notificationRepository = notificationRepository;
         this.reviewRepository = reviewRepository;
+        this.foodClaimService = foodClaimService;
     }
 
     // Create a new food listing
@@ -133,7 +136,7 @@ public class FoodController {
                     recipientName,
                     rating,
                     comment
-            );
+            ).withListingDetails(food.getPickupEndTime(), food.getTags(), food.getPhotos());
         }).toList();
 
         return ResponseEntity.ok(responseList);
@@ -151,7 +154,6 @@ public class FoodController {
 
     // DT-73 & DT-96: Recipient requests food listing, moving it to CLAIMED and notifying the donor
     @PostMapping("/{id}/request")
-    @Transactional
     public ResponseEntity<?> requestFoodListing(@PathVariable Long id, Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You must be logged in to request food.");
@@ -164,36 +166,12 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
         }
 
-        Optional<Food> foodOpt = foodRepository.findById(id);
-        if (foodOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
+        // Shared with POST /api/orders/{foodId}: creates the order and applies the cooldown (DT-51)
+        try {
+            return ResponseEntity.ok(foodClaimService.claim(id, recipientId).food());
+        } catch (FoodClaimService.ClaimException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         }
-
-        Food food = foodOpt.get();
-        if (!"ACTIVE".equalsIgnoreCase(food.getStatus())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This food listing is no longer available.");
-        }
-
-        // Donor cannot claim their own listing
-        if (food.getUserId() != null && food.getUserId().equals(recipientId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You cannot request your own food listing.");
-        }
-
-        food.setStatus("CLAIMED");
-        food.setClaimedByUserId(recipientId);
-        Food updated = foodRepository.save(food);
-
-        // Notify donor (DT-73)
-        Notification notification = new Notification(
-                food.getUserId(),
-                food.getId(),
-                "REQUEST_RECEIVED",
-                "New Request for " + food.getFoodItem(),
-                "A recipient has requested your listing '" + food.getFoodItem() + "'. Click to coordinate pickup."
-        );
-        notificationRepository.save(notification);
-
-        return ResponseEntity.ok(updated);
     }
 
     // DT-78: Donor confirms pickup request and schedules it
@@ -233,6 +211,7 @@ public class FoodController {
 
         food.setStatus("SCHEDULED");
         Food updated = foodRepository.save(food);
+        foodClaimService.updateOrderStatus(food, "scheduled");
 
         // Notify donor (DT-78)
         Notification notification = new Notification(
@@ -298,6 +277,7 @@ public class FoodController {
 
         food.setStatus("COMPLETED");
         Food updated = foodRepository.save(food);
+        foodClaimService.updateOrderStatus(food, "completed");
 
         // Notify donor (DT-85)
         Notification notification = new Notification(
