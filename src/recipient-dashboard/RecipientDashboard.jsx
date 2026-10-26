@@ -5,6 +5,7 @@ import "../index.css";
 import "../App.css";
 import "../CDashboard.css";
 import "./RecipientDashboard.css";
+import RecipientNotificationBell from "./RecipientNotificationBell";
 
 import { apiFetch } from "../api";
 
@@ -21,7 +22,7 @@ function RecipientDashboard() {
 
 	// Set VITE_USE_MOCK_FOOD=true in a local .env.local to test without PostgreSQL.
 	// Mock mode is explicit; API failures never masquerade as successful data.
-	const useMockFood = import.meta.env.VITE_USE_MOCK_FOOD === "true";
+	const useMockFood = import.meta.env.VITE_USE_MOCK_FOOD === "false";
 	const [listings, setListings] = useState([]);
 	const [listingsLoading, setListingsLoading] = useState(true);
 	const [listingsError, setListingsError] = useState("");
@@ -265,6 +266,8 @@ function RecipientDashboard() {
 					>
 						Profile
 					</button>
+
+					<RecipientNotificationBell onSelectNotification={() => navigate("/recipient-past-orders")} />
 
 					{/* Gear dropdown menu */}
 					<div className="gear_wrap" ref={dropdownRef}>
