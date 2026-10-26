@@ -24,10 +24,15 @@ public class FoodController {
 
     private final FoodRepository foodRepository;
     private final NotificationRepository notificationRepository;
+    private final ReviewRepository reviewRepository;
 
-    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository) {
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
+    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository, ReviewRepository reviewRepository) {
         this.foodRepository = foodRepository;
         this.notificationRepository = notificationRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     // Create a new food listing
@@ -85,7 +90,6 @@ public class FoodController {
         }
 
         UUID userUuid;
-
         try {
             userUuid = UUID.fromString(authentication.getName());
         } catch (IllegalArgumentException e) {
@@ -93,9 +97,46 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
 
-        return ResponseEntity.ok(
-            foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid)
-        );
+        List<Food> foods = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
+
+        List<DonorListingResponse> responseList = foods.stream().map(food -> {
+            String recipientName = "Unclaimed";
+            UUID recipientId = food.getClaimedByUserId();
+
+            if (recipientId != null) {
+                User recipient = entityManager.find(User.class, recipientId);
+                if (recipient != null) {
+                    recipientName = recipient.getName();
+                } else {
+                    recipientName = "Recipient (" + recipientId.toString().substring(0, 8) + "...)";
+                }
+            }
+
+            // Look up review for this food item (bigint PK)
+            List<Review> reviews = reviewRepository.findByFoodId(food.getId());
+            Integer rating = null;
+            String comment = null;
+
+            if (!reviews.isEmpty()) {
+                Review rev = reviews.get(0);
+                rating = rev.getRating();
+                comment = rev.getComment();
+            }
+
+            return new DonorListingResponse(
+                    food.getId(),
+                    food.getFoodItem(),
+                    food.getStatus(),
+                    food.getDate(),
+                    food.getPickupTime(),
+                    recipientId,
+                    recipientName,
+                    rating,
+                    comment
+            );
+        }).toList();
+
+        return ResponseEntity.ok(responseList);
     }
 
     // Retrieve a specific food listing
@@ -245,6 +286,16 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the donor or recipient can mark this pickup as completed.");
         }
 
+        // DT-74: notify only when a scheduled pickup actually becomes completed.
+        if (!"SCHEDULED".equalsIgnoreCase(food.getStatus())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Only a scheduled pickup can be marked as completed.");
+        }
+        if (food.getClaimedByUserId() == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("This pickup has no requesting recipient.");
+        }
+
         food.setStatus("COMPLETED");
         Food updated = foodRepository.save(food);
 
@@ -257,6 +308,17 @@ public class FoodController {
                 "'" + food.getFoodItem() + "' pickup has been completed. Thank you for your donation!"
         );
         notificationRepository.save(notification);
+
+        // DT-74: the recipient also needs to know that pickup is complete.
+        Notification recipientNotification = new Notification(
+                food.getClaimedByUserId(),
+                food.getId(),
+                "PICKUP_COMPLETED",
+                "Pickup Completed: " + food.getFoodItem(),
+                "Your pickup for '" + food.getFoodItem()
+                        + "' has been marked as completed. Thank you for helping reduce food waste!"
+        );
+        notificationRepository.save(recipientNotification);
 
         return ResponseEntity.ok(updated);
     }

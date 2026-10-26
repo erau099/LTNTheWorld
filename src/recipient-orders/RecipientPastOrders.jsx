@@ -3,86 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./RecipientPastOrders.css";
 import "../index.css";
-import ReviewModal from "../ReviewModal.jsx"; 
-
+import ReviewModal from "../ReviewModal.jsx";
 import searchIcon from "../assets/magnifying-glass.png";
-import { apiFetch } from "../api";
-
-// Temporary mock data for recipient past orders.
-const orders = [
-	{
-		id: 1,
-		donor: "Robin Roberts 2",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 2,
-		status: "completed",
-	},
-	{
-		id: 2,
-		donor: "Robin Roberts 4",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 4,
-		status: "completed",
-	},
-	{
-		id: 3,
-		donor: "Robin Roberts 5",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 5,
-		status: "cancelled",
-	},
-	{
-		id: 4,
-		donor: "Robin Roberts 6",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 5,
-		status: "completed",
-	},
-	{
-		id: 4,
-		donor: "Robin Roberts 7",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 5,
-		status: "cancelled",
-	},
-	{
-		id: 5,
-		donor: "Robin Roberts 8",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 3,
-		status: "pending",
-	},
-	{
-		id: 6,
-		donor: "Robin Roberts 9",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 3,
-		status: "pending",
-	},
-	{
-		id: 7,
-		donor: "Robin Roberts 10",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 2,
-		status: "pending",
-	},
-];
 
 function RecipientPastOrders() {
 	const navigate = useNavigate();
