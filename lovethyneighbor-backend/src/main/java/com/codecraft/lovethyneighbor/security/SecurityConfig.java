@@ -39,22 +39,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
+                // Allow all OPTIONS preflight requests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").permitAll()
-                .requestMatchers("/api/food/**").permitAll()
                 .requestMatchers("/api/hello").permitAll()
-
-                // Lets a 403 (wrong role) reach the client instead
-                // of turning into a 401 on the error page.
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
-                .requestMatchers("/api/donor/**").hasAnyRole("DONOR", "BOTH")
-                .requestMatchers("/api/recipient/**").hasAnyRole("RECIPIENT", "BOTH")
-                // Only donors can post food or view their own listings
+
+                // Specific food routes (must be declared BEFORE general food routes)
                 .requestMatchers(HttpMethod.POST, "/api/food").hasAnyRole("DONOR", "BOTH")
                 .requestMatchers("/api/food/mine").hasAnyRole("DONOR", "BOTH")
+
+                // General public food endpoints
+                .requestMatchers(HttpMethod.GET, "/api/food", "/api/food/**").permitAll()
+
+                // Role-restricted routes
+                .requestMatchers("/api/donor/**").hasAnyRole("DONOR", "BOTH")
+                .requestMatchers("/api/recipient/**").hasAnyRole("RECIPIENT", "BOTH")
+
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
@@ -62,13 +70,13 @@ public class SecurityConfig {
             )
             .addFilterBefore(
                 jwtAuthFilter,
-                UsernamePasswordAuthenticationFilter.class);
+                UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
 
-    // 3. Register CORS configuration for React dev server
-@Bean
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:5173"));
