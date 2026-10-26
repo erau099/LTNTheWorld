@@ -1,4 +1,3 @@
-
 package com.codecraft.lovethyneighbor.security;
 
 import com.codecraft.lovethyneighbor.User;
@@ -10,15 +9,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    // DT-134: Check current account status on authenticated requests.
+    // DT-134: Check current account status on authenticated requests
     public JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
@@ -38,15 +38,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         String token = null;
 
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
+        // 1. Check for authToken inside incoming HTTP cookies
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
                 if ("authToken".equals(cookie.getName())) {
                     token = cookie.getValue();
                     break;
@@ -54,49 +53,55 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        if (token == null || token.isBlank()) {
-            filterChain.doFilter(request, response);
-            return;
+        // 2. Fallback to Authorization header if no cookie is present
+        if (token == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
         }
 
-        try {
-            Claims claims = jwtService.parseToken(token);
+        // 3. Validate token using JwtService and verify user status in DB
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                Claims claims = jwtService.parseToken(token);
+                String userId = claims.getSubject();
 
-            String userId = claims.getSubject();
-            UUID id = UUID.fromString(userId);
+                if (userId != null) {
+                    UUID id = UUID.fromString(userId);
+                    Optional<User> userOpt = userRepository.findById(id);
 
-            Optional<User> userOpt = userRepository.findById(id);
+                    if (userOpt.isPresent()) {
+                        User user = userOpt.get();
 
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
+                        // Reject existing sessions for blocked/inactive accounts (DT-134)
+                        if ("ACTIVE".equalsIgnoreCase(user.getStatus()) && user.getRole() != null) {
+                            String role = user.getRole();
+                            String formattedRole = role.toUpperCase(Locale.ROOT);
+                            if (!formattedRole.startsWith("ROLE_")) {
+                                formattedRole = "ROLE_" + formattedRole;
+                            }
 
-                // DT-134: Reject existing sessions for blocked accounts.
-                if ("ACTIVE".equalsIgnoreCase(user.getStatus())
-                        && user.getRole() != null) {
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(
+                                            userId,
+                                            null,
+                                            List.of(new SimpleGrantedAuthority(formattedRole))
+                                    );
 
-                    // Use the current database role, not an outdated JWT role.
-                    String role = user.getRole();
-
-                    var authentication = new UsernamePasswordAuthenticationToken(
-                            userId,
-                            null,
-                            List.of(
-                                    new SimpleGrantedAuthority(
-                                            "ROLE_" + role.toUpperCase(
-                                                    java.util.Locale.ROOT))));
-
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(authentication);
-                } else {
-                    SecurityContextHolder.clearContext();
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        } else {
+                            SecurityContextHolder.clearContext();
+                        }
+                    } else {
+                        SecurityContextHolder.clearContext();
+                    }
                 }
-            } else {
+            } catch (Exception ex) {
+                System.out.println(">>> JWT FILTER AUTHENTICATION FAILED: " + ex.getMessage());
                 SecurityContextHolder.clearContext();
             }
-
-        } catch (Exception e) {
-            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

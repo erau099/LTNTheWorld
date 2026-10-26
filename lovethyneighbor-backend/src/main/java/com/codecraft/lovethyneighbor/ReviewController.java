@@ -7,13 +7,12 @@ import java.util.UUID;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.springframework.security.core.Authentication;
-
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/reviews")
 public class ReviewController {
 
@@ -26,7 +25,7 @@ public class ReviewController {
         this.reviewRepository = reviewRepository;
     }
 
-    // Get reviews for a food item
+    // Get reviews for a food item by bigint ID
     @GetMapping("/food/{foodId}")
     public List<Review> getReviews(@PathVariable Long foodId) {
         return reviewRepository.findByFoodId(foodId);
@@ -34,8 +33,14 @@ public class ReviewController {
 
     // Create a review
     @PostMapping
+    @Transactional
     public Map<String, Object> createReview(
-            @RequestBody ReviewRequest request) {
+            @RequestBody ReviewRequest request,
+            Authentication authentication
+    ) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not authenticated");
+        }
 
         if (request.getRating() < 1 || request.getRating() > 5) {
             throw new ResponseStatusException(
@@ -44,9 +49,15 @@ public class ReviewController {
             );
         }
 
-        UUID userId = request.getUserId();
-        Long foodId = request.getFoodId();
+        if (request.getFoodId() == null) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "foodId cannot be null"
+            );
+        }
 
+        // 1. Resolve reviewer User from JWT sub (UUID)
+        UUID userId = UUID.fromString(authentication.getName());
         User user = entityManager.find(User.class, userId);
         if (user == null) {
             throw new ResponseStatusException(
@@ -54,13 +65,15 @@ public class ReviewController {
             );
         }
 
-        Food food = entityManager.find(Food.class, foodId);
+        // 2. Resolve Food item from bigint PK (Long)
+        Food food = entityManager.find(Food.class, request.getFoodId());
         if (food == null) {
             throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Food not found"
+                HttpStatus.NOT_FOUND, "Food listing not found"
             );
         }
 
+        // 3. Save review
         Review review = new Review();
         review.setUser(user);
         review.setFood(food);
@@ -78,24 +91,18 @@ public class ReviewController {
     // Get reviews written by the signed-in user
     @GetMapping("/my-reviews")
     public List<Review> getMyReviews(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not authenticated");
+        }
         UUID userId = UUID.fromString(authentication.getName());
         return reviewRepository.findByUserId(userId);
     }
 
-    // Request body for creating a review
+    // DTO for incoming review payload
     public static class ReviewRequest {
-        private UUID userId;
         private Long foodId;
         private int rating;
         private String comment;
-
-        public UUID getUserId() {
-            return userId;
-        }
-
-        public void setUserId(UUID userId) {
-            this.userId = userId;
-        }
 
         public Long getFoodId() {
             return foodId;

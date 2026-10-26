@@ -24,10 +24,15 @@ public class FoodController {
 
     private final FoodRepository foodRepository;
     private final NotificationRepository notificationRepository;
+    private final ReviewRepository reviewRepository;
 
-    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository) {
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
+    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository, ReviewRepository reviewRepository) {
         this.foodRepository = foodRepository;
         this.notificationRepository = notificationRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     // Create a new food listing
@@ -85,7 +90,6 @@ public class FoodController {
         }
 
         UUID userUuid;
-
         try {
             userUuid = UUID.fromString(authentication.getName());
         } catch (IllegalArgumentException e) {
@@ -93,9 +97,46 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
 
-        return ResponseEntity.ok(
-            foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid)
-        );
+        List<Food> foods = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
+
+        List<DonorListingResponse> responseList = foods.stream().map(food -> {
+            String recipientName = "Unclaimed";
+            UUID recipientId = food.getClaimedByUserId();
+
+            if (recipientId != null) {
+                User recipient = entityManager.find(User.class, recipientId);
+                if (recipient != null) {
+                    recipientName = recipient.getName();
+                } else {
+                    recipientName = "Recipient (" + recipientId.toString().substring(0, 8) + "...)";
+                }
+            }
+
+            // Look up review for this food item (bigint PK)
+            List<Review> reviews = reviewRepository.findByFoodId(food.getId());
+            Integer rating = null;
+            String comment = null;
+
+            if (!reviews.isEmpty()) {
+                Review rev = reviews.get(0);
+                rating = rev.getRating();
+                comment = rev.getComment();
+            }
+
+            return new DonorListingResponse(
+                    food.getId(),
+                    food.getFoodItem(),
+                    food.getStatus(),
+                    food.getDate(),
+                    food.getPickupTime(),
+                    recipientId,
+                    recipientName,
+                    rating,
+                    comment
+            );
+        }).toList();
+
+        return ResponseEntity.ok(responseList);
     }
 
     // Retrieve a specific food listing
