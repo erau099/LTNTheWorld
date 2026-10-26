@@ -3,285 +3,300 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./RecipientPastOrders.css";
 import "../index.css";
-import ReviewModal from "../ReviewModal.jsx"; 
-
+import ReviewModal from "../ReviewModal.jsx";
 import searchIcon from "../assets/magnifying-glass.png";
-import { apiFetch } from "../api";
-
-// Temporary mock data for recipient past orders.
-const orders = [
-	{
-		id: 1,
-		donor: "Robin Roberts 2",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 2,
-		status: "completed",
-	},
-	{
-		id: 2,
-		donor: "Robin Roberts 4",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 4,
-		status: "completed",
-	},
-	{
-		id: 3,
-		donor: "Robin Roberts 5",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 5,
-		status: "cancelled",
-	},
-	{
-		id: 4,
-		donor: "Robin Roberts 6",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 5,
-		status: "completed",
-	},
-	{
-		id: 4,
-		donor: "Robin Roberts 7",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 5,
-		status: "cancelled",
-	},
-	{
-		id: 5,
-		donor: "Robin Roberts 8",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 3,
-		status: "pending",
-	},
-	{
-		id: 6,
-		donor: "Robin Roberts 9",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 3,
-		status: "pending",
-	},
-	{
-		id: 7,
-		donor: "Robin Roberts 10",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		foodId: 2,
-		status: "pending",
-	},
-];
 
 function RecipientPastOrders() {
-	const navigate = useNavigate();
+    const navigate = useNavigate();
 
-	// Controls the gear dropdown menu.
-	const [dropdownOpen, setDropdownOpen] = useState(false);
-	const dropdownRef = useRef(null);
-	const [reviewOrder, setReviewOrder] = useState(null);
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-	// Closes the dropdown when the user clicks outside of it.
-	useEffect(() => {
-		function handleClickOutside(e) {
-			if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-				setDropdownOpen(false);
-			}
-		}
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
-		document.addEventListener("mousedown", handleClickOutside);
+    // Review flow states
+    const [reviewOrder, setReviewOrder] = useState(null);      // Opens submit modal
+    const [viewReview, setViewReview] = useState(null);        // Opens view modal for already-reviewed item
 
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, []);
+    const [selectFiltering, setSelectedOrders] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
 
-	// Retrieve orders from the backend
-	const [orders, setOrders] = useState([]);
-	const[ordersError, setOrdersError] = useState("");
-	
-	useEffect(() => {
-		apiFetch("/api/orders/mine")
-			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-			//.then(setOrders)
-			.then((data) => {
-				console.log("ORDERS FROM DATABASE:", data);
-				setOrders(data);
-			})
-			.catch(() => setOrdersError("Could not load your orders."));
-	}, []);
+    const fetchOrders = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch("/api/recipient/orders", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include"
+            });
 
-	// Review
-	const handleReviewSubmit = async ({ foodId, rating, comment }) => {
-		try {
-			const response = await fetch('/api/reviews', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					userId: '54336d41-7416-4484-a5fe-69c17933d229',
-					foodId,
-					rating,
-					comment,
-				}),
-			});
+            if (!response.ok) {
+                throw new Error(`Failed to load orders: HTTP ${response.status}`);
+            }
 
-			if (!response.ok) {
-				const message = await response.text();
-				throw new Error(message || `HTTP ${response.status}`);
-			}
+            const data = await response.json();
+            setOrders(data);
+        } catch (err) {
+            console.error("Orders fetch error:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-			alert('Review submitted successfully!');
-			setReviewOrder(null);
-		} catch (error) {
-			console.error('Failed to submit review:', error);
-			alert('Could not submit review. Check the console for details.');
-		}
-	};
+    useEffect(() => {
+        fetchOrders();
+    }, []);
 
-	
-	const [selectFiltering, setSelectedOrders] = useState("all")
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
-	const filteredOrders = orders.filter((order) => {
-		return selectFiltering === "all" || order.status?.toLowerCase() === selectFiltering.toLowerCase();
-	})
+    const handleReviewSubmit = async ({ foodId, rating, comment }) => {
+        try {
+            const response = await fetch("/api/reviews", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    foodId: Number(foodId),
+                    rating: Number(rating),
+                    comment
+                })
+            });
 
-	return (
-		<div className="orders-page">
-			{/* Header navigation for recipient pages */}
-			<nav className="nav">
-				<span className="header_title">Love Thy Neighbor</span>
+            if (!response.ok) {
+                const message = await response.text();
+                throw new Error(message || `HTTP ${response.status}`);
+            }
 
-				<div className="header_links">
-					<Link to="/">
-						<button className="headerbtn">Home</button>
-					</Link>
+            // Update client state immediately so the button converts into the submitted review state
+            setOrders((prev) =>
+                prev.map((order) =>
+                    order.foodId === foodId || order.id === foodId
+                        ? { ...order, reviewed: true, reviewRating: rating, reviewComment: comment }
+                        : order
+                )
+            );
 
-					<Link to="/recipient-dashboard">
-						<button className="headerbtn">Dashboard</button>
-					</Link>
+            alert("Review submitted successfully!");
+            setReviewOrder(null);
+        } catch (err) {
+            console.error("Failed to submit review:", err);
+            alert("Could not submit review. Check console for details.");
+        }
+    };
 
-					<Link to="/receiver-profile">
-						<button className="headerbtn">Profile</button>
-					</Link>
+    const filteredOrders = orders.filter((order) => {
+        const matchesStatus =
+            selectFiltering === "all" ||
+            order.status?.toLowerCase() === selectFiltering.toLowerCase();
 
-					{/* Gear dropdown menu */}
-					<div className="gear_wrap" ref={dropdownRef}>
-						<button
-							className="gear_btn"
-							type="button"
-							onClick={() => setDropdownOpen(!dropdownOpen)}
-						>
-							⚙
-						</button>
+        const matchesSearch =
+            (order.donor?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+            (order.food?.toLowerCase() || "").includes(searchTerm.toLowerCase());
 
-						{dropdownOpen && (
-							<div className="dropdown">
-								<button
-									className="dropdown_item"
-									type="button"
-									onClick={() => navigate("/receiver-profile")}
-								>
-									Profile
-								</button>
+        return matchesStatus && matchesSearch;
+    });
 
-								<button
-									className="dropdown_item"
-									type="button"
-									onClick={() => navigate("/")}
-								>
-									Sign Out
-								</button>
-							</div>
-						)}
-					</div>
-				</div>
-			</nav>
+    return (
+        <div className="orders-page">
+            <nav className="nav">
+                <span className="header_title">Love Thy Neighbor</span>
 
-			{/* Main past orders content */}
-			<main className="orders-container">
-				<h1 className="orders-title">Orders</h1>
+                <div className="header_links">
+                    <Link to="/"><button className="headerbtn">Home</button></Link>
+                    <Link to="/recipient-dashboard"><button className="headerbtn">Dashboard</button></Link>
+                    <Link to="/receiver-profile"><button className="headerbtn">Profile</button></Link>
 
-				{/* Search bar and status filters */}
-				<div className="orders-toolbar">
-					<div className="toolbar-left">
-						<div className="search-wrapper">
-							<input
-								type="text"
-								placeholder="Search"
-								className="orders-search"
-							/>
+                    <div className="gear_wrap" ref={dropdownRef}>
+                        <button
+                            className="gear_btn"
+                            type="button"
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                        >
+                            ⚙
+                        </button>
 
-							<img src={searchIcon} alt="search" className="search-icon" />
-						</div>
+                        {dropdownOpen && (
+                            <div className="dropdown">
+                                <button
+                                    className="dropdown_item"
+                                    type="button"
+                                    onClick={() => navigate("/receiver-profile")}
+                                >
+                                    Profile
+                                </button>
+                                <button
+                                    className="dropdown_item"
+                                    type="button"
+                                    onClick={() => navigate("/")}
+                                >
+                                    Sign Out
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </nav>
 
-						<div className="orders-filters">
-							<button className={selectFiltering === "all" ? "filter-button all" : "filter-button all off"} onClick={() => setSelectedOrders("all")}>All</button>
-							<button className={selectFiltering === "pending" ? "filter-btn pending" : "filter-btn pending off"} onClick={() => setSelectedOrders("pending")}>Pending</button>
-							<button className={selectFiltering === "cancelled" ? "filter-btn cancelled" : "filter-btn cancelled off"} onClick={() => setSelectedOrders("cancelled")}>Cancelled</button>
-							<button className={selectFiltering === "completed" ? "filter-btn completed": "filter-btn completed off"} onClick={() => setSelectedOrders("completed")}>Completed</button>
-						</div>
-					</div>
-				</div>
+            <main className="orders-container">
+                <h1 className="orders-title">Past Orders</h1>
 
-				{/* Orders table */}
-				<div className="orders-table">
-					<div className="orders-header-row">
-						<span>Donor Name</span>
-						<span>Date</span>
-						<span>Time</span>
-						<span>Food Title</span>
-						<button className="review-btn header-review-btn" type="button">Review</button>
-					</div>
+                <div className="orders-toolbar">
+                    <div className="toolbar-left">
+                        <div className="search-wrapper">
+                            <input
+                                type="text"
+                                placeholder="Search by donor or food item..."
+                                className="orders-search"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <img src={searchIcon} alt="search" className="search-icon" />
+                        </div>
 
-					{filteredOrders.length > 0 ? (
-						filteredOrders.map((order, id) => (
-							<div className="orders-row"
-							key={id}>
-								<span>{order.donor}</span>
-								<span>{order.food?.date ? new Date(order.food.date + "T00:00:00").toLocaleDateString() : ""}</span>
-								<span>{order.food?.pickupTime ? new Date(order.food.pickupTime).toLocaleTimeString([], {
-									hour: "numeric", minute: "2-digit",
-								}) :""}</span>
-								<span>{order.food?.foodItem}</span>
+                        <div className="orders-filters">
+                            <button
+                                className={selectFiltering === "all" ? "filter-btn all" : "filter-btn all off"}
+                                onClick={() => setSelectedOrders("all")}
+                            >
+                                All
+                            </button>
+                            <button
+                                className={selectFiltering === "pending" || selectFiltering === "claimed" ? "filter-btn pending" : "filter-btn pending off"}
+                                onClick={() => setSelectedOrders("claimed")}
+                            >
+                                Claimed
+                            </button>
+                            <button
+                                className={selectFiltering === "cancelled" ? "filter-btn cancelled" : "filter-btn cancelled off"}
+                                onClick={() => setSelectedOrders("cancelled")}
+                            >
+                                Cancelled
+                            </button>
+                            <button
+                                className={selectFiltering === "completed" ? "filter-btn completed" : "filter-btn completed off"}
+                                onClick={() => setSelectedOrders("completed")}
+                            >
+                                Completed
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-								<button
-									className={`review-btn ${order.status?.toLowerCase()}`}
-									type="button"
-									disabled={order.status !== "completed"}
-									onClick={() => setReviewOrder(order)}>
-									Review
-								</button>
-							</div>
-						))
-					) : (
-						<p className="no-orders">No past orders found</p>
-					)}
-				</div>
-			</main>
-			
-			{reviewOrder && (
-				<ReviewModal
-					foodId={reviewOrder.foodId}
-					onClose={() => setReviewOrder(null)}
-					onSubmit={handleReviewSubmit}
-				/>
-			)}
+                <div className="orders-table">
+                    <div className="orders-header-row">
+                        <span>Donor Name</span>
+                        <span>Date</span>
+                        <span>Time</span>
+                        <span>Food Title</span>
+                        <span>Status</span>
+                        <span className="header-review-btn">Review</span>
+                    </div>
 
-		</div>
-	);
+                    {loading ? (
+                        <p className="no-orders">Loading orders...</p>
+                    ) : error ? (
+                        <p className="no-orders error-msg">{error}</p>
+                    ) : filteredOrders.length > 0 ? (
+                        filteredOrders.map((order) => (
+                            <div className="orders-row" key={order.id}>
+                                <span>{order.donor}</span>
+                                <span>{order.date}</span>
+                                <span>{order.time}</span>
+                                <span>{order.food}</span>
+
+                                <span className={`status-pill status-${order.status?.toLowerCase()}`}>
+                                    {order.status || "CLAIMED"}
+                                </span>
+
+                                <div className="review-col">
+                                    {order.reviewed ? (
+                                        <button
+                                            className="view-review-btn"
+                                            type="button"
+                                            onClick={() =>
+                                                setViewReview({
+                                                    foodTitle: order.food,
+                                                    donorName: order.donor,
+                                                    rating: order.reviewRating,
+                                                    comment: order.reviewComment || "No written feedback provided."
+                                                })
+                                            }
+                                        >
+                                            ⭐ {order.reviewRating}/5 View
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className={`submit-review-action-btn ${order.status?.toLowerCase() === "completed" ? "active" : "disabled"}`}
+                                            type="button"
+                                            disabled={order.status?.toLowerCase() !== "completed"}
+                                            onClick={() => setReviewOrder(order)}
+                                        >
+                                            Review
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="no-orders">No past orders found</p>
+                    )}
+                </div>
+            </main>
+
+            {/* Submit Review Modal */}
+            {reviewOrder && (
+                <ReviewModal
+                    foodId={reviewOrder.foodId || reviewOrder.id}
+                    onClose={() => setReviewOrder(null)}
+                    onSubmit={handleReviewSubmit}
+                />
+            )}
+
+            {/* Read-Only Submitted Review Modal */}
+            {viewReview && (
+                <div className="modal-overlay" onClick={() => setViewReview(null)}>
+                    <div className="donor-review-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="modal-title">Review for {viewReview.foodTitle}</h3>
+                        <p className="modal-field">
+                            <strong>Donor:</strong> {viewReview.donorName}
+                        </p>
+                        <p className="modal-stars">
+                            {"★".repeat(viewReview.rating || 0)}
+                            {"☆".repeat(Math.max(0, 5 - (viewReview.rating || 0)))}
+                            <span className="rating-number">
+                                ({viewReview.rating}/5)
+                            </span>
+                        </p>
+                        <div className="modal-comment-box">
+                            <strong>Your Feedback:</strong>
+                            <p className="modal-comment-text">
+                                {viewReview.comment}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            className="modal-close-btn"
+                            onClick={() => setViewReview(null)}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default RecipientPastOrders;
