@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,10 +93,10 @@ public class FoodController {
             return ResponseEntity.status(401)
                     .body("Invalid authentication identity.");
         }
-
-        return ResponseEntity.ok(
-            foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid)
-        );
+        List<Food> listings = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
+        updateExpiredFoodListings(listings);
+        
+        return ResponseEntity.ok(listings);
     }
 
     // Retrieve a specific food listing
@@ -106,6 +107,19 @@ public class FoodController {
                 .orElseGet(() ->
                     ResponseEntity.notFound().build()
                 );
+    }
+
+        // Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
+    private void updateExpiredFoodListings(List<Food> listings) {
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Food food : listings) {
+            if ("ACTIVE".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && food.getPickupEndTime().isAfter(now)) {
+                food.setStatus("UNAVAILABLE");
+            }
+        }
+
+        foodRepository.saveAll(listings);
     }
 
     // DT-73 & DT-96: Recipient requests food listing, moving it to CLAIMED and notifying the donor
