@@ -180,6 +180,16 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the listing donor can confirm this pickup.");
         }
 
+        // Only an existing pending recipient request can be approved. (DT-75)
+        if (!"CLAIMED".equalsIgnoreCase(food.getStatus())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Only a pending food request can be approved.");
+        }
+        if (food.getClaimedByUserId() == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("This food listing has no requesting recipient.");
+        }
+
         food.setStatus("SCHEDULED");
         Food updated = foodRepository.save(food);
 
@@ -192,6 +202,17 @@ public class FoodController {
                 "Pickup for '" + food.getFoodItem() + "' has been confirmed and scheduled."
         );
         notificationRepository.save(notification);
+
+        // DT-75: notify the recipient who requested this listing.
+        Notification recipientNotification = new Notification(
+                food.getClaimedByUserId(),
+                food.getId(),
+                "REQUEST_APPROVED",
+                "Request Approved: " + food.getFoodItem(),
+                "Your request for '" + food.getFoodItem()
+                        + "' has been approved by the donor. Please check your orders for pickup details."
+        );
+        notificationRepository.save(recipientNotification);
 
         return ResponseEntity.ok(updated);
     }
