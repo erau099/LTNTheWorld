@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +32,10 @@ public class AdminController {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    // DT-89: Notify donors when an administrator removes a listing.
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -223,7 +228,9 @@ public class AdminController {
         return ResponseEntity.ok(activity);
     }
 
+    // DT-89: Update food status and notify the donor when removed by an admin.
     @PatchMapping("/food/{id}/status")
+    @Transactional
     public ResponseEntity<?> updateFoodStatus(
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> body) {
@@ -241,14 +248,45 @@ public class AdminController {
                 ? body.get("status")
                 : "REMOVED_BY_ADMIN";
 
-        food.setStatus(newStatus.toUpperCase());
+        if (newStatus == null) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Food status is required"));
+        }
+
+        String normalizedStatus = newStatus.toUpperCase(Locale.ROOT);
+        String previousStatus = food.getStatus();
+
+        food.setStatus(normalizedStatus);
 
         if (body != null && body.containsKey("removalReason")) {
             food.setRemovalReason(body.get("removalReason"));
         }
 
-        foodRepository.save(food);
+        Food savedFood = foodRepository.save(food);
 
-        return ResponseEntity.ok(food);
+        // DT-89: Notify only when the listing first becomes REMOVED_BY_ADMIN.
+        if ("REMOVED_BY_ADMIN".equals(normalizedStatus)
+                && !"REMOVED_BY_ADMIN".equalsIgnoreCase(previousStatus)) {
+
+            String reason = food.getRemovalReason();
+
+            String message = "Your listing '" + food.getFoodItem()
+                    + "' has been removed from availability by an administrator."
+                    + (reason != null && !reason.isBlank()
+                        ? " Reason: " + reason
+                        : "");
+
+            Notification notification = new Notification(
+                    food.getUserId(),
+                    food.getId(),
+                    "LISTING_REMOVED_BY_ADMIN",
+                    "Food Listing Removed by Administrator",
+                    message
+            );
+
+            notificationRepository.save(notification);
+        }
+
+        return ResponseEntity.ok(savedFood);
     }
 }
