@@ -1,4 +1,8 @@
+
 package com.codecraft.lovethyneighbor.security;
+
+import com.codecraft.lovethyneighbor.User;
+import com.codecraft.lovethyneighbor.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -15,14 +19,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    // DT-134: Check current account status on authenticated requests.
+    public JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -54,18 +63,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Claims claims = jwtService.parseToken(token);
 
             String userId = claims.getSubject();
-            String role = claims.get("role", String.class);
+            UUID id = UUID.fromString(userId);
 
-            var authentication = new UsernamePasswordAuthenticationToken(
-                    userId,
-                    null,
-                    List.of(
-                            new SimpleGrantedAuthority(
-                                    "ROLE_" + role.toUpperCase())));
+            Optional<User> userOpt = userRepository.findById(id);
 
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+
+                // DT-134: Reject existing sessions for blocked accounts.
+                if ("ACTIVE".equalsIgnoreCase(user.getStatus())
+                        && user.getRole() != null) {
+
+                    // Use the current database role, not an outdated JWT role.
+                    String role = user.getRole();
+
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            userId,
+                            null,
+                            List.of(
+                                    new SimpleGrantedAuthority(
+                                            "ROLE_" + role.toUpperCase(
+                                                    java.util.Locale.ROOT))));
+
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(authentication);
+                } else {
+                    SecurityContextHolder.clearContext();
+                }
+            } else {
+                SecurityContextHolder.clearContext();
+            }
 
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
