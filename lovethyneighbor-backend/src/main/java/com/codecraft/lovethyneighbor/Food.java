@@ -202,7 +202,7 @@ public class Food {
         }
 
         if (status == null) {
-            status = "pending";
+            status = "ACTIVE";
         }
     }
 

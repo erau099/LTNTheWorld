@@ -90,7 +90,7 @@ public class FoodLifecycleTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SCHEDULED"));
 
-        verify(notificationRepository).save(any(Notification.class));
+        verify(notificationRepository, org.mockito.Mockito.times(2)).save(any(Notification.class));
     }
 
     @Test
