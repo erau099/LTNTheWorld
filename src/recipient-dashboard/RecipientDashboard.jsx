@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +9,6 @@ import "./RecipientDashboard.css";
 import RecipientNotificationBell from "./RecipientNotificationBell";
 
 import { apiFetch } from "../api";
-
 
 function RecipientDashboard() {
 	const navigate = useNavigate();
@@ -83,7 +83,6 @@ function RecipientDashboard() {
 		return () => controller.abort();
 	}, [useMockFood, retryCount]);
 
-
 	// DT-51: recipients can request food once per cooldown window
 	const [cooldown, setCooldown] = useState(null);
 	const loadCooldown = () => {
@@ -107,36 +106,36 @@ function RecipientDashboard() {
 	// Handles the action to request a food listing
 	const [requestLoading, setRequestLoading] = useState(false);
 	const handleFoodRequest = async () => {
-    	if (!selectListing?.id) {
-     		alert("Please select a food listing.");
-        	return;
-    	}
-    	if (useMockFood) {
-        	alert("Food requests are unavailable in mock mode.");
-        	return;
-    	}
-    	setRequestLoading(true);
-    	try {
-        	const response = await apiFetch(`/api/orders/${selectListing.id}`, {
-            	method: "POST",
-        	});
-        	if (!response.ok) {
-            	const message = await response.text();
-            	throw new Error(message || "Failed to request food.");
-        	}
-        	alert("Food requested successfully!");
-        	loadCooldown();
+		if (!selectListing?.id) {
+			alert("Please select a food listing.");
+			return;
+		}
+		if (useMockFood) {
+			alert("Food requests are unavailable in mock mode.");
+			return;
+		}
+		setRequestLoading(true);
+		try {
+			const response = await apiFetch(`/api/orders/${selectListing.id}`, {
+				method: "POST",
+			});
+			if (!response.ok) {
+				const message = await response.text();
+				throw new Error(message || "Failed to request food.");
+			}
+			alert("Food requested successfully!");
+			loadCooldown();
 
-        	// Close the popup
-        	setListings((prev) => prev.filter((item) => item.id !== selectListing.id));
-        	setSelectListing(false);
+			// Close the popup
+			setListings((prev) => prev.filter((item) => item.id !== selectListing.id));
+			setSelectListing(false);
 
-    	} catch (error) {
-        	console.error("Error requesting food:", error);
-        	alert(error.message);
-    	} finally {
-        	setRequestLoading(false);
-    	}
+		} catch (error) {
+			console.error("Error requesting food:", error);
+			alert(error.message);
+		} finally {
+			setRequestLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -203,7 +202,36 @@ function RecipientDashboard() {
 	}, []);
 
 	// Checks the selected food listing against the recipient's saved allergies
-	const handleListingClick = (item) => {
+	const handleListingClick = async (item) => {
+		// DT-88: Recheck listing status when a recipient tries to open it.
+		// A listing may have been put on hold since the dashboard loaded.
+		if (!useMockFood) {
+			try {
+				const response = await fetch(`/api/food/${item.id}`);
+				if (response.ok) {
+					const latestListing = await response.json();
+
+					if (latestListing.status?.toUpperCase() === "ON_HOLD") {
+						alert("This food listing is temporarily unavailable because it is on hold.");
+						setListings((prev) => prev.filter((listing) => listing.id !== item.id));
+						return;
+					}
+
+					if (latestListing.status?.toUpperCase() !== "ACTIVE") {
+						alert("This food listing is no longer available.");
+						setListings((prev) => prev.filter((listing) => listing.id !== item.id));
+						return;
+					}
+				} else if (response.status === 404) {
+					alert("This food listing is no longer available.");
+					setListings((prev) => prev.filter((listing) => listing.id !== item.id));
+					return;
+				}
+			} catch (error) {
+				console.error("Unable to recheck food listing status:", error);
+			}
+		}
+
 		const listingAllergies = item.allergies || [];
 
 		const matchingAllergies = listingAllergies.filter((listingAllergy) =>
@@ -319,8 +347,8 @@ function RecipientDashboard() {
 				)}
 				<section className="top-picks-grid">
 					{filteredListings.map((item) => (
-						<article className="food-card" 
-									key={item.id} 
+						<article className="food-card"
+									key={item.id}
 									onClick={() => handleListingClick(item)}>
 							<div className="food-image"
 								style={item.photos?.length ? {
@@ -350,8 +378,6 @@ function RecipientDashboard() {
 					))}
 				</section>
 
-				
-				
 				<section>
 					{selectListing && (
 						<div
