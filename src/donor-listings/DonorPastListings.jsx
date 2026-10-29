@@ -18,13 +18,38 @@ function DonorPastListings() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectFiltering, setSelectedListings] = useState("all");
 
+    const [recipientName, setRecipientName] = useState({});
+
     // Modal state for viewing reviews
     const [activeReview, setActiveReview] = useState(null);
 
     useEffect(() => {
         apiFetch("/api/food/mine")
             .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-            .then(setListings)
+            .then((data) => {
+			setListings(data)
+
+			// Retrieve the recipient name for each listing
+			data.forEach((listing) => {
+				const recipientId = listing.claimedByUserId;
+
+				if (recipientId) {
+					fetch('/api/users/' + recipientId, {
+						credentials: "include"
+					})
+						.then((res) => (res.ok ? res.json(): Promise.reject(res.status)))
+						.then((user) => {
+							setRecipientName((prev) => ({
+								...prev,
+								[recipientId]: user.firstName + " " + user.lastName
+							}));
+						})
+						.catch((error) => {
+							console.error("Could not load recipient name:", error)
+						});
+					}
+			});
+		})
             .catch(() => setLoadError("Could not load your listings."));
     }, []);
 
@@ -160,7 +185,7 @@ function DonorPastListings() {
                     ) : filteredListings.length > 0 ? (
                         filteredListings.map((listing) => (
                             <div className="orders-row" key={listing.id}>
-                                <span>{listing.recipientName || "Unclaimed"}</span>
+                                <span>{recipientName[listing.claimedByUserId] || "Unclaimed"}</span>
                                 <span>
                                     {listing.date
                                         ? new Date(listing.date + "T00:00:00").toLocaleDateString()

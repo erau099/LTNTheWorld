@@ -211,10 +211,12 @@ function RecipientPastOrders() {
                     ) : filteredOrders.length > 0 ? (
                         filteredOrders.map((order) => (
                             <div className="orders-row" key={order.id}>
-                                <span>{order.donor}</span>
-                                <span>{order.date}</span>
-                                <span>{order.time}</span>
-                                <span>{order.food}</span>
+								<span>{donorName[order.food?.userId] || "Unknown"}</span>
+								<span>{order.food?.date ? new Date(order.food.date + "T00:00:00").toLocaleDateString() : ""}</span>
+								<span>{order.food?.pickupTime ? new Date(order.food.pickupTime).toLocaleTimeString([], {
+									hour: "numeric", minute: "2-digit",
+								}) :""}</span>
+								<span>{order.food?.foodItem}</span>
 
                                 <span className={`status-pill status-${order.status?.toLowerCase()}`}>
                                     {order.status || "CLAIMED"}
