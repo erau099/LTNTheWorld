@@ -313,6 +313,15 @@ function RecipientDashboard() {
 					<button className={selectFiltering === "Fresh / Hot" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
 					<button className={selectFiltering === "Canned" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Canned")}>Canned</button>
 				</div>
+				
+				<div className= "searchbar">
+					<input
+						type="text"
+						placeholder="Search food..."
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+					/>
+				</div>
 
 				<h2>Top Picks:</h2>
 
