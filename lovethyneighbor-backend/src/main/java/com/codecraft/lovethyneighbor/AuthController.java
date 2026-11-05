@@ -5,6 +5,9 @@ import com.codecraft.lovethyneighbor.security.JwtService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +38,15 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
+    // DT-332: how long a signup verification link stays valid
+    static final int VERIFICATION_LINK_HOURS = 24;
+
+    // Where verification links point (the React app)
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
@@ -46,6 +58,13 @@ public class AuthController {
                         userOpt.get().getPassword())) {
 
             User user = userOpt.get();
+
+            // DT-332: new accounts must click the emailed link before logging in
+            if (!user.isEmailVerified()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Please verify your email before logging in. Check your inbox for the verification link.");
+            }
+
             // DT-134: Only active accounts are allowed to log in.
             if  (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -135,9 +154,65 @@ public class AuthController {
                 request.getPhoneNumber(),
                 request.getRole());
 
+        // DT-332: account stays locked until the emailed link is clicked
+        newUser.setEmailVerified(false);
+        String rawToken = issueVerificationToken(newUser);
+
         userRepository.save(newUser);
 
+        sendVerificationEmail(newUser, rawToken);
+
         return ResponseEntity.ok("success");
+    }
+
+    // DT-332: called by the /verify-email page with the token from the emailed link
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailRequest request) {
+
+        if (request == null || request.getToken() == null || request.getToken().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid verification link");
+        }
+
+        Optional<User> userOpt = userRepository.findByVerificationTokenHash(hashToken(request.getToken()));
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid or already used verification link");
+        }
+
+        User user = userOpt.get();
+
+        if (user.getVerificationTokenExpiration() == null
+                || user.getVerificationTokenExpiration().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Verification link has expired. Request a new one below.");
+        }
+
+        user.setEmailVerified(true);
+        user.setVerificationTokenHash(null);
+        user.setVerificationTokenExpiration(null);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Your email has been verified. You can now log in.");
+    }
+
+    // DT-332: sends a fresh link. Always answers the same way so it can't be used to check which emails exist.
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody ForgotPasswordRequest request) {
+
+        if (request != null && request.getEmail() != null) {
+            userRepository.findByEmail(request.getEmail())
+                    .filter(user -> !user.isEmailVerified())
+                    .ifPresent(user -> {
+                        String rawToken = issueVerificationToken(user);
+                        userRepository.save(user);
+                        sendVerificationEmail(user, rawToken);
+                    });
+        }
+
+        return ResponseEntity.ok(
+                "If that account still needs verifying, a new link has been sent.");
     }
 
     @PostMapping("/forgot-password")
@@ -264,6 +339,24 @@ public class AuthController {
                 request.getNewEmail());
 
         return ResponseEntity.ok("success");
+    }
+
+    // Stores the hash of a new verification token on the user and returns the raw token for the email
+    private String issueVerificationToken(User user) {
+        String rawToken = generateResetToken();
+        user.setVerificationTokenHash(hashToken(rawToken));
+        user.setVerificationTokenExpiration(LocalDateTime.now().plusHours(VERIFICATION_LINK_HOURS));
+        return rawToken;
+    }
+
+    // A failed email shouldn't fail signup: the account is saved and the user can resend from the login page
+    private void sendVerificationEmail(User user, String rawToken) {
+        String link = frontendUrl + "/#/verify-email?token=" + rawToken;
+        try {
+            emailService.sendSignupConfirmation(user.getEmail(), user.getFirstName(), link);
+        } catch (Exception e) {
+            log.warn("Could not send verification email to user {}: {}", user.getId(), e.getMessage());
+        }
     }
 
     private String generateResetToken() {
@@ -548,4 +641,11 @@ class ChangeEmailRequest {
     public void setNewEmail(String newEmail) {
         this.newEmail = newEmail;
     }
+}
+
+class VerifyEmailRequest {
+    private String token;
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }
