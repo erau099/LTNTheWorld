@@ -1,3 +1,4 @@
+
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,14 @@ public class FoodClaimService {
     public Claim claim(Long foodId, UUID recipientId) {
         Food food = foodRepository.findById(foodId)
                 .orElseThrow(() -> new ClaimException(HttpStatus.NOT_FOUND, "Food listing not found."));
+
+        // DT-88: Explain when a listing is temporarily on hold.
+        if ("ON_HOLD".equalsIgnoreCase(food.getStatus())) {
+            throw new ClaimException(
+                    HttpStatus.CONFLICT,
+                    "This food listing is temporarily unavailable because it is on hold."
+            );
+        }
 
         if (!"ACTIVE".equalsIgnoreCase(food.getStatus())) {
             throw new ClaimException(HttpStatus.BAD_REQUEST, "This food is no longer available.");
