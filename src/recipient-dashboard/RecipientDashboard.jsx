@@ -329,15 +329,20 @@ function RecipientDashboard() {
 						onChange={(e) => setSearchTerm(e.target.value)}
 					/>
 				</div>
-				<div className="dropdown">
-					<input
-						type="search"
-						placeholder="Filter by category..."
-						value={filterTerm}
-						onChange={(e) => setFilterTerm(e.target.value)}
-					/>
-				</div>
-
+				{showDropdown && searchTerm.trim() !== "" && (
+					<div className="search-dropdown">
+						{foundListings.length > 0 ? (
+							foundListings.map((listing) => (
+								<div key={listing.id} className="search-item">
+									{listing.food}
+								</div>
+							))
+						) : (
+							<p>No results found.</p>
+						)}
+					</div>
+				)}
+				
 				<h2>Top Picks:</h2>
 
 				{/* Food cards shown to recipients */}
