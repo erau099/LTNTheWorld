@@ -2,6 +2,8 @@ package com.codecraft.lovethyneighbor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+@EnableScheduling 
 @RequestMapping("/api/food")
 @CrossOrigin(origins = "http://localhost:5173")
 public class FoodController {
@@ -94,7 +97,7 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
         List<Food> listings = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
-        updateExpiredFoodListings(listings);
+        updateExpiredFoodListings();
         
         return ResponseEntity.ok(listings);
     }
@@ -110,9 +113,16 @@ public class FoodController {
     }
 
         // Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
-    private void updateExpiredFoodListings(List<Food> listings) {
-        LocalDateTime now = LocalDateTime.now();
+        @Scheduled(fixedRate = 1000)
+        @Transactional 
+        private void updateExpiredFoodListings() {
+            LocalDateTime now = LocalDateTime.now();
+            List<Food> listings = foodRepository.findByStatusIgnoreCase("pending");
+            System.out.println("Checking for expired food listings at: " + now);
+            int updated = 0;
 
+            System.out.println("Updated " + updated + " expired food listings to UNAVAILABLE.");
+        
         for (Food food : listings) {
             if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && !food.getPickupEndTime().isAfter(now)) {
                 food.setStatus("UNAVAILABLE");
