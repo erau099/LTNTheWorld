@@ -9,6 +9,14 @@ import "./RecipientDashboard.css";
 import RecipientNotificationBell from "./RecipientNotificationBell";
 
 import { apiFetch } from "../api";
+import { ALLERGENS } from "../food-upload/foodDraft.js";
+
+
+// "Eggs" / "egg", and the older "Dairy" / "Diary" spellings of Milk, compare as the same allergen
+function normalizeAllergen(name) {
+	const value = (name || "").trim().toLowerCase().replace(/s$/, "");
+	return value === "dairy" || value === "diary" ? "milk" : value;
+}
 
 function RecipientDashboard() {
 	const navigate = useNavigate();
@@ -172,9 +180,41 @@ function RecipientDashboard() {
 	// Handles the filtering for the listings
 	const [selectFiltering, setSelectedFiltering] = useState("all")
 
+	// Search box and allergen filter, combined with the category tabs
+	const [searchText, setSearchText] = useState("");
+	const [excludedAllergens, setExcludedAllergens] = useState([]);
+
+	const toggleExcludedAllergen = (allergen) => {
+		setExcludedAllergens((prev) =>
+			prev.includes(allergen) ? prev.filter((a) => a !== allergen) : [...prev, allergen]
+		);
+	};
+
+	const clearFilters = () => {
+		setSearchText("");
+		setExcludedAllergens([]);
+		setSelectedFiltering("all");
+	};
+
+	const filtersActive = searchText.trim() !== "" || excludedAllergens.length > 0 || selectFiltering !== "all";
+
 	const filteredListings = listings.filter((item) => {
-		return selectFiltering === "all" || item.category === selectFiltering;
-	})
+		const matchesCategory = selectFiltering === "all" || item.category === selectFiltering;
+
+		const query = searchText.trim().toLowerCase();
+		const matchesSearch =
+			!query ||
+			[item.food, item.description, item.category].some((text) =>
+				(text || "").toLowerCase().includes(query)
+			);
+
+		const listingAllergens = item.allergies.map(normalizeAllergen);
+		const safeForMe = excludedAllergens.every(
+			(allergen) => !listingAllergens.includes(normalizeAllergen(allergen))
+		);
+
+		return matchesCategory && matchesSearch && safeForMe;
+	});
 
 	// Stores the logged-in recipient's saved allergies
 	const [recipientAllergies, setRecipientAllergies] = useState([]);
@@ -324,6 +364,32 @@ function RecipientDashboard() {
 					<button className={selectFiltering === "Canned" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Canned")}>Canned</button>
 				</div>
 
+				{/* Search and allergen filter */}
+				<div className="listing-search-row">
+					<input
+						type="search"
+						className="listing-search"
+						placeholder="Search food or keyword"
+						aria-label="Search food listings"
+						value={searchText}
+						onChange={(e) => setSearchText(e.target.value)}
+					/>
+				</div>
+				<div className="allergen-filter-row" role="group" aria-label="Hide food containing">
+					<span className="allergen-filter-label">Hide food containing:</span>
+					{ALLERGENS.map((allergen) => (
+						<button
+							key={allergen}
+							type="button"
+							className={excludedAllergens.includes(allergen) ? "allergen-chip active" : "allergen-chip"}
+							aria-pressed={excludedAllergens.includes(allergen)}
+							onClick={() => toggleExcludedAllergen(allergen)}
+						>
+							{allergen}
+						</button>
+					))}
+				</div>
+
 				<h2>Top Picks:</h2>
 
 				{coolingDown && (
@@ -343,7 +409,18 @@ function RecipientDashboard() {
 					</div>
 				)}
 				{!listingsLoading && !listingsError && filteredListings.length === 0 && (
-					<p>No food listings found for this category.</p>
+					<div className="no-results" role="status">
+						<p>
+							{listings.length === 0
+								? "No food listings are available right now."
+								: "No food listings match your search and filters."}
+						</p>
+						{filtersActive && listings.length > 0 && (
+							<button type="button" className="filter-button" onClick={clearFilters}>
+								Clear filters
+							</button>
+						)}
+					</div>
 				)}
 				<section className="top-picks-grid">
 					{filteredListings.map((item) => (

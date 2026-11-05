@@ -19,6 +19,7 @@ import FoodSubmission from './food-upload/FoodSubmission.jsx'
 import AdminDashboard from "./admin/AdminDashboard.jsx";
 import ForgotPassword from "./ForgotPassword.jsx"
 import ResetPassword from "./ResetPassword.jsx"
+import VerifyEmail from "./VerifyEmail.jsx"
 import AdminLogin from "./admin/AdminLogin.jsx";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
 import AdminArchivedListings from "./admin/AdminArchivedListings.jsx";
@@ -36,6 +37,7 @@ function App() {
         <Route path="/Signup" element={<Signup />} /> {/* Defined path for Signup page */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/HowItWorks" element={<HowItWorks />} /> {/* Defined path for How It Works page */}
         <Route path="/UploadFoodDetails" element={<UploadFoodDetails />} /> {/* Defined path for Food Upload page */}
         <Route path="/UploadFoodLocation" element={<UploadFoodLocation />} />
