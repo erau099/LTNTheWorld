@@ -97,7 +97,6 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
         List<Food> listings = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
-        updateExpiredFoodListings();
         
         return ResponseEntity.ok(listings);
     }
@@ -117,8 +116,7 @@ public class FoodController {
         @Transactional 
         private void updateExpiredFoodListings() {
             LocalDateTime now = LocalDateTime.now();
-            List<Food> listings = foodRepository.findByStatusIgnoreCase("pending");
-            System.out.println("Checking for expired food listings at: " + now);
+            List<Food> listings = foodRepository.findAll();
             int updated = 0;
 
             System.out.println("Updated " + updated + " expired food listings to UNAVAILABLE.");
@@ -127,6 +125,7 @@ public class FoodController {
             if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && !food.getPickupEndTime().isAfter(now)) {
                 food.setStatus("UNAVAILABLE");
                 foodRepository.save(food);
+                updated++;
             }
         }
     }
