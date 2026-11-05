@@ -87,6 +87,9 @@ function RecipientDashboard() {
 	const foundListings = listings.filter((item) =>
 		item.food.toLowerCase().includes(searchTerm.toLowerCase())
 	);
+
+	//Handles the dropdown for the filter tags
+	const [filterTerm, setFilterTerm] = useState("");
 	// Handles the action to request a food listing
 	const [requestLoading, setRequestLoading] = useState(false);
 	const handleFoodRequest = async () => {
@@ -320,10 +323,18 @@ function RecipientDashboard() {
 				
 				<div className= "searchbar">
 					<input
-						type="text"
+						type="search"
 						placeholder="Search food..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
+					/>
+				</div>
+				<div className="dropdown">
+					<input
+						type="search"
+						placeholder="Filter by category..."
+						value={filterTerm}
+						onChange={(e) => setFilterTerm(e.target.value)}
 					/>
 				</div>
 
