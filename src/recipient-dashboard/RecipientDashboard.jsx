@@ -82,7 +82,11 @@ function RecipientDashboard() {
 		return () => controller.abort();
 	}, [useMockFood, retryCount]);
 
-
+	// Handles the search bar input for filtering food listings
+	const [searchTerm, setSearchTerm] = useState("");
+	const foundListings = listings.filter((item) =>
+		item.food.toLowerCase().includes(searchTerm.toLowerCase())
+	);
 	// Handles the action to request a food listing
 	const [requestLoading, setRequestLoading] = useState(false);
 	const handleFoodRequest = async () => {
