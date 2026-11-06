@@ -111,7 +111,7 @@ public class FoodController {
                 );
     }
 
-        // Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
+        // DT-98 - Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
         @Scheduled(fixedRate = 1000)
         @Transactional 
         private void updateExpiredFoodListings() {
