@@ -1,0 +1,256 @@
+.pickup-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(2px);
+}
+
+.pickup-modal {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: pickupModalSlideIn 0.2s ease-out;
+}
+
+@keyframes pickupModalSlideIn {
+  from {
+    transform: translateY(12px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.pickup-modal-header {
+  padding: 18px 24px;
+  background-color: #2e5939;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pickup-modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pickup-modal-close-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.pickup-modal-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.pickup-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: 75vh;
+}
+
+.pickup-food-hero {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  background-color: #f7faf7;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #e1ebe2;
+}
+
+.pickup-food-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  background-color: #e5ede6;
+  flex-shrink: 0;
+}
+
+.pickup-food-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pickup-food-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a3321;
+  margin: 0 0 4px 0;
+}
+
+.pickup-food-desc {
+  font-size: 0.88rem;
+  color: #556b5a;
+  margin: 0;
+}
+
+.pickup-status-tracker {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0 24px 0;
+  position: relative;
+}
+
+.pickup-status-tracker::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 24px;
+  right: 24px;
+  height: 3px;
+  background-color: #e2e8e3;
+  z-index: 1;
+}
+
+.tracker-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.tracker-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #e2e8e3;
+  color: #7b8f7f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.tracker-step.active .tracker-dot {
+  background-color: #2e5939;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(46, 89, 57, 0.2);
+}
+
+.tracker-step.completed .tracker-dot {
+  background-color: #1e824c;
+  color: #ffffff;
+}
+
+.tracker-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6d8272;
+}
+
+.tracker-step.active .tracker-label {
+  color: #1a3321;
+  font-weight: 700;
+}
+
+.pickup-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pickup-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #e8efe9;
+}
+
+.pickup-detail-label {
+  color: #637766;
+  font-weight: 500;
+}
+
+.pickup-detail-value {
+  color: #1a3321;
+  font-weight: 600;
+  text-align: right;
+}
+
+.pickup-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #eef3ef;
+}
+
+.pickup-action-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  border: none;
+}
+
+.pickup-btn-secondary {
+  background-color: #edf2ee;
+  color: #3b5040;
+}
+
+.pickup-btn-secondary:hover {
+  background-color: #dfe7e0;
+}
+
+.pickup-btn-primary {
+  background-color: #2e5939;
+  color: #ffffff;
+}
+
+.pickup-btn-primary:hover {
+  background-color: #23452c;
+}
+
+.pickup-btn-complete {
+  background-color: #1e824c;
+  color: #ffffff;
+}
+
+.pickup-btn-complete:hover {
+  background-color: #16653b;
+}
+
+.pickup-error-msg {
+  background-color: #fdf2f2;
+  color: #9b1c1c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+}

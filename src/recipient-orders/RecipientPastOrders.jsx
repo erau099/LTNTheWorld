@@ -6,6 +6,7 @@ import "../index.css";
 import ReviewModal from "../ReviewModal.jsx"; 
 
 import searchIcon from "../assets/magnifying-glass.png";
+import { apiFetch } from "../api";
 
 // Temporary mock data for recipient past orders.
 const orders = [
@@ -61,6 +62,20 @@ function RecipientPastOrders() {
 		};
 	}, []);
 
+	// Retrieve orders from the backend
+	const [orders, setOrders] = useState([]);
+	const[ordersError, setOrdersError] = useState("");
+	
+	useEffect(() => {
+		apiFetch("/api/orders/mine")
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			//.then(setOrders)
+			.then((data) => {
+				setOrders(data);
+			})
+			.catch(() => setOrdersError("Could not load your orders."));
+	}, []);
+
 	// Review
 	const handleReviewSubmit = async ({ foodId, rating, comment }) => {
 		try {
@@ -95,7 +110,7 @@ function RecipientPastOrders() {
 	const [selectFiltering, setSelectedOrders] = useState("all")
 
 	const filteredOrders = orders.filter((order) => {
-		return selectFiltering === "all" || order.status === selectFiltering;
+		return selectFiltering === "all" || order.status?.toLowerCase() === selectFiltering.toLowerCase();
 	})
 
 	return (
@@ -191,12 +206,14 @@ function RecipientPastOrders() {
 							<div className="orders-row"
 							key={id}>
 								<span>{order.donor}</span>
-								<span>{order.date}</span>
-								<span>{order.time}</span>
-								<span>{order.food}</span>
+								<span>{order.food?.date ? new Date(order.food.date + "T00:00:00").toLocaleDateString() : ""}</span>
+								<span>{order.food?.pickupTime ? new Date(order.food.pickupTime).toLocaleTimeString([], {
+									hour: "numeric", minute: "2-digit",
+								}) :""}</span>
+								<span>{order.food?.foodItem}</span>
 
 								<button
-									className={`review-btn ${order.status}`}
+									className={`review-btn ${order.status?.toLowerCase()}`}
 									type="button"
 									disabled={order.status !== "completed"}
 									onClick={() => setReviewOrder(order)}>

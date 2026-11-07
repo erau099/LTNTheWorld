@@ -1,3 +1,4 @@
+
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class AdminController {
         }
 
         Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             boolean passwordMatches = (passwordEncoder != null
@@ -49,10 +51,14 @@ public class AdminController {
 
             if (passwordMatches) {
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                    return ResponseEntity.ok(new LoginResponse("success", user.getName(), "ADMIN", null));
+                    return ResponseEntity.ok(
+                            new LoginResponse("success", user.getName(), "ADMIN", null)
+                    );
                 } else {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(new MessageResponse("Access denied: Administrator privileges required"));
+                            .body(new MessageResponse(
+                                    "Access denied: Administrator privileges required"
+                            ));
                 }
             }
         }
@@ -66,6 +72,7 @@ public class AdminController {
         List<UserSummaryDTO> users = userRepository.findAll().stream()
                 .map(UserSummaryDTO::new)
                 .collect(Collectors.toList());
+
         return ResponseEntity.ok(users);
     }
 
@@ -78,29 +85,42 @@ public class AdminController {
     public ResponseEntity<AdminStatsDTO> getStats() {
         long totalUsers = userRepository.count();
         long activeListings = foodRepository.countByStatusIgnoreCase("ACTIVE");
-        return ResponseEntity.ok(new AdminStatsDTO(totalUsers, activeListings, 0L));
+
+        return ResponseEntity.ok(
+                new AdminStatsDTO(totalUsers, activeListings, 0L)
+        );
     }
 
     @GetMapping("/food/active")
     public ResponseEntity<List<Food>> getActiveFoodListings() {
-        List<Food> activeListings = foodRepository.findByStatusIgnoreCase("ACTIVE");
+        List<Food> activeListings =
+                foodRepository.findByStatusIgnoreCase("ACTIVE");
+
         return ResponseEntity.ok(activeListings);
     }
 
     @GetMapping("/food/archived")
     public ResponseEntity<List<Food>> getArchivedFoodListings() {
-        List<Food> archivedListings = foodRepository.findByStatusIgnoreCase("ARCHIVED");
+        List<Food> archivedListings =
+                foodRepository.findByStatusIgnoreCase("ARCHIVED");
+
         return ResponseEntity.ok(archivedListings);
     }
 
     @PatchMapping("/users/{id}/status")
-    public ResponseEntity<?> toggleUserStatus(@PathVariable UUID id,
+    public ResponseEntity<?> toggleUserStatus(
+            @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {
+
         Optional<User> userOpt = userRepository.findById(id);
+
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
         }
+
         User user = userOpt.get();
+
         if (body != null && body.containsKey("status")) {
             user.setStatus(body.get("status").toUpperCase());
         } else {
@@ -110,25 +130,54 @@ public class AdminController {
                 user.setStatus("SUSPENDED");
             }
         }
+
         userRepository.save(user);
+
         return ResponseEntity.ok(new UserSummaryDTO(user));
     }
 
     @PatchMapping("/users/{id}/restrictions")
-    public ResponseEntity<?> toggleUserRestrictions(@PathVariable UUID id,
+    public ResponseEntity<?> toggleUserRestrictions(
+            @PathVariable UUID id,
             @RequestBody(required = false) Map<String, Boolean> body) {
+
         Optional<User> userOpt = userRepository.findById(id);
+
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
         }
+
         User user = userOpt.get();
+
         if (body != null && body.containsKey("canPostListings")) {
             user.setCanPostListings(body.get("canPostListings"));
         } else {
-            user.setCanPostListings(!Boolean.TRUE.equals(user.getCanPostListings()));
+            user.setCanPostListings(
+                    !Boolean.TRUE.equals(user.getCanPostListings())
+            );
         }
+
         userRepository.save(user);
+
         return ResponseEntity.ok(new UserSummaryDTO(user));
+    }
+
+    // DT-112: Admin view user full profile and activity history
+    @GetMapping("/users/{id}/activity")
+    public ResponseEntity<?> getUserActivity(@PathVariable UUID id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User not found"));
+        }
+
+        User user = userOpt.get();
+        UserSummaryDTO summary = new UserSummaryDTO(user);
+        List<Food> listings = foodRepository.findByUser_IdOrderByCreatedAtDesc(id);
+
+        UserActivityDTO activity = new UserActivityDTO(summary, listings);
+        return ResponseEntity.ok(activity);
     }
 
     @PatchMapping("/food/{id}/status")

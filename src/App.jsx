@@ -56,14 +56,11 @@ function App() {
         <Route path="/admin-flagged-users" element={<AdminProtectedRoute><AdminFlaggedUsers /></AdminProtectedRoute>} />
         <Route path="/admin-flagged-listings" element={<AdminProtectedRoute><AdminFlaggedListings /></AdminProtectedRoute>} />
         <Route path="/reviews" element={<Review />} />
-        <Route
-          path="/admin-dashboard"
-          element={
-            <AdminProtectedRoute>
-              <AdminDashboard />
-            </AdminProtectedRoute>
-          }
-        />
+        <Route path="/admin-dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+        <Route path="/admin-archived-listings" element={<AdminProtectedRoute><AdminArchivedListings /></AdminProtectedRoute>} />
+        <Route path="/admin-reports" element={<AdminProtectedRoute><AdminReports /></AdminProtectedRoute>} />
+        <Route path="/admin-flagged-users" element={<AdminProtectedRoute><AdminFlaggedUsers /></AdminProtectedRoute>} />
+        <Route path="/admin-flagged-listings" element={<AdminProtectedRoute><AdminFlaggedListings /></AdminProtectedRoute>} />
       </Routes>
     </Router>
   )

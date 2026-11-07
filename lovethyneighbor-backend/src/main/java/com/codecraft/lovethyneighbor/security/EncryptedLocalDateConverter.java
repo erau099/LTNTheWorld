@@ -82,7 +82,11 @@ public class EncryptedLocalDateConverter implements AttributeConverter<LocalDate
             // "2001-04-15" string -> back into a LocalDate
             return LocalDate.parse(plainValue);
         } catch (Exception e) {
-            throw new RuntimeException("Decryption failed", e);
+            try {
+                return LocalDate.parse(dbValue);
+            } catch (Exception ignored) {
+                return null;
+            }
         }
     }
 }

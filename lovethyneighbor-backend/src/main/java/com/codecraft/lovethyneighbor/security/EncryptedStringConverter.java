@@ -86,7 +86,8 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
             byte[] plaintext = cipher.doFinal(ciphertext);
             return new String(plaintext, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException("Decryption failed", e);
+            // Decryption failed (e.g. unencrypted plain text or key mismatch)
+            return dbValue;
         }
     }
 }

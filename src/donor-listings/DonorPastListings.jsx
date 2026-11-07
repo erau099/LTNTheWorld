@@ -3,55 +3,25 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./DonorPastListings.css";
 import "../index.css";
+import "../App.css";
+import "../CDashboard.css";
 
 import searchIcon from "../assets/magnifying-glass.png";
-
-// Temporary mock data for donor past listings.
-const listings = [
-	{
-		id: 1,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "pending",
-	},
-	{
-		id: 2,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "pending",
-	},
-	{
-		id: 3,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "pending",
-	},
-	{
-		id: 4,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "cancelled",
-	},
-	{
-		id: 5,
-		donor: "Robin Roberts",
-		date: "01/03/2026",
-		time: "1:30pm",
-		food: "Donuts",
-		status: "completed",
-	},
-];
+import { apiFetch } from "../api";
 
 function DonorPastListings() {
 	const navigate = useNavigate();
+
+	// Listings posted by the logged-in donor, loaded from the backend.
+	const [listings, setListings] = useState([]);
+	const [loadError, setLoadError] = useState("");
+
+	useEffect(() => {
+		apiFetch("/api/food/mine")
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			.then(setListings)
+			.catch(() => setLoadError("Could not load your listings."));
+	}, []);
 
 	// Controls the gear dropdown menu.
 	const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -159,7 +129,7 @@ function DonorPastListings() {
 				{/* Listings table */}
 				<div className="orders-table">
 					<div className="orders-header-row">
-						<span>Donor Name</span>
+						<span>Recipient Name</span>
 						<span>Date</span>
 						<span>Time</span>
 						<span>Food Title</span>
@@ -167,13 +137,15 @@ function DonorPastListings() {
 					</div>
 
 					{filteredListings.length > 0 ? (
-						filteredListings.map((listing, id) => (
+						filteredListings.map((listing) => (
 							<div className="orders-row" 
-							key={id}>
-								<span>{listing.donor}</span>
-								<span>{listing.date}</span>
-								<span>{listing.time}</span>
-								<span>{listing.food}</span>
+							key={listing.id}>
+								<span>{listing.userId}</span>
+								<span>{new Date(listing.date + "T00:00:00").toLocaleDateString()}</span>
+								<span>{new Date(listing.pickupTime).toLocaleTimeString([], {
+									hour: "numeric", minute: "2-digit",
+								})}</span>
+								<span>{listing.foodItem}</span>
 
 								<button className={`review-btn ${listing.status}`}>
 									Review

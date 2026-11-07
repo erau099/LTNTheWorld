@@ -1,6 +1,5 @@
 package com.codecraft.lovethyneighbor;
 
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 

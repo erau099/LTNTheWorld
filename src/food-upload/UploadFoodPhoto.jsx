@@ -63,7 +63,7 @@ function UploadFoodPhoto() {
                     date: draft.date,
                     startTime: draft.startTime,
                     endTime: draft.endTime,
-                    photos: draft.photos,
+                    photos: draft.photos
                 }),
             });
 
