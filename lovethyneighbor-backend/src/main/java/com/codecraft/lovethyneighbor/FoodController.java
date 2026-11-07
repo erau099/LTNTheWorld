@@ -104,7 +104,7 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
         List<Food> foods = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
-        updateExpiredFoodListings(foods);
+        updateExpiredFoodListings();
 
         List<DonorListingResponse> responseList = foods.stream().map(food -> {
             String recipientName = "Unclaimed";
@@ -157,7 +157,6 @@ public class FoodController {
     }
 
         // DT-98 - Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
-        @Scheduled(fixedRate = 1000)
         @Transactional 
         private void updateExpiredFoodListings() {
             LocalDateTime now = LocalDateTime.now();
