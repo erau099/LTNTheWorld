@@ -54,6 +54,13 @@ public class FoodOrderController {
         return ResponseEntity.ok(orders);
     }
 
+    // Recipient Notifications: send a notification to the recipient with pickup location and time, and mark the order as "ready for pickup"
+    @PostMapping("/{orderId}/notify")
+    @Transactional
+    public ResponseEntity<?> notifyRecipient(){
+        
+    }
+
     // Recipient Dashboard: request a food listing
     @PostMapping("/{foodId}")
     public ResponseEntity<?> createOrder(
