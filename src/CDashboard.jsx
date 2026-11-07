@@ -40,9 +40,9 @@ function CDashboard() {
     }, [navigate]);
 
     // Handle dropdown actions including Sign Out
-    const handleAction = (item) => {
+    const handleAction = async (item) => {
         if (item === "Sign Out") {
-            logout(); // Clear session data from localStorage
+            await logout(); // clear authentication session
             navigate("/"); // Redirect back to landing page
         } else {
             console.log(item);

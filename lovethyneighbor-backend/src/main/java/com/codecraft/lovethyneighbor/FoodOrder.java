@@ -88,4 +88,14 @@ public class FoodOrder {
         return createdAt;
     }
 
+    void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    // Donor's name for the recipient's order history (DT-261)
+    public String getDonorName() {
+        User donor = food == null ? null : food.getUser();
+        return donor == null ? null : donor.getName();
+    }
+
 }

@@ -7,8 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import com.codecraft.lovethyneighbor.security.JwtService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,6 +34,18 @@ public class AdminControllerTest {
     @Mock
     private FoodRepository foodRepository;
 
+    @Mock
+    private NotificationRepository notificationRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private ReportRepository reportRepository;
+
     @InjectMocks
     private AdminController adminController;
 
@@ -41,13 +55,12 @@ public class AdminControllerTest {
     }
 
     @Test
-    void testAdminLoginWithDefaultCredentials() throws Exception {
+    void testAdminLoginWithMissingCredentialsReturnsBadRequest() throws Exception {
         mockMvc.perform(post("/api/admin/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\":\"admin\",\"password\":\"1234\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.role").value("ADMIN"));
+                .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Username and password are required"));
     }
 
     @Test
@@ -55,6 +68,7 @@ public class AdminControllerTest {
         User donorUser = new User("Jane", "Doe", "jane@example.com", "secret",
                 LocalDate.of(1995, 1, 1), "1234567890", "donor");
         when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(donorUser));
+        when(passwordEncoder.matches("secret", "secret")).thenReturn(true);
 
         mockMvc.perform(post("/api/admin/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -78,7 +92,10 @@ public class AdminControllerTest {
     void testAdminLoginWithAdminRoleInDatabaseReturnsOk() throws Exception {
         User adminUser = new User("Admin", "Staff", "admin@domain.com", "pass123",
                 LocalDate.of(1990, 5, 10), "5551234567", "ADMIN");
+        adminUser.setStatus("ACTIVE");
         when(userRepository.findByEmail("admin@domain.com")).thenReturn(Optional.of(adminUser));
+        when(passwordEncoder.matches("pass123", "pass123")).thenReturn(true);
+        when(jwtService.generateToken(any(), any())).thenReturn("mock-token");
 
         mockMvc.perform(post("/api/admin/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

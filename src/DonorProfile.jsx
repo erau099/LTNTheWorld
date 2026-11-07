@@ -1,23 +1,65 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, logout } from "./utils/auth";
+import { logout } from "./utils/auth";
 import "./index.css";
 import "./App.css";
 import "./CDashboard.css";
 import "./DonorProfile.css";
 import WaiverText from "./Waivers/WaiverText.jsx";
 
-const NAV_LINKS = ["Discover", "Orders"];
 const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
 
 const STATES = [
-  "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
-  "Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana",
-  "Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana",
-  "Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina",
-  "North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina",
-  "South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia",
-  "Wisconsin","Wyoming"
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
 ];
 
 const COUNTRIES = ["United States", "Canada", "Mexico"];
@@ -40,6 +82,7 @@ function EditableInput({
   editable,
   onToggleEdit,
   ariaLabel,
+  canEdit = true,
 }) {
   return (
     <div className={`dp-inputWrap ${editable ? "is-editing" : ""}`}>
@@ -50,111 +93,95 @@ function EditableInput({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        disabled={!editable}
+        disabled={!editable || !canEdit}
         aria-label={ariaLabel || name}
         autoComplete="off"
       />
-      <button
-        type="button"
-        className="dp-editBtn"
-        onClick={() => onToggleEdit(name)}
-        aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
-        title={editable ? "Lock" : "Edit"}
-      >
-        <PencilIcon className="dp-pencil" />
-      </button>
+
+      {canEdit && (
+        <button
+          type="button"
+          className="dp-editBtn"
+          onClick={() => onToggleEdit(name)}
+          aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
+          title={editable ? "Lock" : "Edit"}
+        >
+          <PencilIcon className="dp-pencil" />
+        </button>
+      )}
     </div>
   );
 }
 
-function EditableSelect({ name, value, onChange, editable, onToggleEdit, options, ariaLabel }) {
+function EditableSelect({
+  name,
+  value,
+  onChange,
+  editable,
+  onToggleEdit,
+  options,
+  ariaLabel,
+  canEdit = true,
+}) {
   return (
-    <div className={`dp-inputWrap dp-selectWrap ${editable ? "is-editing" : ""}`}>
+    <div
+      className={`dp-inputWrap dp-selectWrap ${
+        editable ? "is-editing" : ""
+      }`}
+    >
       <select
         className="dp-input dp-select"
         name={name}
         value={value}
         onChange={onChange}
-        disabled={!editable}
+        disabled={!editable || !canEdit}
         aria-label={ariaLabel || name}
       >
         {options.map((opt) => (
-          <option key={opt} value={opt}>{opt}</option>
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
         ))}
       </select>
 
-      <button
-        type="button"
-        className="dp-editBtn"
-        onClick={() => onToggleEdit(name)}
-        aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
-        title={editable ? "Lock" : "Edit"}
-      >
-        <PencilIcon className="dp-pencil" />
-      </button>
+      {canEdit && (
+        <button
+          type="button"
+          className="dp-editBtn"
+          onClick={() => onToggleEdit(name)}
+          aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
+          title={editable ? "Lock" : "Edit"}
+        >
+          <PencilIcon className="dp-pencil" />
+        </button>
+      )}
     </div>
   );
 }
 
 export default function DonorProfile() {
-  // header state (copied from CDashboard) 
   const navigate = useNavigate();
+
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const [user, setUser] = useState({ firstName: "Test" });
+
+  const [user, setUser] = useState({
+    firstName: "User",
+  });
 
   const [showSignedWaiver, setShowSignedWaiver] = useState(false);
 
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    
-    // keep this commented out otherwise you'll route straight to login page if you try accessing donor profile page
-    /*
-    if (!currentUser) {
-      navigate("/Login"); // matches your App.jsx route
-    } else {
-      setUser(currentUser);
-    }
-    */
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-
-    function handleClickOut(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOut);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOut);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [navigate]);
-
-  const handleAction = (item) => {
-    if (item === "Sign Out") {
-      logout();
-      navigate("/");
-    } else {
-      console.log(item);
-    }
-    setDropdownOpen(false);
-  };
-
-  //if (!user) return null;
-
   const [form, setForm] = useState({
-    firstName: "Joe",
-    lastName: "Shmoe",
-    email: "jshmoe24@gmail.com",
+    firstName: "",
+    lastName: "",
+    email: "",
     password: "******",
-    dob: "01/01/2001",
-    phone: "(916)-111-1111",
-    address: "9999 Josh Way",
-    zip: "12345",
-    city: "Sacramento",
+    dob: "",
+    phone: "",
+    address: "",
+    zip: "",
+    city: "",
     state: "California",
     country: "United States",
   });
@@ -173,47 +200,271 @@ export default function DonorProfile() {
     country: false,
   });
 
-  const canSave = useMemo(() => true, []);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+
+    window.addEventListener("scroll", onScroll);
+
+    function handleClickOut(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOut);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOut);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/users/me", {
+      credentials: "include",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Unable to load profile");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        setForm((prev) => ({
+          ...prev,
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          dob: data.dateOfBirth || "",
+          phone: data.phoneNumber || "",
+        }));
+
+        setUser((prev) => ({
+          ...prev,
+          firstName: data.firstName || "User",
+        }));
+      })
+      .catch((error) => {
+        console.error("Error loading profile:", error);
+      });
+  }, []);
+
+  // DT-129: Load the saved donor address separately from profile information.
+  useEffect(() => {
+    fetch("/api/addresses/me", { credentials: "include" })
+      .then((response) => {
+        if (response.status === 404) return null;
+        if (!response.ok) throw new Error("Unable to load address");
+        return response.json();
+      })
+      .then((address) => {
+        if (!address) return;
+        setForm((prev) => ({
+          ...prev,
+          address: address.streetAddress || "",
+          zip: address.zipCode || "",
+          city: address.city || "",
+          state: address.state || "California",
+          country: address.country || "United States",
+        }));
+      })
+      .catch((error) => console.error("Error loading address:", error));
+  }, []);
+
+  const handleAction = async (item) => {
+    if (item === "Sign Out") {
+      await logout();
+      navigate("/");
+    } else if (item === "Profile") {
+      navigate("/donor-profile");
+    } else {
+      console.log(item);
+    }
+
+    setDropdownOpen(false);
+  };
+
+  const canSave = useMemo(() => {
+    return (
+      form.firstName.trim() !== "" &&
+      form.lastName.trim() !== "" &&
+      form.email.trim() !== "" &&
+      form.dob !== "" &&
+      form.phone.trim() !== ""
+    );
+  }, [form]);
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   function toggleEdit(field) {
-    setEditing((prev) => ({ ...prev, [field]: !prev[field] }));
+    setEditing((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault();
-    console.log("Saving donor profile:", form);
 
-    setEditing((prev) => {
-      const next = { ...prev };
-      Object.keys(next).forEach((k) => (next[k] = false));
-      return next;
-    });
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!form.firstName.trim()) {
+      alert("First name is required.");
+      return;
+    }
+
+    if (!form.lastName.trim()) {
+      alert("Last name is required.");
+      return;
+    }
+
+    if (!emailPattern.test(form.email.trim())) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (!form.dob) {
+      alert("Date of birth is required.");
+      return;
+    }
+
+    const selectedDob = new Date(`${form.dob}T00:00:00`);
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDob > today) {
+      alert("Date of birth cannot be in the future.");
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      alert("Phone number is required.");
+      return;
+    }
+
+    // DT-129: An address is optional, but entered addresses must be complete.
+    const hasAddress = Boolean(
+      form.address.trim() || form.city.trim() || form.zip.trim()
+    );
+
+    if (
+      hasAddress &&
+      (!form.address.trim() || !form.city.trim() || !form.zip.trim())
+    ) {
+      alert("Street address, city, and ZIP code are required to save an address.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          email: form.email.trim(),
+          dateOfBirth: form.dob,
+          phoneNumber: form.phone.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "Unable to save profile");
+      }
+
+      const updatedUser = await response.json();
+
+      setForm((prev) => ({
+        ...prev,
+        firstName: updatedUser.firstName || "",
+        lastName: updatedUser.lastName || "",
+        email: updatedUser.email || "",
+        dob: updatedUser.dateOfBirth || "",
+        phone: updatedUser.phoneNumber || "",
+      }));
+
+      setUser((prev) => ({
+        ...prev,
+        firstName: updatedUser.firstName || "User",
+      }));
+
+      // DT-129: Save address after the existing profile update succeeds.
+      if (hasAddress) {
+        const addressResponse = await fetch("/api/addresses/me", {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            streetAddress: form.address.trim(),
+            zipCode: form.zip.trim(),
+            city: form.city.trim(),
+            state: form.state,
+            country: form.country,
+          }),
+        });
+
+        if (!addressResponse.ok) {
+          throw new Error("Profile saved, but the address could not be saved.");
+        }
+      }
+
+      setEditing((prev) => {
+        const next = { ...prev };
+
+        Object.keys(next).forEach((key) => {
+          next[key] = false;
+        });
+
+        return next;
+      });
+
+      alert("Profile updated successfully");
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert(error.message || "Unable to update profile");
+    }
   }
 
   return (
     <div className="dp-page">
-      {/* Header */}
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <span className="header_title">Hello, {user.firstName}</span>
+
         <div className="header_links">
-            <div className="header_links">
-              <button className="headerbtn" onClick={() => navigate("/")}>
-                Home
-              </button>
+          <div className="header_links">
+            <button className="headerbtn" onClick={() => navigate("/")}>
+              Home
+            </button>
 
-              <button className="headerbtn" onClick={() => navigate("/donor-dashboard")}>
-                Dashboard
-              </button>
+            <button
+              className="headerbtn"
+              onClick={() => navigate("/donor-dashboard")}
+            >
+              Dashboard
+            </button>
 
-              <button className="headerbtn" onClick={() => navigate("/donor-past-listings")}>
-                Past Listings
-              </button>
-            </div>
+            <button
+              className="headerbtn"
+              onClick={() => navigate("/donor-past-listings")}
+            >
+              Past Listings
+            </button>
+          </div>
 
           <div className="gear_wrap" ref={dropdownRef}>
             <button
@@ -223,6 +474,7 @@ export default function DonorProfile() {
             >
               ⚙
             </button>
+
             {dropdownOpen && (
               <div className="dropdown">
                 {DROPDOWN.map((item) => (
@@ -241,7 +493,6 @@ export default function DonorProfile() {
         </div>
       </nav>
 
-      {/* Content */}
       <div className="dp-card">
         <div className="dp-header">
           <div className="dp-subtitle">Your Information</div>
@@ -260,6 +511,7 @@ export default function DonorProfile() {
                 onToggleEdit={toggleEdit}
                 ariaLabel="First name"
               />
+
               <EditableInput
                 name="lastName"
                 value={form.lastName}
@@ -288,21 +540,24 @@ export default function DonorProfile() {
               value={form.password}
               onChange={handleChange}
               placeholder="Password"
-              editable={editing.password}
+              editable={false}
               onToggleEdit={toggleEdit}
               ariaLabel="Password"
+              canEdit={false}
             />
 
             <div className="dp-twoCol">
               <EditableInput
                 name="dob"
+                type="date"
                 value={form.dob}
                 onChange={handleChange}
-                placeholder="DOB: mm/dd/yyyy"
+                placeholder="Date of Birth"
                 editable={editing.dob}
                 onToggleEdit={toggleEdit}
                 ariaLabel="Date of birth"
               />
+
               <EditableInput
                 name="phone"
                 value={form.phone}
@@ -324,6 +579,7 @@ export default function DonorProfile() {
                 onToggleEdit={toggleEdit}
                 ariaLabel="Street address"
               />
+
               <EditableInput
                 name="zip"
                 value={form.zip}
@@ -355,6 +611,7 @@ export default function DonorProfile() {
                 options={STATES}
                 ariaLabel="State"
               />
+
               <EditableSelect
                 name="country"
                 value={form.country}
@@ -367,16 +624,17 @@ export default function DonorProfile() {
             </div>
           </div>
 
-          <button className="dp-saveBtn" type="submit" disabled={!canSave}>
+          <button
+            className="dp-saveBtn"
+            type="submit"
+            disabled={!canSave}
+          >
             Save Changes
           </button>
         </form>
 
-        {/* Read-only waiver status shown on the user's profile */}
         <div className="waiver_signed_info">
-          <span className="waiver_signed_title">
-            Waiver Signed
-          </span>
+          <span className="waiver_signed_title">Waiver Signed</span>
 
           <p className="waiver_signed_date">
             {user?.waiver?.acceptedAt
@@ -394,7 +652,6 @@ export default function DonorProfile() {
         </div>
       </div>
 
-      {/* Read-only signed waiver modal */}
       {showSignedWaiver && (
         <div className="waiver_modal">
           <div className="waiver_content">

@@ -6,6 +6,7 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
   const [loading, setLoading] = useState(!food && !!foodId);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     if (!listing && foodId) {
@@ -58,6 +59,35 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
     }
   };
 
+  // DT-76: decline the pending request and return the listing to ACTIVE.
+  const handleDeclineRequest = async () => {
+    if (!listing || actionLoading) return;
+    setActionLoading(true);
+    setError(null);
+    setSuccessMessage("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/orders/food/${listing.id}/decline-request`, {
+        method: "PATCH",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!res.ok) {
+        const message = await res.text();
+        throw new Error(message || "Failed to decline request");
+      }
+      const updated = await res.json();
+      setListing(updated);
+      setSuccessMessage("Request declined. The recipient has been notified and the listing is available again.");
+      if (onStatusUpdated) onStatusUpdated(updated);
+    } catch (failure) {
+      setError(failure.message || "Unable to decline request.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleCompletePickup = async () => {
     if (!listing) return;
     setActionLoading(true);
@@ -104,7 +134,8 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
         </div>
 
         <div className="pickup-modal-body">
-          {error && <div className="pickup-error-msg">{error}</div>}
+          {error && <div className="pickup-error-msg" role="alert">{error}</div>}
+          {successMessage && <p className="pickup-success-msg" role="status">{successMessage}</p>}
 
           {loading ? (
             <p style={{ textAlign: "center", padding: "20px" }}>Loading details...</p>
@@ -128,7 +159,7 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
               </div>
 
               {/* Lifecycle Progress Tracker */}
-              <div className="pickup-status-tracker">
+              {currentStatus !== "ACTIVE" && <div className="pickup-status-tracker">
                 <div
                   className={`tracker-step ${
                     ["CLAIMED", "SCHEDULED", "COMPLETED"].includes(currentStatus)
@@ -165,7 +196,7 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
                   </div>
                   <span className="tracker-label">Completed</span>
                 </div>
-              </div>
+              </div>}
 
               {/* Pickup Details */}
               <div className="pickup-details-list">
@@ -198,6 +229,17 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
                 >
                   Close
                 </button>
+
+                {currentStatus === "CLAIMED" && (
+                  <button
+                    type="button"
+                    className="pickup-action-btn pickup-btn-decline"
+                    onClick={handleDeclineRequest}
+                    disabled={actionLoading}
+                  >
+                    Decline Request
+                  </button>
+                )}
 
                 {currentStatus === "CLAIMED" && (
                   <button

@@ -58,7 +58,16 @@ export const login = (email, password) => {
     return { success: false, message: "Invalid credentials" };
 };
 
-export const logout = () => {
+export const logout = async () => {
+    try {
+        await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+        });
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
+
     localStorage.removeItem(CURRENT_USER_KEY);
 };
 

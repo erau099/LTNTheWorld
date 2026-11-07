@@ -254,3 +254,31 @@
   margin-bottom: 16px;
   font-size: 0.88rem;
 }
+
+/* DONOR DECLINES PICKUP REQUEST: Keeps the decline action distinct from pickup confirmation. (DT-76) */
+.pickup-btn-decline {
+  background-color: #fce8e8;
+  color: #9b1c1c;
+}
+
+.pickup-btn-decline:hover {
+  background-color: #f8d4d4;
+}
+
+.pickup-success-msg {
+  background-color: #edf5ee;
+  color: #23452c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+}
+
+.pickup-modal-actions {
+  flex-wrap: wrap;
+}
+
+.pickup-action-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}

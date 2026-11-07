@@ -25,10 +25,18 @@ public class FoodController {
 
     private final FoodRepository foodRepository;
     private final NotificationRepository notificationRepository;
+    private final ReviewRepository reviewRepository;
+    private final FoodClaimService foodClaimService;
 
-    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository) {
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
+    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository,
+            ReviewRepository reviewRepository, FoodClaimService foodClaimService) {
         this.foodRepository = foodRepository;
         this.notificationRepository = notificationRepository;
+        this.reviewRepository = reviewRepository;
+        this.foodClaimService = foodClaimService;
     }
 
     // Create a new food listing
@@ -86,17 +94,53 @@ public class FoodController {
         }
 
         UUID userUuid;
-
         try {
             userUuid = UUID.fromString(authentication.getName());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(401)
                     .body("Invalid authentication identity.");
         }
-        List<Food> listings = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
-        updateExpiredFoodListings(listings);
-        
-        return ResponseEntity.ok(listings);
+        List<Food> foods = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
+        updateExpiredFoodListings(foods);
+
+        List<DonorListingResponse> responseList = foods.stream().map(food -> {
+            String recipientName = "Unclaimed";
+            UUID recipientId = food.getClaimedByUserId();
+
+            if (recipientId != null) {
+                User recipient = entityManager.find(User.class, recipientId);
+                if (recipient != null) {
+                    recipientName = recipient.getName();
+                } else {
+                    recipientName = "Recipient (" + recipientId.toString().substring(0, 8) + "...)";
+                }
+            }
+
+            // Look up review for this food item (bigint PK)
+            List<Review> reviews = reviewRepository.findByFoodId(food.getId());
+            Integer rating = null;
+            String comment = null;
+
+            if (!reviews.isEmpty()) {
+                Review rev = reviews.get(0);
+                rating = rev.getRating();
+                comment = rev.getComment();
+            }
+
+            return new DonorListingResponse(
+                    food.getId(),
+                    food.getFoodItem(),
+                    food.getStatus(),
+                    food.getDate(),
+                    food.getPickupTime(),
+                    recipientId,
+                    recipientName,
+                    rating,
+                    comment
+            ).withListingDetails(food.getPickupEndTime(), food.getTags(), food.getPhotos());
+        }).toList();
+
+        return ResponseEntity.ok(responseList);
     }
 
     // Retrieve a specific food listing
@@ -123,7 +167,6 @@ public class FoodController {
 
     // DT-73 & DT-96: Recipient requests food listing, moving it to CLAIMED and notifying the donor
     @PostMapping("/{id}/request")
-    @Transactional
     public ResponseEntity<?> requestFoodListing(@PathVariable Long id, Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You must be logged in to request food.");
@@ -136,36 +179,12 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
         }
 
-        Optional<Food> foodOpt = foodRepository.findById(id);
-        if (foodOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
+        // Shared with POST /api/orders/{foodId}: creates the order and applies the cooldown (DT-51)
+        try {
+            return ResponseEntity.ok(foodClaimService.claim(id, recipientId).food());
+        } catch (FoodClaimService.ClaimException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         }
-
-        Food food = foodOpt.get();
-        if (!"ACTIVE".equalsIgnoreCase(food.getStatus())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This food listing is no longer available.");
-        }
-
-        // Donor cannot claim their own listing
-        if (food.getUserId() != null && food.getUserId().equals(recipientId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You cannot request your own food listing.");
-        }
-
-        food.setStatus("CLAIMED");
-        food.setClaimedByUserId(recipientId);
-        Food updated = foodRepository.save(food);
-
-        // Notify donor (DT-73)
-        Notification notification = new Notification(
-                food.getUserId(),
-                food.getId(),
-                "REQUEST_RECEIVED",
-                "New Request for " + food.getFoodItem(),
-                "A recipient has requested your listing '" + food.getFoodItem() + "'. Click to coordinate pickup."
-        );
-        notificationRepository.save(notification);
-
-        return ResponseEntity.ok(updated);
     }
 
     // DT-78: Donor confirms pickup request and schedules it
@@ -193,8 +212,19 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the listing donor can confirm this pickup.");
         }
 
+        // Only an existing pending recipient request can be approved. (DT-75)
+        if (!"CLAIMED".equalsIgnoreCase(food.getStatus())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Only a pending food request can be approved.");
+        }
+        if (food.getClaimedByUserId() == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("This food listing has no requesting recipient.");
+        }
+
         food.setStatus("SCHEDULED");
         Food updated = foodRepository.save(food);
+        foodClaimService.updateOrderStatus(food, "scheduled");
 
         // Notify donor (DT-78)
         Notification notification = new Notification(
@@ -205,6 +235,17 @@ public class FoodController {
                 "Pickup for '" + food.getFoodItem() + "' has been confirmed and scheduled."
         );
         notificationRepository.save(notification);
+
+        // DT-75: notify the recipient who requested this listing.
+        Notification recipientNotification = new Notification(
+                food.getClaimedByUserId(),
+                food.getId(),
+                "REQUEST_APPROVED",
+                "Request Approved: " + food.getFoodItem(),
+                "Your request for '" + food.getFoodItem()
+                        + "' has been approved by the donor. Please check your orders for pickup details."
+        );
+        notificationRepository.save(recipientNotification);
 
         return ResponseEntity.ok(updated);
     }
@@ -237,8 +278,19 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the donor or recipient can mark this pickup as completed.");
         }
 
+        // DT-74: notify only when a scheduled pickup actually becomes completed.
+        if (!"SCHEDULED".equalsIgnoreCase(food.getStatus())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Only a scheduled pickup can be marked as completed.");
+        }
+        if (food.getClaimedByUserId() == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("This pickup has no requesting recipient.");
+        }
+
         food.setStatus("COMPLETED");
         Food updated = foodRepository.save(food);
+        foodClaimService.updateOrderStatus(food, "completed");
 
         // Notify donor (DT-85)
         Notification notification = new Notification(
@@ -249,6 +301,17 @@ public class FoodController {
                 "'" + food.getFoodItem() + "' pickup has been completed. Thank you for your donation!"
         );
         notificationRepository.save(notification);
+
+        // DT-74: the recipient also needs to know that pickup is complete.
+        Notification recipientNotification = new Notification(
+                food.getClaimedByUserId(),
+                food.getId(),
+                "PICKUP_COMPLETED",
+                "Pickup Completed: " + food.getFoodItem(),
+                "Your pickup for '" + food.getFoodItem()
+                        + "' has been marked as completed. Thank you for helping reduce food waste!"
+        );
+        notificationRepository.save(recipientNotification);
 
         return ResponseEntity.ok(updated);
     }
