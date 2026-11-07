@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +9,14 @@ import "./RecipientDashboard.css";
 import RecipientNotificationBell from "./RecipientNotificationBell";
 
 import { apiFetch } from "../api";
+import { ALLERGENS } from "../food-upload/foodDraft.js";
 
+
+// "Eggs" / "egg", and the older "Dairy" / "Diary" spellings of Milk, compare as the same allergen
+function normalizeAllergen(name) {
+	const value = (name || "").trim().toLowerCase().replace(/s$/, "");
+	return value === "dairy" || value === "diary" ? "milk" : value;
+}
 
 function RecipientDashboard() {
 	const navigate = useNavigate();
@@ -116,7 +124,6 @@ function RecipientDashboard() {
 		return () => controller.abort();
 	}, [useMockFood, retryCount, userLocation, selectedRadius]);
 
-
 	// DT-51: recipients can request food once per cooldown window
 	const [cooldown, setCooldown] = useState(null);
 	const loadCooldown = () => {
@@ -140,36 +147,36 @@ function RecipientDashboard() {
 	// Handles the action to request a food listing
 	const [requestLoading, setRequestLoading] = useState(false);
 	const handleFoodRequest = async () => {
-    	if (!selectListing?.id) {
-     		alert("Please select a food listing.");
-        	return;
-    	}
-    	if (useMockFood) {
-        	alert("Food requests are unavailable in mock mode.");
-        	return;
-    	}
-    	setRequestLoading(true);
-    	try {
-        	const response = await apiFetch(`/api/orders/${selectListing.id}`, {
-            	method: "POST",
-        	});
-        	if (!response.ok) {
-            	const message = await response.text();
-            	throw new Error(message || "Failed to request food.");
-        	}
-        	alert("Food requested successfully!");
-        	loadCooldown();
+		if (!selectListing?.id) {
+			alert("Please select a food listing.");
+			return;
+		}
+		if (useMockFood) {
+			alert("Food requests are unavailable in mock mode.");
+			return;
+		}
+		setRequestLoading(true);
+		try {
+			const response = await apiFetch(`/api/orders/${selectListing.id}`, {
+				method: "POST",
+			});
+			if (!response.ok) {
+				const message = await response.text();
+				throw new Error(message || "Failed to request food.");
+			}
+			alert("Food requested successfully!");
+			loadCooldown();
 
-        	// Close the popup
-        	setListings((prev) => prev.filter((item) => item.id !== selectListing.id));
-        	setSelectListing(false);
+			// Close the popup
+			setListings((prev) => prev.filter((item) => item.id !== selectListing.id));
+			setSelectListing(false);
 
-    	} catch (error) {
-        	console.error("Error requesting food:", error);
-        	alert(error.message);
-    	} finally {
-        	setRequestLoading(false);
-    	}
+		} catch (error) {
+			console.error("Error requesting food:", error);
+			alert(error.message);
+		} finally {
+			setRequestLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -206,9 +213,41 @@ function RecipientDashboard() {
 	// Handles the filtering for the listings
 	const [selectFiltering, setSelectedFiltering] = useState("all")
 
+	// Search box and allergen filter, combined with the category tabs
+	const [searchText, setSearchText] = useState("");
+	const [excludedAllergens, setExcludedAllergens] = useState([]);
+
+	const toggleExcludedAllergen = (allergen) => {
+		setExcludedAllergens((prev) =>
+			prev.includes(allergen) ? prev.filter((a) => a !== allergen) : [...prev, allergen]
+		);
+	};
+
+	const clearFilters = () => {
+		setSearchText("");
+		setExcludedAllergens([]);
+		setSelectedFiltering("all");
+	};
+
+	const filtersActive = searchText.trim() !== "" || excludedAllergens.length > 0 || selectFiltering !== "all";
+
 	const filteredListings = listings.filter((item) => {
-		return selectFiltering === "all" || item.category === selectFiltering;
-	})
+		const matchesCategory = selectFiltering === "all" || item.category === selectFiltering;
+
+		const query = searchText.trim().toLowerCase();
+		const matchesSearch =
+			!query ||
+			[item.food, item.description, item.category].some((text) =>
+				(text || "").toLowerCase().includes(query)
+			);
+
+		const listingAllergens = item.allergies.map(normalizeAllergen);
+		const safeForMe = excludedAllergens.every(
+			(allergen) => !listingAllergens.includes(normalizeAllergen(allergen))
+		);
+
+		return matchesCategory && matchesSearch && safeForMe;
+	});
 
 	// Stores the logged-in recipient's saved allergies
 	const [recipientAllergies, setRecipientAllergies] = useState([]);
@@ -236,7 +275,36 @@ function RecipientDashboard() {
 	}, []);
 
 	// Checks the selected food listing against the recipient's saved allergies
-	const handleListingClick = (item) => {
+	const handleListingClick = async (item) => {
+		// DT-88: Recheck listing status when a recipient tries to open it.
+		// A listing may have been put on hold since the dashboard loaded.
+		if (!useMockFood) {
+			try {
+				const response = await fetch(`/api/food/${item.id}`);
+				if (response.ok) {
+					const latestListing = await response.json();
+
+					if (latestListing.status?.toUpperCase() === "ON_HOLD") {
+						alert("This food listing is temporarily unavailable because it is on hold.");
+						setListings((prev) => prev.filter((listing) => listing.id !== item.id));
+						return;
+					}
+
+					if (latestListing.status?.toUpperCase() !== "ACTIVE") {
+						alert("This food listing is no longer available.");
+						setListings((prev) => prev.filter((listing) => listing.id !== item.id));
+						return;
+					}
+				} else if (response.status === 404) {
+					alert("This food listing is no longer available.");
+					setListings((prev) => prev.filter((listing) => listing.id !== item.id));
+					return;
+				}
+			} catch (error) {
+				console.error("Unable to recheck food listing status:", error);
+			}
+		}
+
 		const listingAllergies = item.allergies || [];
 
 		const matchingAllergies = listingAllergies.filter((listingAllergy) =>
@@ -339,6 +407,32 @@ function RecipientDashboard() {
 					</div>
 				</div>
 
+				{/* Search and allergen filter */}
+				<div className="listing-search-row">
+					<input
+						type="search"
+						className="listing-search"
+						placeholder="Search food or keyword"
+						aria-label="Search food listings"
+						value={searchText}
+						onChange={(e) => setSearchText(e.target.value)}
+					/>
+				</div>
+				<div className="allergen-filter-row" role="group" aria-label="Hide food containing">
+					<span className="allergen-filter-label">Hide food containing:</span>
+					{ALLERGENS.map((allergen) => (
+						<button
+							key={allergen}
+							type="button"
+							className={excludedAllergens.includes(allergen) ? "allergen-chip active" : "allergen-chip"}
+							aria-pressed={excludedAllergens.includes(allergen)}
+							onClick={() => toggleExcludedAllergen(allergen)}
+						>
+							{allergen}
+						</button>
+					))}
+				</div>
+
 				<h2>Top Picks:</h2>
 
 				{coolingDown && (
@@ -358,12 +452,23 @@ function RecipientDashboard() {
 					</div>
 				)}
 				{!listingsLoading && !listingsError && filteredListings.length === 0 && (
-					<p>No food listings found for this category.</p>
+					<div className="no-results" role="status">
+						<p>
+							{listings.length === 0
+								? "No food listings are available right now."
+								: "No food listings match your search and filters."}
+						</p>
+						{filtersActive && listings.length > 0 && (
+							<button type="button" className="filter-button" onClick={clearFilters}>
+								Clear filters
+							</button>
+						)}
+					</div>
 				)}
 				<section className="top-picks-grid">
 					{filteredListings.map((item) => (
-						<article className="food-card" 
-									key={item.id} 
+						<article className="food-card"
+									key={item.id}
 									onClick={() => handleListingClick(item)}>
 							<div className="food-image"
 								style={item.photos?.length ? {
@@ -397,8 +502,6 @@ function RecipientDashboard() {
 					))}
 				</section>
 
-				
-				
 				<section>
 					{selectListing && (
 						<div

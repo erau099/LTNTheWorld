@@ -11,6 +11,23 @@ function Login({}) {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const passwordReset = searchParams.get("reset") === "success"
+    const checkEmail = searchParams.get("signup") === "check-email"
+    const [resendMessage, setResendMessage] = useState('')
+
+    // DT-332: send a new verification link to the email typed in the form
+    const handleResendVerification = async () => {
+        setResendMessage('')
+        try {
+            const response = await fetch('/api/auth/resend-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: username })
+            })
+            setResendMessage(await response.text())
+        } catch {
+            setResendMessage('Could not connect to the server.')
+        }
+    }
     const { setUser } = useAuth()
 
     // Login function
@@ -44,7 +61,10 @@ function Login({}) {
             }
         } else if (response.status === 403) {
             const text = await response.text().catch(() => '');
-            if (text.toLowerCase().includes('suspended')) {
+            if (text.toLowerCase().includes('verify your email')) {
+                setResendMessage('')
+                setPopup('unverified')
+            } else if (text.toLowerCase().includes('suspended')) {
                 setPopup('suspended')
             } else {
                 setPopup('error')
@@ -68,6 +88,14 @@ function Login({}) {
                     <button onClick={() => setPopup('')}>✕</button>
                 </div>
             )}
+            {popup === 'unverified' && (
+                <div className="popup error_popup">
+                    📧 Please verify your email before signing in. Check your inbox for the link.
+                    <button type="button" onClick={handleResendVerification}>Resend email</button>
+                    <button onClick={() => setPopup('')}>✕</button>
+                    {resendMessage && <div>{resendMessage}</div>}
+                </div>
+            )}
             {popup === 'suspended' && (
                 <div className="popup error_popup">
                     ⛔ Account is suspended. Please contact support.
@@ -83,6 +111,11 @@ function Login({}) {
                     <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
                 </div>
             </nav>
+            {checkEmail && (
+                <div className="popup success_popup">
+                    ✅ Account created! Check your email for a verification link, then sign in.
+                </div>
+            )}
             {passwordReset && (
                 <div className="popup success_popup">
                     ✅ Password reset successfully! You can now sign in.

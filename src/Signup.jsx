@@ -98,8 +98,8 @@ function Signup() {
             });
 
             if (response.ok) {
-                alert("Account created successfully!");
-                navigate("/Login"); // Redirect to login on successful signup
+                // DT-332: the account can't sign in until the emailed link is clicked
+                navigate("/Login?signup=check-email");
             } else {
                 const message = await response.text();
                 setError(message);

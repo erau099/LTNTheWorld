@@ -52,6 +52,18 @@ public class User {
     @Column(name = "reset_token_expiration")
     private LocalDateTime resetTokenExpiration;
 
+    // DT-332: email verification. Accounts created before verification existed have null here
+    // and count as verified, so existing users aren't locked out.
+    @Column(name = "email_verified")
+    private Boolean emailVerified;
+
+    // SHA-256 of the token emailed at signup; cleared once the link is used
+    @Column(name = "verification_token_hash")
+    private String verificationTokenHash;
+
+    @Column(name = "verification_token_expiration")
+    private LocalDateTime verificationTokenExpiration;
+
     // One user can have multiple food listings
     @OneToMany(mappedBy = "user")
     @JsonIgnore
@@ -121,6 +133,12 @@ public class User {
     public java.time.LocalDateTime getCreatedAt() { return createdAt; }
     public String getResetTokenHash() { return resetTokenHash; }
     public void setResetTokenHash(String resetTokenHash) { this.resetTokenHash = resetTokenHash; }
+    public boolean isEmailVerified() { return emailVerified == null || emailVerified; }
+    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+    public String getVerificationTokenHash() { return verificationTokenHash; }
+    public void setVerificationTokenHash(String verificationTokenHash) { this.verificationTokenHash = verificationTokenHash; }
+    public LocalDateTime getVerificationTokenExpiration() { return verificationTokenExpiration; }
+    public void setVerificationTokenExpiration(LocalDateTime verificationTokenExpiration) { this.verificationTokenExpiration = verificationTokenExpiration; }
     public LocalDateTime getResetTokenExpiration() { return resetTokenExpiration; }
     public void setResetTokenExpiration(LocalDateTime resetTokenExpiration) { this.resetTokenExpiration = resetTokenExpiration; }
     public String getStatus() { return status != null ? status : "ACTIVE"; }

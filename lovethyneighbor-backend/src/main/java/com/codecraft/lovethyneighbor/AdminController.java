@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,6 +33,10 @@ public class AdminController {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    // DT-50: Retrieve low-rated reviews for the admin dashboard.
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     // DT-89: Notify donors when an administrator removes a listing.
     @Autowired
@@ -114,6 +119,77 @@ public class AdminController {
     public ResponseEntity<List<Report>> getAllReports() {
         return ResponseEntity.ok(reportRepository.findAll());
     }
+
+    // DT-50: Update a report after administrator review.
+    @PatchMapping("/reports/{id}/status")
+    public ResponseEntity<?> updateReportStatus(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+
+        Optional<Report> reportOpt = reportRepository.findById(id);
+
+        if (reportOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Report not found"));
+        }
+
+        String requestedStatus =
+                body != null ? body.get("status") : null;
+
+        if (requestedStatus == null
+                || (!requestedStatus.equalsIgnoreCase("PENDING")
+                && !requestedStatus.equalsIgnoreCase("RESOLVED"))) {
+
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Invalid report status"));
+        }
+
+        Report report = reportOpt.get();
+        report.setStatus(requestedStatus.toUpperCase(Locale.ROOT));
+
+        Report updatedReport = reportRepository.save(report);
+
+        return ResponseEntity.ok(updatedReport);
+    }
+
+    // DT-50: Show reviews with ratings of 1 or 2 stars.
+    // Identify the listing owner using Food.userId instead of
+    // confusing the owner with the user who submitted the review.
+    @GetMapping("/reviews/negative")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<NegativeReviewDTO>> getNegativeReviews() {
+        List<NegativeReviewDTO> reviews = reviewRepository
+                .findByRatingLessThanEqualOrderByCreatedAtDesc(2)
+                .stream()
+                .map(review -> {
+                    Food food = review.getFood();
+
+                    return new NegativeReviewDTO(
+                            review.getId(),
+                            review.getRating(),
+                            review.getComment(),
+                            review.getCreatedAt(),
+                            food != null ? food.getId() : null,
+                            food != null ? food.getFoodItem() : null,
+                            food != null ? food.getUserId() : null
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(reviews);
+    }
+
+    // DT-50: Return only the information needed for moderation,
+    // avoiding serialization of entire related entities.
+    public record NegativeReviewDTO(
+            UUID id,
+            int rating,
+            String comment,
+            LocalDateTime createdAt,
+            Long foodId,
+            String foodItem,
+            UUID listingOwnerId
+    ) {}
 
     @GetMapping("/stats")
     public ResponseEntity<AdminStatsDTO> getStats() {
@@ -214,6 +290,7 @@ public class AdminController {
     @GetMapping("/users/{id}/activity")
     public ResponseEntity<?> getUserActivity(@PathVariable UUID id) {
         Optional<User> userOpt = userRepository.findById(id);
+
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("User not found"));

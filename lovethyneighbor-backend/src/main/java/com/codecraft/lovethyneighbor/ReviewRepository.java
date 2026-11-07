@@ -1,3 +1,4 @@
+
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     // userId is UUID
     List<Review> findByUserId(UUID userId);
+
+    // DT-50: Retrieve negative reviews for administrator review.
+    List<Review> findByRatingLessThanEqualOrderByCreatedAtDesc(int rating);
 }

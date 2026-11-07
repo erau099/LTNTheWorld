@@ -312,3 +312,55 @@
   font-style: italic;
 }
 
+/* Search box and "hide food containing" allergen filter */
+.recipient-dashboard .listing-search-row {
+  margin: 0 0 12px;
+}
+
+.recipient-dashboard .listing-search {
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid #cfd8d1;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.recipient-dashboard .allergen-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.recipient-dashboard .allergen-filter-label {
+  font-size: 14px;
+  color: #4a5a4f;
+  margin-right: 4px;
+}
+
+.recipient-dashboard .allergen-chip {
+  border: 1px solid #cfd8d1;
+  background: #fff;
+  color: #3d4a41;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.recipient-dashboard .allergen-chip.active {
+  background: #2d7a3a;
+  border-color: #2d7a3a;
+  color: #fff;
+  text-decoration: line-through;
+}
+
+.recipient-dashboard .no-results {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
