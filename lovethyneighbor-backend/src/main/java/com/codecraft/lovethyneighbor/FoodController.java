@@ -27,16 +27,25 @@ public class FoodController {
     private final NotificationRepository notificationRepository;
     private final ReviewRepository reviewRepository;
     private final FoodClaimService foodClaimService;
+    private final GeocodingService geocodingService;
 
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
 
     public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository,
             ReviewRepository reviewRepository, FoodClaimService foodClaimService) {
+        this(foodRepository, notificationRepository, reviewRepository, foodClaimService, address -> Optional.empty());
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository,
+            ReviewRepository reviewRepository, FoodClaimService foodClaimService,
+            GeocodingService geocodingService) {
         this.foodRepository = foodRepository;
         this.notificationRepository = notificationRepository;
         this.reviewRepository = reviewRepository;
         this.foodClaimService = foodClaimService;
+        this.geocodingService = geocodingService;
     }
 
     // Create a new food listing
@@ -71,16 +80,69 @@ public class FoodController {
         // The JWT subject is the user's UUID, so the donor can't post as someone else
         food.setUserId(UUID.fromString(authentication.getName()));
 
+        // Geocode coordinates upon saving (Story 325)
+        geocodingService.geocode(food.getAddress()).ifPresent(coords -> {
+            food.setLatitude(coords.latitude());
+            food.setLongitude(coords.longitude());
+        });
+
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.ok(savedFood);
     }
 
-    // Recipient Dashboard: retrieve active listings
+    // Recipient Dashboard: retrieve active listings with optional distance filtering (Story 327)
     @GetMapping
-    public ResponseEntity<List<Food>> getAllActiveFood() {
-        return ResponseEntity.ok(
-            foodRepository.findByStatusIgnoreCase("ACTIVE")
-        );
+    public ResponseEntity<List<Food>> getAllActiveFood(
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng,
+            @RequestParam(required = false) Double radiusMiles) {
+
+        List<Food> foods = foodRepository.findByStatusIgnoreCase("ACTIVE");
+
+        if (lat != null && lng != null) {
+            foods = foods.stream()
+                    .peek(f -> {
+                        if (f.getLatitude() != null && f.getLongitude() != null) {
+                            double dist = DistanceUtils.calculateDistanceMiles(lat, lng, f.getLatitude(), f.getLongitude());
+                            f.setDistanceMiles(dist);
+                            f.setFormattedDistance(DistanceUtils.formatDistance(dist));
+                        }
+                    })
+                    .filter(f -> radiusMiles == null || (f.getDistanceMiles() != null && f.getDistanceMiles() <= radiusMiles))
+                    .sorted((f1, f2) -> {
+                        if (f1.getDistanceMiles() == null && f2.getDistanceMiles() == null) return 0;
+                        if (f1.getDistanceMiles() == null) return 1;
+                        if (f2.getDistanceMiles() == null) return -1;
+                        return Double.compare(f1.getDistanceMiles(), f2.getDistanceMiles());
+                    })
+                    .toList();
+        }
+
+        // Story 108 Sub-task 3 & Story 326 Privacy Safeguard:
+        // Mask exact street address in public recipient dashboard browsing
+        for (Food f : foods) {
+            String approx = extractApproximateLocation(f.getAddress());
+            f.setApproximateLocation(approx);
+            f.setAddress(approx);
+        }
+
+        return ResponseEntity.ok(foods);
+    }
+
+    private static String extractApproximateLocation(String fullAddress) {
+        if (fullAddress == null || fullAddress.trim().isEmpty()) {
+            return "Sacramento Area";
+        }
+        String[] parts = fullAddress.split(",");
+        if (parts.length >= 2) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i < parts.length; i++) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(parts[i].trim());
+            }
+            return sb.toString();
+        }
+        return fullAddress.trim();
     }
 
     // Donor Dashboard: retrieve own listings
@@ -153,7 +215,7 @@ public class FoodController {
                 );
     }
 
-        // Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
+    // Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
     private void updateExpiredFoodListings(List<Food> listings) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -289,6 +351,7 @@ public class FoodController {
         }
 
         food.setStatus("COMPLETED");
+        food.setCompletedAt(LocalDateTime.now());
         Food updated = foodRepository.save(food);
         foodClaimService.updateOrderStatus(food, "completed");
 

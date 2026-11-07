@@ -28,6 +28,24 @@ public class Food {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Transient
+    private Double distanceMiles;
+
+    @Transient
+    private String formattedDistance;
+
+    @Transient
+    private String approximateLocation;
+
     @Column(name = "\"foodItem\"")
     private String foodItem;
 
@@ -333,5 +351,53 @@ public class Food {
 
     public void setClaimedByUserId(UUID claimedByUserId) {
         this.claimedByUserId = claimedByUserId;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public Double getDistanceMiles() {
+        return distanceMiles;
+    }
+
+    public void setDistanceMiles(Double distanceMiles) {
+        this.distanceMiles = distanceMiles;
+    }
+
+    public String getFormattedDistance() {
+        return formattedDistance;
+    }
+
+    public void setFormattedDistance(String formattedDistance) {
+        this.formattedDistance = formattedDistance;
+    }
+
+    public String getApproximateLocation() {
+        return approximateLocation;
+    }
+
+    public void setApproximateLocation(String approximateLocation) {
+        this.approximateLocation = approximateLocation;
     }
 }

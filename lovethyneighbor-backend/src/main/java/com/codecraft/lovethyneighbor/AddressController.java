@@ -13,12 +13,22 @@ public class AddressController {
 
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
+    private final GeocodingService geocodingService;
 
     public AddressController(
             AddressRepository addressRepository,
             UserRepository userRepository) {
+        this(addressRepository, userRepository, address -> Optional.empty());
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AddressController(
+            AddressRepository addressRepository,
+            UserRepository userRepository,
+            GeocodingService geocodingService) {
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
+        this.geocodingService = geocodingService;
     }
 
     // Retrieve the authenticated user's saved address.
@@ -78,6 +88,15 @@ public class AddressController {
         address.setState(request.getState().trim());
         address.setZipCode(request.getZipCode().trim());
         address.setCountry(request.getCountry().trim());
+
+        // Resolve geographic coordinates (Story 325)
+        String fullAddress = String.format("%s, %s, %s %s, %s",
+                address.getStreetAddress(), address.getCity(),
+                address.getState(), address.getZipCode(), address.getCountry());
+        geocodingService.geocode(fullAddress).ifPresent(coords -> {
+            address.setLatitude(coords.latitude());
+            address.setLongitude(coords.longitude());
+        });
 
         Address savedAddress = addressRepository.save(address);
 

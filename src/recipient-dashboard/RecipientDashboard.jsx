@@ -28,6 +28,28 @@ function RecipientDashboard() {
 	const [listingsError, setListingsError] = useState("");
 	const [retryCount, setRetryCount] = useState(0);
 
+	// Story 327: Distance filter & location states
+	const [selectedRadius, setSelectedRadius] = useState("all");
+	const [userLocation, setUserLocation] = useState({ lat: 38.5816, lng: -121.4944 }); // Sacramento default
+
+	// Prompt browser geolocation if available
+	useEffect(() => {
+		if ("geolocation" in navigator) {
+			navigator.geolocation.getCurrentPosition(
+				(pos) => {
+					setUserLocation({
+						lat: pos.coords.latitude,
+						lng: pos.coords.longitude
+					});
+				},
+				(err) => {
+					console.info("Using default Sacramento coordinates for distance search:", err.message);
+				},
+				{ timeout: 8000 }
+			);
+		}
+	}, []);
+
 	useEffect(() => {
 		const controller = new AbortController();
 
@@ -48,6 +70,8 @@ function RecipientDashboard() {
 				description: item.description || "No description provided",
 				status: item.status || "UNKNOWN",
 				photos: Array.isArray(item.photos) ? item.photos : [],
+				distance: item.formattedDistance || null,
+				location: item.approximateLocation || item.address || "Sacramento Area",
 			};
 		};
 
@@ -58,11 +82,20 @@ function RecipientDashboard() {
 				let food;
 				if (useMockFood) {
 					food = [
-						{ id: 1, foodItem: "Donuts", description: "Assorted donuts", pickupTime: "2026-10-12T16:00:00", tags: "Fresh / Hot", allergens: "Milk, Wheat", status: "ACTIVE" },
-						{ id: 2, foodItem: "Canned Tuna", description: "Unopened cans", pickupTime: "2026-10-12T17:00:00", tags: "Canned", allergens: "Fish", status: "UNAVAILABLE" },
+						{ id: 1, foodItem: "Donuts", description: "Assorted donuts", pickupTime: "2026-10-12T16:00:00", tags: "Fresh / Hot", allergens: "Milk, Wheat", status: "ACTIVE", formattedDistance: "1.2 miles away", approximateLocation: "Sacramento, CA" },
+						{ id: 2, foodItem: "Canned Tuna", description: "Unopened cans", pickupTime: "2026-10-12T17:00:00", tags: "Canned", allergens: "Fish", status: "UNAVAILABLE", formattedDistance: "3.5 miles away", approximateLocation: "Sacramento, CA" },
 					];
 				} else {
-					const response = await fetch("/api/food", { signal: controller.signal });
+					const params = new URLSearchParams();
+					if (userLocation) {
+						params.append("lat", userLocation.lat);
+						params.append("lng", userLocation.lng);
+					}
+					if (selectedRadius !== "all") {
+						params.append("radiusMiles", selectedRadius);
+					}
+					const url = `/api/food?${params.toString()}`;
+					const response = await fetch(url, { signal: controller.signal });
 					if (!response.ok) throw new Error(`Food API returned ${response.status}`);
 					food = await response.json();
 				}
@@ -81,7 +114,7 @@ function RecipientDashboard() {
 		}
 		loadListings();
 		return () => controller.abort();
-	}, [useMockFood, retryCount]);
+	}, [useMockFood, retryCount, userLocation, selectedRadius]);
 
 
 	// DT-51: recipients can request food once per cooldown window
@@ -289,11 +322,21 @@ function RecipientDashboard() {
 
 			{/* Main dashboard content */}
 			<main className="recipient-main">
-				{/* Filter buttons for food categories */}
-				<div className="filter-row">
-					<button className={selectFiltering === "all" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("all")}>All</button>
-					<button className={selectFiltering === "Fresh / Hot" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
-					<button className={selectFiltering === "Canned" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Canned")}>Canned</button>
+				{/* Filter buttons for food categories & distance radius (Story 327) */}
+				<div className="filter-controls-container">
+					<div className="filter-row">
+						<button className={selectFiltering === "all" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("all")}>All Categories</button>
+						<button className={selectFiltering === "Fresh / Hot" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Fresh / Hot")}>Fresh / Hot</button>
+						<button className={selectFiltering === "Canned" ? "filter-button active" : "filter-button"} onClick={() => setSelectedFiltering("Canned")}>Canned</button>
+					</div>
+
+					<div className="filter-row distance-filter-row">
+						<span className="distance-filter-label">Distance:</span>
+						<button className={selectedRadius === "all" ? "filter-button active" : "filter-button"} onClick={() => setSelectedRadius("all")}>All</button>
+						<button className={selectedRadius === "5" ? "filter-button active" : "filter-button"} onClick={() => setSelectedRadius("5")}>5 Miles</button>
+						<button className={selectedRadius === "10" ? "filter-button active" : "filter-button"} onClick={() => setSelectedRadius("10")}>10 Miles</button>
+						<button className={selectedRadius === "25" ? "filter-button active" : "filter-button"} onClick={() => setSelectedRadius("25")}>25 Miles</button>
+					</div>
 				</div>
 
 				<h2>Top Picks:</h2>
@@ -339,6 +382,10 @@ function RecipientDashboard() {
 									</p>
 
 									<p className="pickup-time">{item.pickup}</p>
+									<p className="pickup-location-meta">
+										📍 {item.location}
+										{item.distance && <span className="card-distance-pill">{item.distance}</span>}
+									</p>
 								</div>
 
 								<div className="rating">
@@ -442,6 +489,17 @@ function RecipientDashboard() {
 											<p className="food-popup-pickup">
 												◷ {selectListing.pickup}
 											</p>
+										</div>
+
+										<div className="food-popup-section">
+											<h3>Approximate Location</h3>
+											<p className="food-popup-pickup">
+												📍 {selectListing.location}
+												{selectListing.distance && ` (${selectListing.distance})`}
+											</p>
+											<small className="food-popup-privacy-note">
+												🔒 Full street address revealed once claim is approved.
+											</small>
 										</div>
 									</div>
 
