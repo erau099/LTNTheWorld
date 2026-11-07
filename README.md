@@ -45,6 +45,24 @@ Lighten The World is a completely web based food donation and receiving app, see
 
 ## 🧪 Testing
 
+### Backend (JUnit 5 & Mockito)
+Navigate to the backend directory and run the Maven wrapper:
+```bash
+cd lovethyneighbor-backend
+./mvnw test       # On macOS/Linux
+.\mvnw.cmd test   # On Windows
+```
+
+### Frontend (Vitest & React Testing Library)
+Run the test runner from the repository root:
+```bash
+npm run test:run  # Single run
+npm test          # Watch mode
+```
+
+### Automated CI
+Automated testing runs on every push and pull request to `main` and `dev` via GitHub Actions (`.github/workflows/ci.yml`).
+
 ## 🚀 Deployment
 
 ## 👨‍💻 Developer Instructions

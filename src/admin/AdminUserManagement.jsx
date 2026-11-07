@@ -6,6 +6,7 @@ function AdminUserManagement({ onUserCountChange }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingStatusId, setUpdatingStatusId] = useState(null);
+  const [selectedStatuses, setSelectedStatuses] = useState({});
   const [updatingRestrictionId, setUpdatingRestrictionId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserIdForModal, setSelectedUserIdForModal] = useState(null);
@@ -35,10 +36,13 @@ function AdminUserManagement({ onUserCountChange }) {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleStatusChange = async (userId, currentStatus) => {
-    const nextStatus = currentStatus === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+  const handleStatusChange = async (userId, currentStatus, requestedStatus = null) => {
+    const nextStatus = requestedStatus || (currentStatus === "ACTIVE" ? "SUSPENDED" : "ACTIVE");
+
     const confirmMessage = nextStatus === "SUSPENDED"
       ? "Are you sure you want to suspend this user? They will be blocked from logging in."
+      : nextStatus === "INACTIVE"
+      ? "Are you sure you want to mark this user account as inactive? They will be blocked from logging in."
       : "Are you sure you want to reactivate this user account?";
 
     if (!window.confirm(confirmMessage)) return;
@@ -59,6 +63,13 @@ function AdminUserManagement({ onUserCountChange }) {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, status: updatedUser.status } : u))
       );
+
+      // DT-134: Clear the dropdown selection after a successful save.
+      setSelectedStatuses((prev) => {
+        const next = { ...prev };
+        delete next[userId];
+        return next;
+      });
     } catch (err) {
       console.error("Error updating user status:", err);
       alert("Failed to update user status. Please check backend connection.");
@@ -232,6 +243,42 @@ function AdminUserManagement({ onUserCountChange }) {
                   </span>
 
                   <span className="user-action-cell">
+                    {/* DT-134: Select and save account status. */}
+                    <select
+                      aria-label={`Account status for ${displayName}`}
+                      value={selectedStatuses[user.id] || userStatus}
+                      disabled={updatingStatusId === user.id}
+                      onChange={(e) => {
+                        setSelectedStatuses((prev) => ({
+                          ...prev,
+                          [user.id]: e.target.value,
+                        }));
+                      }}
+                    >
+                      <option value="ACTIVE">Active</option>
+                      <option value="SUSPENDED">Suspended</option>
+                      <option value="INACTIVE">Inactive</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      className="admin-user-action"
+                      disabled={
+                        updatingStatusId === user.id ||
+                        !selectedStatuses[user.id] ||
+                        selectedStatuses[user.id] === userStatus
+                      }
+                      onClick={() =>
+                        handleStatusChange(
+                          user.id,
+                          userStatus,
+                          selectedStatuses[user.id]
+                        )
+                      }
+                    >
+                      {updatingStatusId === user.id ? "Saving..." : "Save Status"}
+                    </button>
+
                     {/* DT-112: View Full Profile & Activity History */}
                     <button
                       className="admin-user-action"

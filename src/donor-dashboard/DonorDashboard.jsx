@@ -70,11 +70,11 @@ function DonorDashboard() {
 	}, []);
 
 	// Handles the Profile and Sign Out buttons in the gear dropdown.
-	const handleDropdownAction = (item) => {
+	const handleDropdownAction = async (item) => {
 		if (item === "Profile") {
 			navigate("/donor-profile");
 		} else if (item === "Sign Out") {
-			logout();
+			await logout();
 			navigate("/");
 		}
 
@@ -169,7 +169,7 @@ function DonorDashboard() {
 
 				{/* Filter buttons for listing status */}
 				<div className="filter-row">
-					{["all", "active", "claimed", "scheduled", "completed"].map((status) => (
+					{["all", "active", "claimed", "scheduled", "completed", "expired"].map((status) => (
 						<button
 							key={status}
 							className={`filter-button ${filter === status ? "active" : ""}`}

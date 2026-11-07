@@ -8,17 +8,11 @@ function DonorNotificationBell({ onSelectNotification }) {
   const dropdownRef = useRef(null);
 
   const fetchNotifications = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
+    // Login uses an HttpOnly cookie now, so send it with the request (no localStorage token)
     try {
       const [listRes, countRes] = await Promise.all([
-        fetch("/api/notifications", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("/api/notifications/unread-count", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        fetch("/api/notifications", { credentials: "include" }),
+        fetch("/api/notifications/unread-count", { credentials: "include" }),
       ]);
 
       if (listRes.ok) {
@@ -53,14 +47,10 @@ function DonorNotificationBell({ onSelectNotification }) {
 
   const handleMarkAsRead = async (notification) => {
     if (!notification.read) {
-      const token = localStorage.getItem("token");
       try {
         await fetch(`/api/notifications/${notification.id}/read`, {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
+          credentials: "include",
         });
         setNotifications((prev) =>
           prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
@@ -78,14 +68,10 @@ function DonorNotificationBell({ onSelectNotification }) {
   };
 
   const handleMarkAllRead = async () => {
-    const token = localStorage.getItem("token");
     try {
       await fetch("/api/notifications/read-all", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        credentials: "include",
       });
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
@@ -150,7 +136,7 @@ function DonorNotificationBell({ onSelectNotification }) {
                     <span className="notification-time">{formatTime(n.createdAt)}</span>
                   </div>
                   <p className="notification-msg">{n.message}</p>
-                  {n.foodId && (
+                  {n.foodId && n.type !== "LISTING_EXPIRED" && (
                     <span className="notification-cta">Click to manage pickup &rarr;</span>
                   )}
                 </li>

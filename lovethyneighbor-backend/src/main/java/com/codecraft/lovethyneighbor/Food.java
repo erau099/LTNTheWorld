@@ -201,8 +201,9 @@ public class Food {
             createdAt = LocalDateTime.now();
         }
 
+        // DT-102: New listings must be available in the recipient dashboard.
         if (status == null) {
-            status = "pending";
+            status = "ACTIVE";
         }
     }
 
@@ -325,6 +326,7 @@ public class Food {
     public void setPhotos(List<String> photos) {
         this.photos = photos;
     }
+
     public UUID getClaimedByUserId() {
         return claimedByUserId;
     }
