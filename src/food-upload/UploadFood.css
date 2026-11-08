@@ -311,3 +311,134 @@
         gap: 12px;
     }
 }
+
+/* Story 326: Location toggle and autocomplete styles */
+.address_toggle_group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.address_toggle_btn {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: 1px solid #2d7a3a;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #2d7a3a;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.address_toggle_btn:hover {
+    background: #eef6ef;
+}
+
+.address_toggle_btn.active {
+    background: #2d7a3a;
+    color: #ffffff;
+}
+
+.saved_address_card {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.saved_badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #166534;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.saved_address_text {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.saved_address_status {
+    font-size: 13px;
+    color: #4b5563;
+    font-style: italic;
+    margin: 6px 0;
+}
+
+.autocomplete_wrapper {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.autocomplete_spinner {
+    display: block;
+    font-size: 12px;
+    color: #4b5563;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.autocomplete_dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 50;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.autocomplete_item {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s ease;
+}
+
+.autocomplete_item:hover {
+    background-color: #f0fdf4;
+    color: #166534;
+}
+
+.privacy_safeguard_box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 12px;
+}
+
+.privacy_icon {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.privacy_text {
+    margin: 0;
+    font-size: 12px;
+    color: #1e3a8a;
+    line-height: 1.4;
+}
+

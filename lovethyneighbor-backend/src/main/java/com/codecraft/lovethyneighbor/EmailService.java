@@ -11,6 +11,19 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    // DT-332: sent at signup; the account can't log in until this link is used
+    public void sendSignupConfirmation(String toEmail, String firstName, String verificationLink) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Confirm your Love Thy Neighbor account");
+        message.setText("Hi " + firstName + ",\n\n"
+                + "Thanks for signing up for Love Thy Neighbor. Please confirm your account by clicking the link below:\n\n"
+                + verificationLink + "\n\n"
+                + "This link will expire in 24 hours."
+                + "\nIf you did not create this account, you can ignore this email.");
+        mailSender.send(message);
+    }
+
     public void sendPasswordResetEmail(String toEmail, String resetLink) {
         SimpleMailMessage message = new SimpleMailMessage();
 

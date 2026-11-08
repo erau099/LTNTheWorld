@@ -73,6 +73,29 @@ public class ReviewController {
             );
         }
 
+        // Story 108 Sub-task 5: Enforce review authorization and 72-hour review eligibility
+        if (food.getClaimedByUserId() == null || !food.getClaimedByUserId().equals(userId)) {
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN, "Only the recipient who claimed this pickup can leave a review"
+            );
+        }
+
+        if (!"COMPLETED".equalsIgnoreCase(food.getStatus())) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Reviews can only be submitted for completed pickups"
+            );
+        }
+
+        java.time.LocalDateTime completedAt = food.getCompletedAt();
+        if (completedAt == null) {
+            completedAt = food.getPickupEndTime() != null ? food.getPickupEndTime() : food.getCreatedAt();
+        }
+        if (completedAt != null && completedAt.isBefore(java.time.LocalDateTime.now().minusHours(72))) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Review window expired: reviews must be submitted within 72 hours of pickup completion"
+            );
+        }
+
         // 3. Save review
         Review review = new Review();
         review.setUser(user);
