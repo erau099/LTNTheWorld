@@ -104,7 +104,7 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
         List<Food> foods = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
-        updateExpiredFoodListings();
+        updatePendingToUnavailable();
 
         List<DonorListingResponse> responseList = foods.stream().map(food -> {
             String recipientName = "Unclaimed";
@@ -157,19 +157,18 @@ public class FoodController {
     }
 
         // DT-98 - Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
+        @Scheduled(
+            initialDelayString = "PT30S",
+            fixedDelayString = "PT${app.listings.expiry-check-minutes:5}M" 
+        )
         @Transactional 
-        private void updateExpiredFoodListings() {
+        private void updatePendingToUnavailable() {
             LocalDateTime now = LocalDateTime.now();
-            List<Food> listings = foodRepository.findAll();
-            int updated = 0;
-
-            System.out.println("Updated " + updated + " expired food listings to UNAVAILABLE.");
-        
+            List<Food> listings = foodRepository.findByStatusIgnoreCaseAndPickupEndTimeBefore("pending", now);
         for (Food food : listings) {
             if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && !food.getPickupEndTime().isAfter(now)) {
                 food.setStatus("UNAVAILABLE");
                 foodRepository.save(food);
-                updated++;
             }
         }
     }
