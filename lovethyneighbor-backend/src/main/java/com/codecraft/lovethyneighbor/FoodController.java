@@ -104,7 +104,6 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
         List<Food> foods = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
-        updatePendingToUnavailable();
 
         List<DonorListingResponse> responseList = foods.stream().map(food -> {
             String recipientName = "Unclaimed";
@@ -244,6 +243,17 @@ public class FoodController {
         );
         notificationRepository.save(notification);
 
+        // DT - 79: notify the recipient with scheduled pickup location and time
+        Notification recipientPickup = new Notification(
+            food.getClaimedByUserId(),
+            food.getId(),
+            "PICKUP_WAITING",
+            "Pickup Waiting: " + food.getFoodItem(),
+            "Pickup located at: " + food.getAddress()
+            + "Scheduled at: " + food.getPickupTime() + " - " + food.getPickupEndTime()
+        );
+        notificationRepository.save(recipientPickup);
+
         // DT-75: notify the recipient who requested this listing.
         Notification recipientNotification = new Notification(
                 food.getClaimedByUserId(),
@@ -257,7 +267,7 @@ public class FoodController {
 
         return ResponseEntity.ok(updated);
     }
-
+    
     // DT-85: Mark pickup as completed
     @PatchMapping("/{id}/complete-pickup")
     @Transactional
