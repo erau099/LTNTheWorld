@@ -5,6 +5,7 @@ import "./RecipientPastOrders.css";
 import "../index.css";
 import ReviewModal from "../ReviewModal.jsx";
 import searchIcon from "../assets/magnifying-glass.png";
+import { apiFetch } from "../api";
 
 function RecipientPastOrders() {
     const navigate = useNavigate();
@@ -29,7 +30,6 @@ function RecipientPastOrders() {
 	useEffect(() => {
 		apiFetch("/api/orders/mine")
 			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-			//.then(setOrders)
 			.then((data) => {
 				setOrders(data);
 			})

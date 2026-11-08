@@ -353,7 +353,7 @@ function RecipientDashboard() {
 						Profile
 					</button>
 
-					<RecipientNotificationBell onSelectNotification={() => navigate("/recipient-past-orders")} />
+					<RecipientNotificationBell userLocation={userLocation} onSelectNotification={() => navigate("/recipient-past-orders")} />
 
 					{/* Gear dropdown menu */}
 					<div className="gear_wrap" ref={dropdownRef}>

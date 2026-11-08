@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useId, useCallback } from "react";
 import { apiFetch } from "../api";
 import "./RecipientNotificationBell.css";
 
-function RecipientNotificationBell({ onSelectNotification }) {
+function RecipientNotificationBell({ onSelectNotification, userLocation }) {
 	const [open, setOpen] = useState(false);
 	const [showHistory, setShowHistory] = useState(false);
 	const [notifications, setNotifications] = useState([]);
@@ -14,7 +14,11 @@ function RecipientNotificationBell({ onSelectNotification }) {
 	const requestRef = useRef(null);
 	const savingRef = useRef(false);
 	const panelId = useId();
-	const unreadCount = notifications.filter((notification) => !notification.read).length;
+	const [nearbyAlerts, setNearbyAlerts] = useState([]);
+	const allNotfications = [...notifications, ...nearbyAlerts].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+	const unreadCount = allNotfications.filter((notification) => !notification.read).length;
+	const seenFoodIds = useRef(new Set());
+	const nearbyInitialized = useRef(false);
 
 	// Refresh on opening and every 30 seconds. Cancel older refreshes.
 	const loadNotifications = useCallback(async () => {
@@ -105,7 +109,93 @@ function RecipientNotificationBell({ onSelectNotification }) {
 		}
 	}
 
-	const visibleNotifications = showHistory ? notifications : notifications.slice(0, 5);
+	const visibleNotifications = showHistory ? allNotfications : allNotfications.slice(0, 5);
+
+	useEffect(() => {
+		if (!userLocation) return;
+		const controller = new AbortController();
+		let checking = false;
+		let cancelled = false;
+		seenFoodIds.current = new Set();
+		nearbyInitialized.current = false;
+		setNearbyAlerts([]);
+		const loadNearbyFood = async() => {
+			if (checking || cancelled) return;
+			checking = true;
+			try {
+				const params = new URLSearchParams({
+        		lat: String(userLocation.lat),
+        		lng: String(userLocation.lng),
+        		radiusMiles: "10",
+      		});
+			const response = await fetch(`/api/food?${params.toString()}`, {
+            	signal: controller.signal
+            });
+      		if (!response.ok) {
+        		throw new Error(`Food API error: ${response.status}`);
+      		}
+      		const food = await response.json();
+
+      		if (!Array.isArray(food)) {
+        		throw new Error("Invalid food listings response");
+      		}
+      		if (cancelled) return;
+      		if (!nearbyInitialized.current) {
+        		food.forEach((food) => {
+          			seenFoodIds.current.add(food.id);
+        		});
+        		nearbyInitialized.current = true;
+        		return;
+      		}
+      	const newAlerts = [];
+
+      	// Compare current food against previously seen food
+      	food.forEach((food) => {
+        	if (
+          		food.status?.toUpperCase() === "ACTIVE" &&
+          		!seenFoodIds.current.has(food.id)
+        	) {
+          		seenFoodIds.current.add(food.id);
+          	newAlerts.push({
+            	id: `nearby-${food.id}`,
+            	foodId: food.id,
+            	type: "NEW_FOOD_NEARBY",
+            	title: "New Food Available Nearby!",
+            	message: `${food.foodItem} is now available within 10 miles of you.`,
+            	read: false,
+            	createdAt: new Date().toISOString(),
+            	localAlert: true,
+          	});
+        	}
+      	});
+
+     	// Display any new notifications
+    	if (newAlerts.length > 0) {
+    	    setNearbyAlerts((previous) => [
+    			...newAlerts,
+    			...previous,
+        	]);
+      	}
+    } catch (error) {
+    	if (!cancelled && error.name !== "AbortError") {
+        	console.error("Nearby food notification error:", error);
+    	}
+    } finally {
+    	checking = false;
+	}
+};
+
+	// Check immediately when the component loads
+	loadNearbyFood();
+	// Check again every 30 seconds
+	const interval = setInterval(loadNearbyFood, 30000);
+	// Stop checking when the component unmounts
+	return () => {
+		cancelled = true;
+    	clearInterval(interval);
+		controller.abort();
+	};
+}, [userLocation?.lat, userLocation?.lng]);
 
 	return (
 		<div className="recipient-notification-bell" ref={wrapperRef}>
@@ -127,7 +217,7 @@ function RecipientNotificationBell({ onSelectNotification }) {
 					</div>
 					{loading && <p role="status">Loading notifications...</p>}
 					{error && <div role="alert"><p>{error}</p><button type="button" disabled={saving || loading} onClick={loadNotifications}>Retry</button></div>}
-					{!loading && !error && notifications.length === 0 && <p>No notifications yet.</p>}
+					{!loading && !error && allNotfications.length === 0 && <p>No notifications yet.</p>}
 					<ul className="recipient-notification-list">
 						{visibleNotifications.map((notification) => (
 							<li key={notification.id}>
@@ -142,7 +232,7 @@ function RecipientNotificationBell({ onSelectNotification }) {
 							</li>
 						))}
 					</ul>
-					{notifications.length > 5 && <button type="button" className="recipient-notification-history" onClick={() => setShowHistory(!showHistory)}>{showHistory ? "Show recent notifications" : `View notification history (${notifications.length})`}</button>}
+					{allNotfications.length > 5 && <button type="button" className="recipient-notification-history" onClick={() => setShowHistory(!showHistory)}>{showHistory ? "Show recent notifications" : `View notification history (${allNotfications.length})`}</button>}
 				</section>
 			)}
 		</div>
