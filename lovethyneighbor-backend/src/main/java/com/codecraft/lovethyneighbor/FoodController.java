@@ -30,16 +30,25 @@ public class FoodController {
     private final NotificationRepository notificationRepository;
     private final ReviewRepository reviewRepository;
     private final FoodClaimService foodClaimService;
+    private final GeocodingService geocodingService;
 
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
 
     public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository,
             ReviewRepository reviewRepository, FoodClaimService foodClaimService) {
+        this(foodRepository, notificationRepository, reviewRepository, foodClaimService, address -> Optional.empty());
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository,
+            ReviewRepository reviewRepository, FoodClaimService foodClaimService,
+            GeocodingService geocodingService) {
         this.foodRepository = foodRepository;
         this.notificationRepository = notificationRepository;
         this.reviewRepository = reviewRepository;
         this.foodClaimService = foodClaimService;
+        this.geocodingService = geocodingService;
     }
 
     // Create a new food listing
@@ -74,16 +83,69 @@ public class FoodController {
         // The JWT subject is the user's UUID, so the donor can't post as someone else
         food.setUserId(UUID.fromString(authentication.getName()));
 
+        // Geocode coordinates upon saving (Story 325)
+        geocodingService.geocode(food.getAddress()).ifPresent(coords -> {
+            food.setLatitude(coords.latitude());
+            food.setLongitude(coords.longitude());
+        });
+
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.ok(savedFood);
     }
 
-    // Recipient Dashboard: retrieve active listings
+    // Recipient Dashboard: retrieve active listings with optional distance filtering (Story 327)
     @GetMapping
-    public ResponseEntity<List<Food>> getAllActiveFood() {
-        return ResponseEntity.ok(
-            foodRepository.findByStatusIgnoreCase("ACTIVE")
-        );
+    public ResponseEntity<List<Food>> getAllActiveFood(
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng,
+            @RequestParam(required = false) Double radiusMiles) {
+
+        List<Food> foods = foodRepository.findByStatusIgnoreCase("ACTIVE");
+
+        if (lat != null && lng != null) {
+            foods = foods.stream()
+                    .peek(f -> {
+                        if (f.getLatitude() != null && f.getLongitude() != null) {
+                            double dist = DistanceUtils.calculateDistanceMiles(lat, lng, f.getLatitude(), f.getLongitude());
+                            f.setDistanceMiles(dist);
+                            f.setFormattedDistance(DistanceUtils.formatDistance(dist));
+                        }
+                    })
+                    .filter(f -> radiusMiles == null || (f.getDistanceMiles() != null && f.getDistanceMiles() <= radiusMiles))
+                    .sorted((f1, f2) -> {
+                        if (f1.getDistanceMiles() == null && f2.getDistanceMiles() == null) return 0;
+                        if (f1.getDistanceMiles() == null) return 1;
+                        if (f2.getDistanceMiles() == null) return -1;
+                        return Double.compare(f1.getDistanceMiles(), f2.getDistanceMiles());
+                    })
+                    .toList();
+        }
+
+        // Story 108 Sub-task 3 & Story 326 Privacy Safeguard:
+        // Mask exact street address in public recipient dashboard browsing
+        for (Food f : foods) {
+            String approx = extractApproximateLocation(f.getAddress());
+            f.setApproximateLocation(approx);
+            f.setAddress(approx);
+        }
+
+        return ResponseEntity.ok(foods);
+    }
+
+    private static String extractApproximateLocation(String fullAddress) {
+        if (fullAddress == null || fullAddress.trim().isEmpty()) {
+            return "Sacramento Area";
+        }
+        String[] parts = fullAddress.split(",");
+        if (parts.length >= 2) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i < parts.length; i++) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(parts[i].trim());
+            }
+            return sb.toString();
+        }
+        return fullAddress.trim();
     }
 
     // Donor Dashboard: retrieve own listings
@@ -307,6 +369,7 @@ public class FoodController {
         }
 
         food.setStatus("COMPLETED");
+        food.setCompletedAt(LocalDateTime.now());
         Food updated = foodRepository.save(food);
         foodClaimService.updateOrderStatus(food, "completed");
 
@@ -332,6 +395,66 @@ public class FoodController {
         notificationRepository.save(recipientNotification);
 
         return ResponseEntity.ok(updated);
+    }
+
+    // Dev/Test helper: seed placeholder listings across various distances
+    @PostMapping("/seed-test-data")
+    @Transactional
+    public ResponseEntity<?> seedDistanceTestData(Authentication authentication) {
+        UUID donorId = null;
+        if (authentication != null && authentication.getName() != null) {
+            try {
+                donorId = UUID.fromString(authentication.getName());
+            } catch (Exception ignored) {}
+        }
+        if (donorId == null) {
+            List<User> users = entityManager.createQuery("SELECT u FROM User u", User.class)
+                    .setMaxResults(1)
+                    .getResultList();
+            if (users.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("No registered users exist in the database. Please create an account first.");
+            }
+            donorId = users.get(0).getId();
+        }
+
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDateTime pickupStart = tomorrow.atTime(12, 0);
+        LocalDateTime pickupEnd = tomorrow.atTime(15, 0);
+
+        List<Food> testItems = List.of(
+            createSeedItem(donorId, "Fresh Box Lunches (CSUS)", "Healthy deli box lunches and fruit", "Fresh / Hot", "Wheat", "6000 J St, Sacramento, CA 95819", 38.5595, -121.4230, tomorrow, pickupStart, pickupEnd),
+            createSeedItem(donorId, "Artisan Sourdough Loaves (McKinley)", "Fresh baked organic sourdough loaves", "Fresh / Hot", "Wheat", "601 Alhambra Blvd, Sacramento, CA 95816", 38.5772, -121.4645, tomorrow, pickupStart, pickupEnd),
+            createSeedItem(donorId, "Assorted Gourmet Bagels (Downtown)", "Assorted bagels with cream cheese spreads", "Fresh / Hot", "Wheat, Milk", "500 David J Stern Walk, Sacramento, CA 95814", 38.5802, -121.4997, tomorrow, pickupStart, pickupEnd),
+            createSeedItem(donorId, "Organic Canned Soups & Beans (Arden)", "Canned lentil soup, black beans, and chickpeas", "Canned", "", "2405 Butano Dr, Sacramento, CA 95821", 38.6042, -121.3653, tomorrow.plusDays(1), pickupStart, pickupEnd),
+            createSeedItem(donorId, "Farm Fresh Produce Crate (Elk Grove)", "Greens, zucchini, carrots, and apples", "Fresh / Hot", "", "8450 Laguna Blvd, Elk Grove, CA 95758", 38.4235, -121.4225, tomorrow, pickupStart, pickupEnd),
+            createSeedItem(donorId, "Fruit & Pastries (UC Davis)", "Croissants, apples, oranges, and bananas", "Fresh / Hot", "Wheat, Eggs", "1 Shields Ave, Davis, CA 95616", 38.5419, -121.7486, tomorrow, pickupStart, pickupEnd),
+            createSeedItem(donorId, "Canned Sweet Corn & Tuna (Roseville)", "Sweet corn, green beans, and tuna cans", "Canned", "Fish", "1151 Galleria Blvd, Roseville, CA 95678", 38.7708, -121.2687, tomorrow.plusDays(1), pickupStart, pickupEnd),
+            createSeedItem(donorId, "Artisan Cheeses (San Francisco)", "Specialty cheeses and artisanal crackers", "Fresh / Hot", "Milk, Wheat", "1 Ferry Building, San Francisco, CA 94111", 37.7955, -122.3937, tomorrow, pickupStart, pickupEnd)
+        );
+
+        foodRepository.saveAll(testItems);
+        return ResponseEntity.ok(java.util.Map.of(
+            "message", "Successfully seeded " + testItems.size() + " test listings with geographic coordinates.",
+            "count", testItems.size()
+        ));
+    }
+
+    private Food createSeedItem(UUID donorId, String name, String desc, String tag, String allergen, String addr, double lat, double lng, LocalDate date, LocalDateTime start, LocalDateTime end) {
+        Food f = new Food();
+        f.setUserId(donorId);
+        f.setFoodItem(name);
+        f.setDescription(desc);
+        f.setTags(tag);
+        f.setAllergens(allergen);
+        f.setAddress(addr);
+        f.setLatitude(lat);
+        f.setLongitude(lng);
+        f.setDate(date);
+        f.setPickupTime(start);
+        f.setPickupEndTime(end);
+        f.setStatus("ACTIVE");
+        return f;
     }
 
     // Validate food upload information
