@@ -193,7 +193,7 @@ class FoodControllerTest {
                 .willReturn(List.of(activeFood1, activeFood2));
 
         // Act
-        ResponseEntity<List<Food>> response = foodController.getAllActiveFood();
+        ResponseEntity<List<Food>> response = foodController.getAllActiveFood(null, null, null);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
