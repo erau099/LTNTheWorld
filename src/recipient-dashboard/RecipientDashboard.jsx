@@ -333,6 +333,12 @@ function RecipientDashboard() {
 		<div className="recipient-dashboard">
 			{/* Header navigation for recipient pages */}
 			<DashboardHeader />
+      <div className="recipient-notification-toolbar">
+    <RecipientNotificationBell
+      userLocation={userLocation}
+      onSelectNotification={() => navigate("/recipient-past-orders")}
+    />
+  </div>
 
 			{/* Main dashboard content */}
 			<main className="recipient-main">

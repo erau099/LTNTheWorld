@@ -6,6 +6,7 @@ import "./RecipientPastOrders.css";
 import "../index.css";
 import ReviewModal from "../ReviewModal.jsx";
 import searchIcon from "../assets/magnifying-glass.png";
+import { apiFetch } from "../api";
 
 function RecipientPastOrders() {
     const navigate = useNavigate();
@@ -24,6 +25,17 @@ function RecipientPastOrders() {
     const [selectFiltering, setSelectedOrders] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
 
+	// Retrieve orders from the backend
+	const[ordersError, setOrdersError] = useState("");
+	
+	useEffect(() => {
+		apiFetch("/api/orders/mine")
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			.then((data) => {
+				setOrders(data);
+			})
+			.catch(() => setOrdersError("Could not load your orders."));
+	}, []);
     const fetchOrders = async () => {
         setLoading(true);
         setError(null);
