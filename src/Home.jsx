@@ -1,7 +1,10 @@
-import DashboardHeader from "./components/DashboardHeader";
-import { useState, useEffect } from 'react'
-import { Link } from "react-router-dom";
-import './App.css'
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import './App.css';
+
+// Set to true to show the Archive menu, or false to hide/disable it for production
+const SHOW_ARCHIVE = true;
 
 const steps = [
   {
@@ -27,8 +30,13 @@ const steps = [
   {
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-        <path d="M24 8C17.4 8 12 13.4 12 20c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
-        fill="#d4edda" stroke="#2d7a3a" strokeWidth="2" strokeLinejoin="round"/>
+        <path
+          d="M24 8C17.4 8 12 13.4 12 20c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
+          fill="#d4edda"
+          stroke="#2d7a3a"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
         <circle cx="24" cy="20" r="4" fill="#2d7a3a" />
       </svg>
     ),
@@ -37,95 +45,137 @@ const steps = [
   },
 ];
 
-
 function Home() {
-  const [message, setMessage] = useState('')
-  const [sessionUser, setSessionUser] = useState(null);
-  useEffect(() => {
-    let active = true;
-    fetch("/api/users/me", { credentials: "include" })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => { if (active) setSessionUser(data); })
-      .catch(() => {});
-    return () => { active = false; };
-  }, []);
-  const signedIn = Boolean(sessionUser);
-
-  useEffect(() => {
-    fetch('/api/hello')
-      .then(res => res.text())
-      .then(setMessage)
-  }, []);
+  const [message, setMessage] = useState('');
+  const { user, logout } = useAuth();
 
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/hello')
+      .then((res) => res.text())
+      .then(setMessage)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
-    setTimeout(() => setVisible(true), 100);
-    return () => window.removeEventListener("scroll", onScroll);
+    const timer = setTimeout(() => setVisible(true), 100);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
   }, []);
 
   return (
-    <>
-      <div className='main_page'>
+    <div className='main_page'>
+      {/* Header */}
+      <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
+        <span className='header_title'>Love Thy Neighbor</span>
+        
+        <div className='header_links'>
+          <Link to="/HowItWorks"><button className="headerbtn">How It Works</button></Link>
+          <Link to="/about"><button className="headerbtn">About Us</button></Link>
 
-        {/* Header */}
-        {signedIn ? (
-          <DashboardHeader role={sessionUser?.role} />
-        ) : (
-          <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-            <span className="header_title">Love Thy Neighbor</span>
-            <div className="header_links">
-              <Link to="/HowItWorks"><button className="headerbtn">How It Works</button></Link>
-              <Link to="/about"><button className="headerbtn">About Us</button></Link>
-              <Link to="/Login"><button className="loginbtn">Login</button></Link>
-              <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+          {/* Archive Dropdown (toggled via SHOW_ARCHIVE) */}
+          {SHOW_ARCHIVE && (
+            <div 
+              className="archive_container" 
+              style={{ position: 'relative', display: 'inline-block' }}
+              onMouseLeave={() => setArchiveOpen(false)}
+            >
+              <button 
+                type="button"
+                className="headerbtn" 
+                onClick={() => setArchiveOpen((prev) => !prev)}
+              >
+                Archive ▾
+              </button>
+
+              {archiveOpen && (
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '8px 0',
+                    minWidth: '200px',
+                    zIndex: 9999,
+                  }}
+                >
+                  <Link to="/donor-profile" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Donor Profile</Link>
+                  <Link to="/receiver-profile" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Receiver Profile</Link>
+                  <Link to="/recipient-past-orders" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Orders</Link>
+                  <Link to="/donor-past-listings" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Listings</Link>
+                  <Link to="/reviews" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Reviews</Link>
+                  <Link to="/recipient-dashboard" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Recipient Dashboard</Link>
+                  <Link to="/donor-dashboard" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Donor Dashboard</Link>
+                </div>
+              )}
             </div>
-          </nav>
-        )}
+          )}
 
-        {/* Banner */}
-        <section className='banner'>
-          <div className={`banner_bg ${visible ? "loaded" : ""}`}/>
-          <div className='banner_overlay'>
+          {/* Auth Display */}
+          {user ? (
+            <>
+              <span className="user_greeting" style={{ color: 'white', marginRight: '10px' }}>
+                Hi, {user.name}
+              </span>
+              <button className="loginbtn" onClick={logout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/Login"><button className='loginbtn'>Login</button></Link>
+              <Link to="/Signup"><button className="signupbtn">Sign Up</button></Link>
+            </>
+          )}
+        </div>
+      </nav>
+
+      {/* Banner */}
+      <section className='banner'>
+        <div className={`banner_bg ${visible ? "loaded" : ""}`} />
+        <div className='banner_overlay'>
           <div className={`banner_content ${visible ? "visible" : ""}`}>
             <h1 className='banner_title'>
-              Share Extra Food<br/>
+              Share Extra Food<br />
               Help Your Community
             </h1>
             <div className='bannerbtn'>
-                
-              {/*Temporary -> Remove after done with upload food pages*/}
               <button className='btn1'>Find Food Near Me</button>
               <button className='btn2'>Post Your Extra Food</button>
             </div>
           </div>
-          </div>
-        </section>
+        </div>
+      </section>
 
-        <p style={{textAlign: 'center', color: 'green'}}>{message}</p>
+      <p style={{ textAlign: 'center', color: 'green' }}>{message}</p>
 
-        {/* How It Works */}
-        <section className='hiw'>
-          <h2 className='hiwtitle'>How It Works</h2>
-          <div className='steps'>
-            {steps.map((s, i) => (
-              <div className="step_card" key={s.title}>
-                <div className="step_icon">{s.icon}</div>
-                <p className="step_number">Step {i + 1}</p>
-                <div className="divider" />
-                <p className="steps_title">{s.title}</p>
-                <p className="steps_desc">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-      </div>
-    </>
-  )
+      {/* How It Works */}
+      <section className='hiw'>
+        <h2 className='hiwtitle'>How It Works</h2>
+        <div className='steps'>
+          {steps.map((s, i) => (
+            <div className="step_card" key={s.title}>
+              <div className="step_icon">{s.icon}</div>
+              <p className="step_number">Step {i + 1}</p>
+              <div className="divider" />
+              <p className="steps_title">{s.title}</p>
+              <p className="steps_desc">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
 }
 
 export default Home;

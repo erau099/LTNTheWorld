@@ -182,3 +182,17 @@
     border-right-color: var(--border);
   }
 }
+
+.archive_item {
+  padding: 10px 16px;
+  color: #333333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+.archive_item:hover {
+  background-color: #f0f7f1;
+  color: #2d7a3a;
+}
