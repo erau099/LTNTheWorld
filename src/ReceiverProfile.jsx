@@ -1,81 +1,63 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { logout } from "./utils/auth";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import WaiverText from "./Waivers/WaiverText.jsx";
-
-import "./index.css";
-import "./App.css";
 import "./ReceiverProfile.css";
 
-const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
-
-function PencilIcon(props) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M3 17.25V21h3.75L17.8 9.95l-3.75-3.75L3 17.25z" />
-      <path d="M20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-    </svg>
-  );
-}
+const DROPDOWN = ["Profile", "Settings", "Sign Out"];
 
 function EditableInput({
   name,
-  type = "text",
   value,
   onChange,
   placeholder,
   editable,
   onToggleEdit,
+  type = "text",
   ariaLabel,
   canEdit = true,
 }) {
   return (
-    <div className={`rp-inputWrap ${editable ? "is-editing" : ""}`}>
-      <input
-        className="rp-input"
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={!editable || !canEdit}
-        aria-label={ariaLabel || name}
-        autoComplete="off"
-      />
-
-      {canEdit && (
-        <button
-          type="button"
-          className="rp-editBtn"
-          onClick={() => onToggleEdit(name)}
-          aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
-          title={editable ? "Lock" : "Edit"}
-        >
-          <PencilIcon className="rp-pencil" />
-        </button>
-      )}
+    <div className="rp-input-group">
+      <div className="rp-input-wrapper">
+        <input
+          type={type}
+          name={name}
+          value={value ?? ""}
+          onChange={onChange}
+          placeholder={placeholder}
+          disabled={!editable}
+          className={`rp-input ${editable ? "rp-input-active" : ""}`}
+        />
+        {canEdit && (
+          <button
+            type="button"
+            className="rp-pencil-btn"
+            onClick={() => onToggleEdit(name)}
+            aria-label={ariaLabel ? `Edit ${ariaLabel}` : `Edit ${name}`}
+          >
+            ✏️
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
-export default function ReceiverProfile() {
+function ReceiverProfile() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  const [user, setUser] = useState({
-    firstName: "User",
-  });
-
   const [showSignedWaiver, setShowSignedWaiver] = useState(false);
+  const dropdownRef = useRef(null);
 
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    password: "******",
+    password: "••••••••",
     dob: "",
     phone: "",
     allergies: "",
@@ -85,7 +67,6 @@ export default function ReceiverProfile() {
     firstName: false,
     lastName: false,
     email: false,
-    password: false,
     dob: false,
     phone: false,
     allergies: false,
@@ -94,170 +75,84 @@ export default function ReceiverProfile() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    function handleClickOut(e) {
+  useEffect(() => {
+    function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
       }
     }
-
-    document.addEventListener("mousedown", handleClickOut);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOut);
-      window.removeEventListener("scroll", onScroll);
-    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    fetch("/api/users/me", {
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Unable to load profile");
-        }
-        return response.json();
-      })
+    fetch("/api/users/me")
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        setForm((prev) => ({
-          ...prev,
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          dob: data.dateOfBirth || "",
-          phone: data.phoneNumber || "",
-          allergies: data.allergies || "",
-        }));
-
-        setUser((prev) => ({
-          ...prev,
-          firstName: data.firstName || "User",
-          waiver: data.waiver,
-        }));
+        if (data) {
+          setForm({
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            email: data.email || "",
+            password: "••••••••",
+            dob: data.dateOfBirth || data.dob || "",
+            phone: data.phoneNumber || data.phone || "",
+            allergies: data.allergies || "",
+          });
+        }
       })
-      .catch((error) => {
-        console.error("Error loading receiver profile:", error);
-      });
+      .catch((err) => console.error("Error loading profile:", err));
   }, []);
 
-  const handleAction = async (item) => {
-    if (item === "Sign Out") {
-      await logout();
-      navigate("/");
-    } else if (item === "Profile") {
-      navigate("/receiver-profile");
-    }
-    setDropdownOpen(false);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const canSave = useMemo(() => {
-    return (
-      form.firstName.trim() !== "" &&
-      form.lastName.trim() !== "" &&
-      form.email.trim() !== "" &&
-      form.dob !== "" &&
-      form.phone.trim() !== ""
-    );
-  }, [form]);
+  const toggleEdit = (field) => {
+    setEditing((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
+  const handleAction = (item) => {
+    setDropdownOpen(false);
+    if (item === "Profile") {
+      navigate("/receiver-profile");
+    } else if (item === "Settings") {
+      navigate("/settings");
+    } else if (item === "Sign Out") {
+      logout();
+      navigate("/");
+    }
+  };
 
-  function toggleEdit(field) {
-    setEditing((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  }
-
-  async function handleSave(e) {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!form.firstName.trim()) {
-      alert("First name is required.");
-      return;
-    }
-
-    if (!form.lastName.trim()) {
-      alert("Last name is required.");
-      return;
-    }
-
-    if (!emailPattern.test(form.email.trim())) {
-      alert("Please enter a valid email address.");
-      return;
-    }
-
-    if (!form.dob) {
-      alert("Date of birth is required.");
-      return;
-    }
-
-    const selectedDob = new Date(`${form.dob}T00:00:00`);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDob > today) {
-      alert("Date of birth cannot be in the future.");
-      return;
-    }
-
-    if (!form.phone.trim()) {
-      alert("Phone number is required.");
-      return;
-    }
 
     try {
-      const response = await fetch("/api/users/me", {
+      const res = await fetch("/api/users/me", {
         method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName: form.firstName.trim(),
-          lastName: form.lastName.trim(),
-          email: form.email.trim(),
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
           dateOfBirth: form.dob,
-          phoneNumber: form.phone.trim(),
+          phoneNumber: form.phone,
           allergies: form.allergies,
         }),
       });
 
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Unable to save profile");
+      if (!res.ok) {
+        throw new Error("Failed to update profile");
       }
-
-      const updatedUser = await response.json();
-
-      setForm((prev) => ({
-        ...prev,
-        firstName: updatedUser.firstName || "",
-        lastName: updatedUser.lastName || "",
-        email: updatedUser.email || "",
-        dob: updatedUser.dateOfBirth || "",
-        phone: updatedUser.phoneNumber || "",
-        allergies: updatedUser.allergies || "",
-      }));
-
-      setUser((prev) => ({
-        ...prev,
-        firstName: updatedUser.firstName || "User",
-      }));
 
       setEditing({
         firstName: false,
         lastName: false,
         email: false,
-        password: false,
         dob: false,
         phone: false,
         allergies: false,
@@ -265,21 +160,35 @@ export default function ReceiverProfile() {
 
       alert("Profile updated successfully!");
     } catch (error) {
-      console.error("Error saving receiver profile:", error);
-      alert(error.message || "Unable to update profile.");
+      console.error("Error saving profile:", error);
+      alert(error.message || "Unable to update profile");
     }
-  }
+  };
+
+  const canSave = Object.values(editing).some(Boolean);
 
   return (
     <div className="rp-page">
       {/* Header synced across Receiver pages */}
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className="header_title">Hello, {user.firstName}</span>
+        <span className="header_title">Hello, {user?.firstName || "Friend"}</span>
 
         <div className="header_links">
-          <button className="headerbtn" onClick={() => navigate("/")}>Home</button>
-          <button className="headerbtn" onClick={() => navigate("/recipient-dashboard")}>Dashboard</button>
-          <button className="headerbtn" onClick={() => navigate("/recipient-past-orders")}>Orders</button>
+          <button className="headerbtn" onClick={() => navigate("/")}>
+            Home
+          </button>
+          <button
+            className="headerbtn"
+            onClick={() => navigate("/recipient-dashboard")}
+          >
+            Dashboard
+          </button>
+          <button
+            className="headerbtn"
+            onClick={() => navigate("/recipient-past-orders")}
+          >
+            Orders
+          </button>
 
           <div className="gear_wrap" ref={dropdownRef}>
             <button
@@ -396,11 +305,7 @@ export default function ReceiverProfile() {
             />
           </div>
 
-          <button
-            className="rp-saveBtn"
-            type="submit"
-            disabled={!canSave}
-          >
+          <button className="rp-saveBtn" type="submit" disabled={!canSave}>
             Save Changes
           </button>
         </form>
@@ -451,3 +356,5 @@ export default function ReceiverProfile() {
     </div>
   );
 }
+
+export default ReceiverProfile;

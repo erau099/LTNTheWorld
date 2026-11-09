@@ -1,7 +1,7 @@
+import DashboardHeader from "./components/DashboardHeader";
 import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
 import './App.css'
-import { useAuth } from './context/AuthContext';
 
 // Set to true to show the Archive menu, or false to hide/disable it for production
 const SHOW_ARCHIVE = true;
