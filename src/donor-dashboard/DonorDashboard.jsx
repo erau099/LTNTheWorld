@@ -215,9 +215,9 @@ function DonorDashboard() {
 										<p className="pickup-time">{formatPickup(item)}</p>
 									</div>
 
-									<div className="rating" style={{ fontWeight: 700 }}>
-										{item.status}
-									</div>
+									<span className={`status-pill status-${(item.status || "active").toLowerCase()}`}>
+										{item.status || "ACTIVE"}
+									</span>
 								</div>
 							</div>
 						))

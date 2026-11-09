@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { logout } from "./utils/auth";
+import WaiverText from "./Waivers/WaiverText.jsx";
+
 import "./index.css";
 import "./App.css";
-import "./CDashboard.css";
 import "./ReceiverProfile.css";
-import WaiverText from "./Waivers/WaiverText.jsx";
 
 const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
 
@@ -93,7 +93,6 @@ export default function ReceiverProfile() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
-
     window.addEventListener("scroll", onScroll);
 
     function handleClickOut(e) {
@@ -118,7 +117,6 @@ export default function ReceiverProfile() {
         if (!response.ok) {
           throw new Error("Unable to load profile");
         }
-
         return response.json();
       })
       .then((data) => {
@@ -135,6 +133,7 @@ export default function ReceiverProfile() {
         setUser((prev) => ({
           ...prev,
           firstName: data.firstName || "User",
+          waiver: data.waiver,
         }));
       })
       .catch((error) => {
@@ -146,10 +145,9 @@ export default function ReceiverProfile() {
     if (item === "Sign Out") {
       await logout();
       navigate("/");
-    } else {
-      console.log(item);
+    } else if (item === "Profile") {
+      navigate("/receiver-profile");
     }
-
     setDropdownOpen(false);
   };
 
@@ -165,7 +163,6 @@ export default function ReceiverProfile() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -181,7 +178,6 @@ export default function ReceiverProfile() {
 
   async function handleSave(e) {
     e.preventDefault();
-
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!form.firstName.trim()) {
@@ -206,7 +202,6 @@ export default function ReceiverProfile() {
 
     const selectedDob = new Date(`${form.dob}T00:00:00`);
     const today = new Date();
-
     today.setHours(0, 0, 0, 0);
 
     if (selectedDob > today) {
@@ -258,14 +253,14 @@ export default function ReceiverProfile() {
         firstName: updatedUser.firstName || "User",
       }));
 
-      setEditing((prev) => {
-        const next = { ...prev };
-
-        Object.keys(next).forEach((key) => {
-          next[key] = false;
-        });
-
-        return next;
+      setEditing({
+        firstName: false,
+        lastName: false,
+        email: false,
+        password: false,
+        dob: false,
+        phone: false,
+        allergies: false,
       });
 
       alert("Profile updated successfully!");
@@ -277,27 +272,14 @@ export default function ReceiverProfile() {
 
   return (
     <div className="rp-page">
+      {/* Header synced across Receiver pages */}
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <span className="header_title">Hello, {user.firstName}</span>
 
         <div className="header_links">
-          <button className="headerbtn" onClick={() => navigate("/")}>
-            Home
-          </button>
-
-          <button
-            className="headerbtn"
-            onClick={() => navigate("/recipient-dashboard")}
-          >
-            Dashboard
-          </button>
-
-          <button
-            className="headerbtn"
-            onClick={() => navigate("/recipient-past-orders")}
-          >
-            Orders
-          </button>
+          <button className="headerbtn" onClick={() => navigate("/")}>Home</button>
+          <button className="headerbtn" onClick={() => navigate("/recipient-dashboard")}>Dashboard</button>
+          <button className="headerbtn" onClick={() => navigate("/recipient-past-orders")}>Orders</button>
 
           <div className="gear_wrap" ref={dropdownRef}>
             <button
@@ -326,10 +308,11 @@ export default function ReceiverProfile() {
         </div>
       </nav>
 
-      <div className="rp-card">
+      {/* Main Profile Card */}
+      <main className="rp-card">
         <div className="rp-header">
-          <div className="rp-subtitle">Your Information</div>
-          <h1 className="rp-title">Profile</h1>
+          <span className="rp-subtitle">Account Details</span>
+          <h1 className="rp-title">Your Profile</h1>
         </div>
 
         <form className="rp-form" onSubmit={handleSave}>
@@ -406,7 +389,7 @@ export default function ReceiverProfile() {
               name="allergies"
               value={form.allergies}
               onChange={handleChange}
-              placeholder="Allergies: Peanut, Milk, Shellfish"
+              placeholder="Allergies (e.g. Peanut, Dairy, Shellfish)"
               editable={editing.allergies}
               onToggleEdit={toggleEdit}
               ariaLabel="Allergies"
@@ -423,13 +406,14 @@ export default function ReceiverProfile() {
         </form>
 
         <div className="waiver_signed_info">
-          <span className="waiver_signed_title">Waiver Signed</span>
-
-          <p className="waiver_signed_date">
-            {user?.waiver?.acceptedAt
-              ? new Date(user.waiver.acceptedAt).toLocaleString()
-              : "Waiver date unavailable"}
-          </p>
+          <div>
+            <span className="waiver_signed_title">Liability Waiver</span>
+            <p className="waiver_signed_date">
+              {user?.waiver?.acceptedAt
+                ? `Accepted on ${new Date(user.waiver.acceptedAt).toLocaleDateString()}`
+                : "Signed on file"}
+            </p>
+          </div>
 
           <button
             type="button"
@@ -439,15 +423,15 @@ export default function ReceiverProfile() {
             View Waiver
           </button>
         </div>
-      </div>
+      </main>
 
+      {/* Signed Waiver Modal */}
       {showSignedWaiver && (
-        <div className="waiver_modal">
-          <div className="waiver_content">
+        <div className="waiver_modal" onClick={() => setShowSignedWaiver(false)}>
+          <div className="waiver_content" onClick={(e) => e.stopPropagation()}>
             <h3>Signed Liability Waiver</h3>
-
             <p className="waiver_intro_text">
-              This waiver is shown for reference only.
+              This waiver is shown for reference and was signed during registration.
             </p>
 
             <div className="waiver_box">

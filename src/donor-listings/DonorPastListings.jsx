@@ -1,18 +1,19 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { useAuth } from "../context/AuthContext";
+import DonorNotificationBell from "../donor-dashboard/DonorNotificationBell";
+import PickupCoordinationModal from "../donor-dashboard/PickupCoordinationModal";
 import "./DonorPastListings.css";
 import "../index.css";
 import "../App.css";
-import "../CDashboard.css";
 
 import searchIcon from "../assets/magnifying-glass.png";
 import { apiFetch } from "../api";
 
 function DonorPastListings() {
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
-    // Listings posted by the logged-in donor
     const [listings, setListings] = useState([]);
     const [loadError, setLoadError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
@@ -21,11 +22,19 @@ function DonorPastListings() {
     // Modal state for viewing reviews
     const [activeReview, setActiveReview] = useState(null);
 
-    useEffect(() => {
+    // Active listing opened in the Pickup Coordination Modal
+    const [activeCoordinationFood, setActiveCoordinationFood] = useState(null);
+    const [activeCoordinationFoodId, setActiveCoordinationFoodId] = useState(null);
+
+    const fetchListings = () => {
         apiFetch("/api/food/mine")
             .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
             .then(setListings)
             .catch(() => setLoadError("Could not load your listings."));
+    };
+
+    useEffect(() => {
+        fetchListings();
     }, []);
 
     // Gear dropdown logic
@@ -42,7 +51,36 @@ function DonorPastListings() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Filters for status tabs and search input
+    const handleDropdownAction = async (action) => {
+        if (action === "Profile") {
+            navigate("/donor-profile");
+        } else if (action === "Sign Out") {
+            await logout();
+            navigate("/");
+        }
+        setDropdownOpen(false);
+    };
+
+    // Bell notification selection handler
+    const handleSelectNotification = (notification) => {
+        if (notification.foodId) {
+            const match = listings.find((l) => l.id === notification.foodId);
+            if (match) {
+                setActiveCoordinationFood(match);
+                setActiveCoordinationFoodId(null);
+            } else {
+                setActiveCoordinationFood(null);
+                setActiveCoordinationFoodId(notification.foodId);
+            }
+        }
+    };
+
+    const handleStatusUpdated = (updated) => {
+        setListings((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+        setActiveCoordinationFood(updated);
+    };
+
+    // Filter by status and search keyword
     const filteredListings = listings.filter((listing) => {
         const matchesStatus =
             selectFiltering === "all" ||
@@ -55,17 +93,25 @@ function DonorPastListings() {
         return matchesStatus && matchesSearch;
     });
 
+    const displayName = user?.firstName || user?.name || "Donor";
+
     return (
         <div className="orders-page">
-            {/* Header navigation */}
+            {/* Header Navigation matching Donor Dashboard */}
             <nav className="nav">
-                <span className="header_title">Love Thy Neighbor</span>
+                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <span className="header_title">Hello, {displayName}</span>
+                </Link>
 
                 <div className="header_links">
-                    <Link to="/"><button className="headerbtn">Home</button></Link>
-                    <Link to="/donor-dashboard"><button className="headerbtn">Dashboard</button></Link>
-                    <Link to="/donor-profile"><button className="headerbtn">Profile</button></Link>
+                    <button className="headerbtn" onClick={() => navigate("/")}>Home</button>
+                    <button className="headerbtn" onClick={() => navigate("/donor-dashboard")}>Dashboard</button>
+                    <button className="headerbtn" onClick={() => navigate("/donor-profile")}>Profile</button>
 
+                    {/* Notification Bell */}
+                    <DonorNotificationBell onSelectNotification={handleSelectNotification} />
+
+                    {/* Gear Dropdown */}
                     <div className="gear_wrap" ref={dropdownRef}>
                         <button
                             className="gear_btn"
@@ -80,14 +126,14 @@ function DonorPastListings() {
                                 <button
                                     className="dropdown_item"
                                     type="button"
-                                    onClick={() => navigate("/donor-profile")}
+                                    onClick={() => handleDropdownAction("Profile")}
                                 >
                                     Profile
                                 </button>
                                 <button
                                     className="dropdown_item"
                                     type="button"
-                                    onClick={() => navigate("/")}
+                                    onClick={() => handleDropdownAction("Sign Out")}
                                 >
                                     Sign Out
                                 </button>
@@ -97,62 +143,46 @@ function DonorPastListings() {
                 </div>
             </nav>
 
-            {/* Main content */}
+            {/* Main Content */}
             <main className="orders-container">
-                <h1 className="orders-title">Past Listings</h1>
-
-                {/* Toolbar */}
-                <div className="orders-toolbar">
-                    <div className="toolbar-left">
-                        <div className="search-wrapper">
-                            <input
-                                type="text"
-                                placeholder="Search by food or recipient..."
-                                className="orders-search"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <img src={searchIcon} alt="search" className="search-icon" />
-                        </div>
-
-                        <div className="orders-filters">
-                            <button
-                                className={selectFiltering === "all" ? "filter-btn all" : "filter-btn all off"}
-                                onClick={() => setSelectedListings("all")}
-                            >
-                                All
-                            </button>
-                            <button
-                                className={selectFiltering === "claimed" ? "filter-btn pending" : "filter-btn pending off"}
-                                onClick={() => setSelectedListings("claimed")}
-                            >
-                                Claimed
-                            </button>
-                            <button
-                                className={selectFiltering === "cancelled" ? "filter-btn cancelled" : "filter-btn cancelled off"}
-                                onClick={() => setSelectedListings("cancelled")}
-                            >
-                                Cancelled
-                            </button>
-                            <button
-                                className={selectFiltering === "completed" ? "filter-btn completed" : "filter-btn completed off"}
-                                onClick={() => setSelectedListings("completed")}
-                            >
-                                Completed
-                            </button>
-                        </div>
+                <div className="orders-header-bar">
+                    <h1 className="orders-title">Past Listings</h1>
+                    
+                    {/* Search Bar */}
+                    <div className="search-wrapper">
+                        <input
+                            type="text"
+                            placeholder="Search listings or recipients..."
+                            className="orders-search"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <img src={searchIcon} alt="search" className="search-icon" />
                     </div>
                 </div>
 
-                {/* Listings table */}
+                {/* Status Filters synced with Dashboard style */}
+                <div className="filter-row">
+                    {["all", "active", "claimed", "scheduled", "completed", "expired", "cancelled"].map((status) => (
+                        <button
+                            key={status}
+                            type="button"
+                            className={`filter-button ${selectFiltering === status ? "active" : ""}`}
+                            onClick={() => setSelectedListings(status)}
+                        >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Listings Table Card */}
                 <div className="orders-table">
                     <div className="orders-header-row">
+                        <span>Food Item</span>
                         <span>Recipient</span>
-                        <span>Date</span>
-                        <span>Time</span>
-                        <span>Food Title</span>
+                        <span>Pickup Schedule</span>
                         <span>Status</span>
-                        <span className="header-review-btn">Review</span>
+                        <span>Review</span>
                     </div>
 
                     {loadError ? (
@@ -160,27 +190,47 @@ function DonorPastListings() {
                     ) : filteredListings.length > 0 ? (
                         filteredListings.map((listing) => (
                             <div className="orders-row" key={listing.id}>
-                                <span>{listing.recipientName || "Unclaimed"}</span>
-                                <span>
-                                    {listing.date
-                                        ? new Date(listing.date + "T00:00:00").toLocaleDateString()
-                                        : "N/A"}
-                                </span>
-                                <span>
-                                    {listing.pickupTime
-                                        ? new Date(listing.pickupTime).toLocaleTimeString([], {
-                                              hour: "numeric",
-                                              minute: "2-digit"
-                                          })
-                                        : "N/A"}
-                                </span>
-                                <span>{listing.foodItem}</span>
+                                {/* 1. Food Item */}
+                                <div className="col-cell col-food">
+                                    <span className="food-name">{listing.foodItem}</span>
+                                    {listing.tags && (
+                                        <span className="food-tag">{listing.tags.split(",")[0]}</span>
+                                    )}
+                                </div>
 
-                                <span className={`status-pill status-${listing.status?.toLowerCase()}`}>
-                                    {listing.status || "ACTIVE"}
-                                </span>
+                                {/* 2. Recipient */}
+                                <div className="col-cell col-recipient">
+                                    <span className="recipient-name">
+                                        {listing.recipientName || "Unclaimed"}
+                                    </span>
+                                </div>
 
-                                <div className="review-col">
+                                {/* 3. Combined Date & Time */}
+                                <div className="col-cell col-schedule">
+                                    <span className="schedule-date">
+                                        {listing.date
+                                            ? new Date(listing.date + "T00:00:00").toLocaleDateString()
+                                            : "N/A"}
+                                    </span>
+                                    <span className="schedule-time">
+                                        {listing.pickupTime
+                                            ? new Date(listing.pickupTime).toLocaleTimeString([], {
+                                                  hour: "numeric",
+                                                  minute: "2-digit"
+                                              })
+                                            : "Time not set"}
+                                    </span>
+                                </div>
+
+                                {/* 4. Status Badge */}
+                                <div className="col-cell col-status">
+                                    <span className={`status-pill status-${listing.status?.toLowerCase()}`}>
+                                        {listing.status || "ACTIVE"}
+                                    </span>
+                                </div>
+
+                                {/* 5. Feedback View */}
+                                <div className="col-cell col-feedback">
                                     {listing.reviewRating ? (
                                         <button
                                             className="view-review-btn"
@@ -194,21 +244,21 @@ function DonorPastListings() {
                                                 })
                                             }
                                         >
-                                            ⭐ {listing.reviewRating}/5 View
+                                            ★ {listing.reviewRating}/5 View
                                         </button>
                                     ) : (
-                                        <span className="no-review-label">No review</span>
+                                        <span className="no-review-label">—</span>
                                     )}
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <p className="no-orders">No past listings found</p>
+                        <p className="no-orders">No listings matching your search or filter.</p>
                     )}
                 </div>
             </main>
 
-            {/* Read-Only Review Detail Modal */}
+            {/* Read-Only Review Modal */}
             {activeReview && (
                 <div
                     className="modal-overlay"
@@ -222,17 +272,17 @@ function DonorPastListings() {
                         <p className="modal-field">
                             <strong>From:</strong> {activeReview.reviewer}
                         </p>
-                        <p className="modal-stars">
+                        <div className="modal-stars">
                             {"★".repeat(activeReview.rating || 0)}
                             {"☆".repeat(Math.max(0, 5 - (activeReview.rating || 0)))}
                             <span className="rating-number">
                                 ({activeReview.rating}/5)
                             </span>
-                        </p>
+                        </div>
                         <div className="modal-comment-box">
-                            <strong>Feedback:</strong>
+                            <strong style={{ fontSize: "0.85rem", color: "#6b7280" }}>RECIPIENT COMMENT</strong>
                             <p className="modal-comment-text">
-                                {activeReview.comment}
+                                "{activeReview.comment}"
                             </p>
                         </div>
                         <button
@@ -244,6 +294,19 @@ function DonorPastListings() {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* Pickup Coordination Modal (opens via notification bell) */}
+            {(activeCoordinationFood || activeCoordinationFoodId) && (
+                <PickupCoordinationModal
+                    food={activeCoordinationFood}
+                    foodId={activeCoordinationFoodId}
+                    onClose={() => {
+                        setActiveCoordinationFood(null);
+                        setActiveCoordinationFoodId(null);
+                    }}
+                    onStatusUpdated={handleStatusUpdated}
+                />
             )}
         </div>
     );

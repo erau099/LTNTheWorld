@@ -1,65 +1,27 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "./utils/auth";
+import DonorNotificationBell from "./donor-dashboard/DonorNotificationBell";
+import PickupCoordinationModal from "./donor-dashboard/PickupCoordinationModal";
+import WaiverText from "./Waivers/WaiverText.jsx";
+
 import "./index.css";
 import "./App.css";
-import "./CDashboard.css";
 import "./DonorProfile.css";
-import WaiverText from "./Waivers/WaiverText.jsx";
 
 const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
 
 const STATES = [
-  "Alabama",
-  "Alaska",
-  "Arizona",
-  "Arkansas",
-  "California",
-  "Colorado",
-  "Connecticut",
-  "Delaware",
-  "Florida",
-  "Georgia",
-  "Hawaii",
-  "Idaho",
-  "Illinois",
-  "Indiana",
-  "Iowa",
-  "Kansas",
-  "Kentucky",
-  "Louisiana",
-  "Maine",
-  "Maryland",
-  "Massachusetts",
-  "Michigan",
-  "Minnesota",
-  "Mississippi",
-  "Missouri",
-  "Montana",
-  "Nebraska",
-  "Nevada",
-  "New Hampshire",
-  "New Jersey",
-  "New Mexico",
-  "New York",
-  "North Carolina",
-  "North Dakota",
-  "Ohio",
-  "Oklahoma",
-  "Oregon",
-  "Pennsylvania",
-  "Rhode Island",
-  "South Carolina",
-  "South Dakota",
-  "Tennessee",
-  "Texas",
-  "Utah",
-  "Vermont",
-  "Virginia",
-  "Washington",
-  "West Virginia",
-  "Wisconsin",
-  "Wyoming",
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+  "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+  "New Hampshire", "New Jersey", "New Mexico", "New York",
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+  "West Virginia", "Wisconsin", "Wyoming"
 ];
 
 const COUNTRIES = ["United States", "Canada", "Mexico"];
@@ -124,11 +86,7 @@ function EditableSelect({
   canEdit = true,
 }) {
   return (
-    <div
-      className={`dp-inputWrap dp-selectWrap ${
-        editable ? "is-editing" : ""
-      }`}
-    >
+    <div className={`dp-inputWrap dp-selectWrap ${editable ? "is-editing" : ""}`}>
       <select
         className="dp-input dp-select"
         name={name}
@@ -166,11 +124,11 @@ export default function DonorProfile() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const [user, setUser] = useState({
-    firstName: "User",
-  });
-
+  const [user, setUser] = useState({ firstName: "User" });
   const [showSignedWaiver, setShowSignedWaiver] = useState(false);
+
+  // Active listing for the coordination modal
+  const [activeCoordinationFoodId, setActiveCoordinationFoodId] = useState(null);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -202,7 +160,6 @@ export default function DonorProfile() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
-
     window.addEventListener("scroll", onScroll);
 
     function handleClickOut(e) {
@@ -210,7 +167,6 @@ export default function DonorProfile() {
         setDropdownOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOut);
 
     return () => {
@@ -220,15 +176,10 @@ export default function DonorProfile() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/users/me", {
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Unable to load profile");
-        }
-
-        return response.json();
+    fetch("/api/users/me", { credentials: "include" })
+      .then((res) => {
+        if (!res.ok) throw new Error("Unable to load profile");
+        return res.json();
       })
       .then((data) => {
         setForm((prev) => ({
@@ -242,21 +193,19 @@ export default function DonorProfile() {
 
         setUser((prev) => ({
           ...prev,
+          ...data,
           firstName: data.firstName || "User",
         }));
       })
-      .catch((error) => {
-        console.error("Error loading profile:", error);
-      });
+      .catch((error) => console.error("Error loading profile:", error));
   }, []);
 
-  // DT-129: Load the saved donor address separately from profile information.
   useEffect(() => {
     fetch("/api/addresses/me", { credentials: "include" })
-      .then((response) => {
-        if (response.status === 404) return null;
-        if (!response.ok) throw new Error("Unable to load address");
-        return response.json();
+      .then((res) => {
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error("Unable to load address");
+        return res.json();
       })
       .then((address) => {
         if (!address) return;
@@ -278,11 +227,14 @@ export default function DonorProfile() {
       navigate("/");
     } else if (item === "Profile") {
       navigate("/donor-profile");
-    } else {
-      console.log(item);
     }
-
     setDropdownOpen(false);
+  };
+
+  const handleSelectNotification = (notification) => {
+    if (notification.foodId) {
+      setActiveCoordinationFoodId(notification.foodId);
+    }
   };
 
   const canSave = useMemo(() => {
@@ -297,7 +249,6 @@ export default function DonorProfile() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -313,24 +264,20 @@ export default function DonorProfile() {
 
   async function handleSave(e) {
     e.preventDefault();
-
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!form.firstName.trim()) {
       alert("First name is required.");
       return;
     }
-
     if (!form.lastName.trim()) {
       alert("Last name is required.");
       return;
     }
-
     if (!emailPattern.test(form.email.trim())) {
       alert("Please enter a valid email address.");
       return;
     }
-
     if (!form.dob) {
       alert("Date of birth is required.");
       return;
@@ -338,7 +285,6 @@ export default function DonorProfile() {
 
     const selectedDob = new Date(`${form.dob}T00:00:00`);
     const today = new Date();
-
     today.setHours(0, 0, 0, 0);
 
     if (selectedDob > today) {
@@ -351,7 +297,6 @@ export default function DonorProfile() {
       return;
     }
 
-    // DT-129: An address is optional, but entered addresses must be complete.
     const hasAddress = Boolean(
       form.address.trim() || form.city.trim() || form.zip.trim()
     );
@@ -368,9 +313,7 @@ export default function DonorProfile() {
       const response = await fetch("/api/users/me", {
         method: "PATCH",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: form.firstName.trim(),
           lastName: form.lastName.trim(),
@@ -401,14 +344,11 @@ export default function DonorProfile() {
         firstName: updatedUser.firstName || "User",
       }));
 
-      // DT-129: Save address after the existing profile update succeeds.
       if (hasAddress) {
         const addressResponse = await fetch("/api/addresses/me", {
           method: "PUT",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             streetAddress: form.address.trim(),
             zipCode: form.zip.trim(),
@@ -423,14 +363,18 @@ export default function DonorProfile() {
         }
       }
 
-      setEditing((prev) => {
-        const next = { ...prev };
-
-        Object.keys(next).forEach((key) => {
-          next[key] = false;
-        });
-
-        return next;
+      setEditing({
+        firstName: false,
+        lastName: false,
+        email: false,
+        password: false,
+        dob: false,
+        phone: false,
+        address: false,
+        zip: false,
+        city: false,
+        state: false,
+        country: false,
       });
 
       alert("Profile updated successfully");
@@ -442,30 +386,19 @@ export default function DonorProfile() {
 
   return (
     <div className="dp-page">
+      {/* Header synced with DonorDashboard & PastListings */}
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <span className="header_title">Hello, {user.firstName}</span>
 
         <div className="header_links">
-          <div className="header_links">
-            <button className="headerbtn" onClick={() => navigate("/")}>
-              Home
-            </button>
+          <button className="headerbtn" onClick={() => navigate("/")}>Home</button>
+          <button className="headerbtn" onClick={() => navigate("/donor-dashboard")}>Dashboard</button>
+          <button className="headerbtn" onClick={() => navigate("/donor-past-listings")}>Past Listings</button>
 
-            <button
-              className="headerbtn"
-              onClick={() => navigate("/donor-dashboard")}
-            >
-              Dashboard
-            </button>
+          {/* Notification Bell */}
+          <DonorNotificationBell onSelectNotification={handleSelectNotification} />
 
-            <button
-              className="headerbtn"
-              onClick={() => navigate("/donor-past-listings")}
-            >
-              Past Listings
-            </button>
-          </div>
-
+          {/* Gear Dropdown */}
           <div className="gear_wrap" ref={dropdownRef}>
             <button
               className="gear_btn"
@@ -493,10 +426,11 @@ export default function DonorProfile() {
         </div>
       </nav>
 
-      <div className="dp-card">
+      {/* Main Profile Card */}
+      <main className="dp-card">
         <div className="dp-header">
-          <div className="dp-subtitle">Your Information</div>
-          <h1 className="dp-title">Profile</h1>
+          <span className="dp-subtitle">Account Details</span>
+          <h1 className="dp-title">Your Profile</h1>
         </div>
 
         <form className="dp-form" onSubmit={handleSave}>
@@ -584,7 +518,7 @@ export default function DonorProfile() {
                 name="zip"
                 value={form.zip}
                 onChange={handleChange}
-                placeholder="Zip"
+                placeholder="Zip Code"
                 editable={editing.zip}
                 onToggleEdit={toggleEdit}
                 ariaLabel="Zip code"
@@ -634,13 +568,14 @@ export default function DonorProfile() {
         </form>
 
         <div className="waiver_signed_info">
-          <span className="waiver_signed_title">Waiver Signed</span>
-
-          <p className="waiver_signed_date">
-            {user?.waiver?.acceptedAt
-              ? new Date(user.waiver.acceptedAt).toLocaleString()
-              : "Waiver date unavailable"}
-          </p>
+          <div>
+            <span className="waiver_signed_title">Liability Waiver</span>
+            <p className="waiver_signed_date">
+              {user?.waiver?.acceptedAt
+                ? `Accepted on ${new Date(user.waiver.acceptedAt).toLocaleDateString()}`
+                : "Signed on file"}
+            </p>
+          </div>
 
           <button
             type="button"
@@ -650,15 +585,15 @@ export default function DonorProfile() {
             View Waiver
           </button>
         </div>
-      </div>
+      </main>
 
+      {/* Signed Waiver Modal */}
       {showSignedWaiver && (
-        <div className="waiver_modal">
-          <div className="waiver_content">
+        <div className="waiver_modal" onClick={() => setShowSignedWaiver(false)}>
+          <div className="waiver_content" onClick={(e) => e.stopPropagation()}>
             <h3>Signed Liability Waiver</h3>
-
             <p className="waiver_intro_text">
-              This waiver is shown for reference only.
+              This waiver is shown for reference and was signed during registration.
             </p>
 
             <div className="waiver_box">
@@ -674,6 +609,14 @@ export default function DonorProfile() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Pickup Coordination Modal */}
+      {activeCoordinationFoodId && (
+        <PickupCoordinationModal
+          foodId={activeCoordinationFoodId}
+          onClose={() => setActiveCoordinationFoodId(null)}
+        />
       )}
     </div>
   );

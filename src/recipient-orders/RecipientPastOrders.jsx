@@ -1,13 +1,40 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import "./RecipientPastOrders.css";
 import "../index.css";
+import "../App.css";
 import ReviewModal from "../ReviewModal.jsx";
 import searchIcon from "../assets/magnifying-glass.png";
 
+function formatTimeDisplay(timeStr) {
+  if (!timeStr) return "N/A";
+
+  // Case 1: If timeStr is already a full ISO string (e.g., "2026-11-08T22:15:00")
+  if (timeStr.includes("T") || !isNaN(Date.parse(timeStr))) {
+    return new Date(timeStr).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
+  // Case 2: If timeStr is a 24-hr time string (e.g., "22:15" or "22:15:00")
+  const parts = timeStr.split(":");
+  if (parts.length >= 2) {
+    const hours = parseInt(parts[0], 10);
+    const minutes = parts[1];
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${minutes} ${ampm}`;
+  }
+
+  return timeStr;
+}
+
 function RecipientPastOrders() {
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,8 +44,8 @@ function RecipientPastOrders() {
     const dropdownRef = useRef(null);
 
     // Review flow states
-    const [reviewOrder, setReviewOrder] = useState(null);      // Opens submit modal
-    const [viewReview, setViewReview] = useState(null);        // Opens view modal for already-reviewed item
+    const [reviewOrder, setReviewOrder] = useState(null);
+    const [viewReview, setViewReview] = useState(null);
 
     const [selectFiltering, setSelectedOrders] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
@@ -61,6 +88,16 @@ function RecipientPastOrders() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const handleDropdownAction = async (action) => {
+        if (action === "Profile") {
+            navigate("/receiver-profile");
+        } else if (action === "Sign Out") {
+            if (logout) await logout();
+            navigate("/");
+        }
+        setDropdownOpen(false);
+    };
+
     const handleReviewSubmit = async ({ foodId, rating, comment }) => {
         try {
             const response = await fetch("/api/reviews", {
@@ -79,7 +116,6 @@ function RecipientPastOrders() {
                 throw new Error(message || `HTTP ${response.status}`);
             }
 
-            // Update client state immediately so the button converts into the submitted review state
             setOrders((prev) =>
                 prev.map((order) =>
                     order.foodId === foodId || order.id === foodId
@@ -99,7 +135,8 @@ function RecipientPastOrders() {
     const filteredOrders = orders.filter((order) => {
         const matchesStatus =
             selectFiltering === "all" ||
-            order.status?.toLowerCase() === selectFiltering.toLowerCase();
+            order.status?.toLowerCase() === selectFiltering.toLowerCase() ||
+            (selectFiltering === "claimed" && order.status?.toLowerCase() === "pending");
 
         const matchesSearch =
             (order.donor?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
@@ -108,15 +145,20 @@ function RecipientPastOrders() {
         return matchesStatus && matchesSearch;
     });
 
+    const displayName = user?.firstName || user?.name || "Recipient";
+
     return (
         <div className="orders-page">
+            {/* Header Navigation */}
             <nav className="nav">
-                <span className="header_title">Love Thy Neighbor</span>
+                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <span className="header_title">Hello, {displayName}</span>
+                </Link>
 
                 <div className="header_links">
-                    <Link to="/"><button className="headerbtn">Home</button></Link>
-                    <Link to="/recipient-dashboard"><button className="headerbtn">Dashboard</button></Link>
-                    <Link to="/receiver-profile"><button className="headerbtn">Profile</button></Link>
+                    <button className="headerbtn" onClick={() => navigate("/")}>Home</button>
+                    <button className="headerbtn" onClick={() => navigate("/recipient-dashboard")}>Dashboard</button>
+                    <button className="headerbtn" onClick={() => navigate("/receiver-profile")}>Profile</button>
 
                     <div className="gear_wrap" ref={dropdownRef}>
                         <button
@@ -132,14 +174,14 @@ function RecipientPastOrders() {
                                 <button
                                     className="dropdown_item"
                                     type="button"
-                                    onClick={() => navigate("/receiver-profile")}
+                                    onClick={() => handleDropdownAction("Profile")}
                                 >
                                     Profile
                                 </button>
                                 <button
                                     className="dropdown_item"
                                     type="button"
-                                    onClick={() => navigate("/")}
+                                    onClick={() => handleDropdownAction("Sign Out")}
                                 >
                                     Sign Out
                                 </button>
@@ -149,59 +191,51 @@ function RecipientPastOrders() {
                 </div>
             </nav>
 
+            {/* Main Content Container */}
             <main className="orders-container">
-                <h1 className="orders-title">Past Orders</h1>
+                <div className="orders-header-bar">
+                    <h1 className="orders-title">Past Orders</h1>
 
-                <div className="orders-toolbar">
-                    <div className="toolbar-left">
-                        <div className="search-wrapper">
-                            <input
-                                type="text"
-                                placeholder="Search by donor or food item..."
-                                className="orders-search"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <img src={searchIcon} alt="search" className="search-icon" />
-                        </div>
-
-                        <div className="orders-filters">
-                            <button
-                                className={selectFiltering === "all" ? "filter-btn all" : "filter-btn all off"}
-                                onClick={() => setSelectedOrders("all")}
-                            >
-                                All
-                            </button>
-                            <button
-                                className={selectFiltering === "pending" || selectFiltering === "claimed" ? "filter-btn pending" : "filter-btn pending off"}
-                                onClick={() => setSelectedOrders("claimed")}
-                            >
-                                Claimed
-                            </button>
-                            <button
-                                className={selectFiltering === "cancelled" ? "filter-btn cancelled" : "filter-btn cancelled off"}
-                                onClick={() => setSelectedOrders("cancelled")}
-                            >
-                                Cancelled
-                            </button>
-                            <button
-                                className={selectFiltering === "completed" ? "filter-btn completed" : "filter-btn completed off"}
-                                onClick={() => setSelectedOrders("completed")}
-                            >
-                                Completed
-                            </button>
-                        </div>
+                    <div className="search-wrapper">
+                        <input
+                            type="text"
+                            placeholder="Search orders or donors..."
+                            className="orders-search"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <img src={searchIcon} alt="search" className="search-icon" />
                     </div>
                 </div>
 
+                {/* Dashboard-style Filter Tabs */}
+                <div className="filter-row">
+                    {[
+                        { key: "all", label: "All" },
+                        { key: "claimed", label: "Claimed" },
+                        { key: "scheduled", label: "Scheduled" },
+                        { key: "completed", label: "Completed" },
+                        { key: "cancelled", label: "Cancelled" }
+                    ].map(({ key, label }) => (
+                        <button
+                            key={key}
+                            type="button"
+                            className={`filter-button ${selectFiltering === key ? "active" : ""}`}
+                            onClick={() => setSelectedOrders(key)}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Orders Table */}
                 <div className="orders-table">
                     <div className="orders-header-row">
-                        <span>Donor Name</span>
-                        <span>Date</span>
-                        <span>Time</span>
-                        <span>Food Title</span>
+                        <span>Food Item</span>
+                        <span>Donor</span>
+                        <span>Pickup Schedule</span>
                         <span>Status</span>
-                        <span className="header-review-btn">Review</span>
+                        <span>Review</span>
                     </div>
 
                     {loading ? (
@@ -211,16 +245,34 @@ function RecipientPastOrders() {
                     ) : filteredOrders.length > 0 ? (
                         filteredOrders.map((order) => (
                             <div className="orders-row" key={order.id}>
-                                <span>{order.donor}</span>
-                                <span>{order.date}</span>
-                                <span>{order.time}</span>
-                                <span>{order.food}</span>
+                                {/* 1. Food Item */}
+                                <div className="col-cell col-food">
+                                    <span className="food-name">{order.food}</span>
+                                    {order.tags && (
+                                        <span className="food-tag">{order.tags.split(",")[0]}</span>
+                                    )}
+                                </div>
 
-                                <span className={`status-pill status-${order.status?.toLowerCase()}`}>
-                                    {order.status || "CLAIMED"}
-                                </span>
+                                {/* 2. Donor */}
+                                <div className="col-cell col-recipient">
+                                    <span className="recipient-name">{order.donor || "Anonymous Donor"}</span>
+                                </div>
 
-                                <div className="review-col">
+                                {/* 3. Pickup Schedule (Date & Time combined) */}
+                                <div className="col-cell col-schedule">
+                                    <span className="schedule-date">{order.date || "N/A"}</span>
+                                    <span className="schedule-time">{formatTimeDisplay(order.time)}</span>
+                                </div>
+
+                                {/* 4. Status Badge */}
+                                <div className="col-cell col-status">
+                                    <span className={`status-pill status-${(order.status || "claimed").toLowerCase()}`}>
+                                        {order.status || "CLAIMED"}
+                                    </span>
+                                </div>
+
+                                {/* 5. Action / Feedback */}
+                                <div className="col-cell col-feedback">
                                     {order.reviewed ? (
                                         <button
                                             className="view-review-btn"
@@ -234,7 +286,7 @@ function RecipientPastOrders() {
                                                 })
                                             }
                                         >
-                                            ⭐ {order.reviewRating}/5 View
+                                            ★ {order.reviewRating}/5 View
                                         </button>
                                     ) : (
                                         <button
@@ -250,7 +302,7 @@ function RecipientPastOrders() {
                             </div>
                         ))
                     ) : (
-                        <p className="no-orders">No past orders found</p>
+                        <p className="no-orders">No past orders found.</p>
                     )}
                 </div>
             </main>
@@ -272,17 +324,17 @@ function RecipientPastOrders() {
                         <p className="modal-field">
                             <strong>Donor:</strong> {viewReview.donorName}
                         </p>
-                        <p className="modal-stars">
+                        <div className="modal-stars">
                             {"★".repeat(viewReview.rating || 0)}
                             {"☆".repeat(Math.max(0, 5 - (viewReview.rating || 0)))}
                             <span className="rating-number">
                                 ({viewReview.rating}/5)
                             </span>
-                        </p>
+                        </div>
                         <div className="modal-comment-box">
-                            <strong>Your Feedback:</strong>
+                            <strong style={{ fontSize: "0.85rem", color: "#65756a" }}>YOUR FEEDBACK</strong>
                             <p className="modal-comment-text">
-                                {viewReview.comment}
+                                "{viewReview.comment}"
                             </p>
                         </div>
                         <button

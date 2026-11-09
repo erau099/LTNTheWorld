@@ -213,3 +213,50 @@
 
   cursor: pointer;
 }
+
+/* ================= STATUS PILL BADGES ================= */
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-active {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.status-claimed,
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-scheduled {
+  background-color: #ede9fe;
+  color: #5b21b6;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled,
+.status-removed_by_admin {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+}
+
+.status-expired {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
