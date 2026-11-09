@@ -5,6 +5,7 @@ import "./RecipientPastOrders.css";
 import "../index.css";
 import ReviewModal from "../ReviewModal.jsx";
 import searchIcon from "../assets/magnifying-glass.png";
+import { apiFetch } from "../api";
 
 function RecipientPastOrders() {
     const navigate = useNavigate();
@@ -23,6 +24,17 @@ function RecipientPastOrders() {
     const [selectFiltering, setSelectedOrders] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
 
+	// Retrieve orders from the backend
+	const[ordersError, setOrdersError] = useState("");
+	
+	useEffect(() => {
+		apiFetch("/api/orders/mine")
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			.then((data) => {
+				setOrders(data);
+			})
+			.catch(() => setOrdersError("Could not load your orders."));
+	}, []);
     const fetchOrders = async () => {
         setLoading(true);
         setError(null);
@@ -200,6 +212,7 @@ function RecipientPastOrders() {
                         <span>Date</span>
                         <span>Time</span>
                         <span>Food Title</span>
+                        <span>Pickup Location</span>
                         <span>Status</span>
                         <span className="header-review-btn">Review</span>
                     </div>
@@ -215,6 +228,27 @@ function RecipientPastOrders() {
                                 <span>{order.date}</span>
                                 <span>{order.time}</span>
                                 <span>{order.food}</span>
+
+                                {/* Story 108 Sub-task 3 & 4: Progressive Address Disclosure and Directions */}
+                                <div className="order-location-cell">
+                                    {order.directionsUrl ? (
+                                        <a
+                                            href={order.directionsUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="order-directions-link"
+                                            title="Get directions in Google Maps"
+                                        >
+                                            <span className="location-pin">📍</span>
+                                            <span className="address-text">{order.address}</span>
+                                            <span className="directions-badge">Directions ↗</span>
+                                        </a>
+                                    ) : (
+                                        <span className="order-locked-address" title="Exact pickup address is unlocked once the donor approves your request">
+                                            🔒 {order.address || "Locked until approved"}
+                                        </span>
+                                    )}
+                                </div>
 
                                 <span className={`status-pill status-${order.status?.toLowerCase()}`}>
                                     {order.status || "CLAIMED"}
@@ -236,12 +270,31 @@ function RecipientPastOrders() {
                                         >
                                             ⭐ {order.reviewRating}/5 View
                                         </button>
+                                    ) : order.status?.toLowerCase() === "completed" ? (
+                                        order.reviewEligible ? (
+                                            <button
+                                                className="submit-review-action-btn active"
+                                                type="button"
+                                                onClick={() => setReviewOrder(order)}
+                                            >
+                                                Review
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="submit-review-action-btn disabled expired-review-btn"
+                                                type="button"
+                                                disabled
+                                                title={order.reviewEligibilityMessage || "Review window expired (72-hour limit reached)"}
+                                            >
+                                                Expired (&gt;72h)
+                                            </button>
+                                        )
                                     ) : (
                                         <button
-                                            className={`submit-review-action-btn ${order.status?.toLowerCase() === "completed" ? "active" : "disabled"}`}
+                                            className="submit-review-action-btn disabled"
                                             type="button"
-                                            disabled={order.status?.toLowerCase() !== "completed"}
-                                            onClick={() => setReviewOrder(order)}
+                                            disabled
+                                            title="Reviews can only be submitted once pickup is completed"
                                         >
                                             Review
                                         </button>
