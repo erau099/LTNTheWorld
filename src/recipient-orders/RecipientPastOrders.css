@@ -176,7 +176,6 @@
   font-size: 0.98rem !important;
   font-weight: 600 !important;
   color: #2b3930 !important;
-<<<<<<< HEAD
 }
 
 /* 3. Schedule (Date & Time) */
@@ -191,69 +190,6 @@
   color: #65756a !important;
   font-weight: 500 !important;
   margin-top: 2px;
-}
-
-/* Location cell & Directions link (Story 108 Sub-task 3 & 4) */
-.order-location-cell {
-    font-size: 0.85rem;
-    line-height: 1.35;
-    word-break: break-word;
-}
-
-.order-directions-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: #1d4ed8;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.15s ease;
-}
-
-.order-directions-link:hover {
-    color: #1e40af;
-    text-decoration: underline;
-}
-
-.directions-badge {
-    background: #dbeafe;
-    color: #1e40af;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-    text-decoration: none;
-    margin-left: 4px;
-}
-
-.order-locked-address {
-    color: #64748b;
-    font-style: italic;
-    font-size: 0.8rem;
-}
-
-.expired-review-btn {
-    background-color: #e2e8f0 !important;
-    color: #64748b !important;
-    cursor: not-allowed !important;
-    font-size: 0.75rem !important;
-=======
-}
-
-/* 3. Schedule (Date & Time) */
-.schedule-date {
-  font-size: 0.98rem !important;
-  font-weight: 600 !important;
-  color: #2b3930 !important;
-}
-
-.schedule-time {
-  font-size: 0.85rem !important;
-  color: #65756a !important;
-  font-weight: 500 !important;
-  margin-top: 2px;
->>>>>>> d773c5282c7fb3ab27cb74425f25a2021dd019d4
 }
 
 /* 4. Status Badges */
