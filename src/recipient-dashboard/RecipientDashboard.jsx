@@ -432,7 +432,7 @@ function RecipientDashboard() {
 						</button>
 					))}
 				</div>
-
+				
 				<h2>Top Picks:</h2>
 
 				{coolingDown && (
