@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,7 +13,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     setupFiles: './src/setupTests.js',
     css: true,
-  }
-})
+  },
+});
