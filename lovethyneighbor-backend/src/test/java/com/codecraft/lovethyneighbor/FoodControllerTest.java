@@ -49,6 +49,10 @@ class FoodControllerTest {
     @InjectMocks
     private FoodController foodController;
 
+    @Mock
+    private GeocodingService geocodingService;
+    
+
     private UUID donorId;
     private UUID recipientId;
     private Food sampleFood;
