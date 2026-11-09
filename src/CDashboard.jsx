@@ -1,3 +1,4 @@
+import DashboardHeader from "./components/DashboardHeader";
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'; // Added for logout redirection
 import { getCurrentUser, logout } from './utils/auth'; // Added for session management
@@ -55,35 +56,7 @@ function CDashboard() {
     return (
         <div className="cdashboard">
             {/* NavBar */}
-            <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-                {/* Dynamically display current user's first name */}
-                <span className='header_title'>Hello, {user.firstName}</span>
-                <div className='header_links'>
-                    {NAV_LINKS.map((l) => (
-                    <button key={l} className='headerbtn'>{l}</button>
-                    ))}
-
-                    {/* Gear Button and Dropdown Menu */}
-                    <div className='gear_wrap' ref={dropdownRef}>
-                        <button className='gear_btn' onClick={() => setDropdownOpen(!dropdownOpen)}>
-                            ⚙
-                        </button>
-                        {dropdownOpen &&(
-                            <div className='dropdown'>
-                                {DROPDOWN.map((item) => (
-                                    <button
-                                        key={item}
-                                        className={`dropdown_item`}
-                                        onClick={() => handleAction(item)}
-                                    >
-                                        {item}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </nav>
+            <DashboardHeader />
 
             <div className="dashboard_content">
                 <h1>Welcome to your Dashboard</h1>

@@ -1,0 +1,44 @@
+.settings-page { min-height: 100vh; background: #f0fff3; color: #333; font-family: Arial, sans-serif; }
+.settings-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; background: #f0ece7; }
+.settings-nav button { border: 0; background: transparent; cursor: pointer; font: inherit; }
+.settings-card { max-width: 650px; margin: 45px auto; padding: 32px; border-radius: 12px; background: white; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+.settings-eyebrow { font-size: 12px; color: #888; margin: 0 0 6px; }
+.settings-card h1 { margin: 0 0 10px; }
+.settings-description { color: #666; margin-bottom: 28px; }
+.settings-section { padding: 24px 0; border-top: 1px solid #e6e6e6; }
+.settings-section h2, .settings-section h3 { margin: 0 0 10px; font-size: 20px; }
+.settings-section p { line-height: 1.5; }
+.settings-section button { padding: 10px 18px; border: 0; border-radius: 6px; background: #4b88f7; color: white; font-weight: 600; cursor: pointer; }
+.settings-section button:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 700px) { .settings-card { margin: 20px 12px; padding: 22px; } }
+
+/* DT-311: Supporting descriptions */
+.settings-help-text,
+.settings-section .notification-settings > p:first-of-type {
+  color: #000000;
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 4px 0 14px;
+  max-width: 520px;
+}
+
+/* DT-311: Browser notification preference states */
+.settings-section .notification-settings .notification-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 12px;
+}
+.settings-section .notification-settings button.notification-toggle {
+  min-width: 190px;
+  transition: background-color .15s ease, box-shadow .15s ease;
+}
+.settings-section .notification-settings button.notification-toggle.is-enabled {
+  background: #258347;
+}
+.settings-section .notification-settings button.notification-toggle.is-disabled {
+  background: #c43c3c;
+}
+.settings-section .notification-settings button.notification-toggle:not(:disabled):hover {
+  filter: brightness(.92);
+}

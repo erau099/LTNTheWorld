@@ -1,3 +1,4 @@
+import DashboardHeader from "../components/DashboardHeader";
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -331,62 +332,13 @@ function RecipientDashboard() {
 	return (
 		<div className="recipient-dashboard">
 			{/* Header navigation for recipient pages */}
-			<nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-				<span className="header_title">Hello, Test</span>
-
-				<div className="header_links">
-					<button className="headerbtn" onClick={() => navigate("/")}>
-						Home
-					</button>
-
-					<button
-						className="headerbtn"
-						onClick={() => navigate("/recipient-past-orders")}
-					>
-						Orders
-					</button>
-
-					<button
-						className="headerbtn"
-						onClick={() => navigate("/receiver-profile")}
-					>
-						Profile
-					</button>
-
-					<RecipientNotificationBell userLocation={userLocation} onSelectNotification={() => navigate("/recipient-past-orders")} />
-
-					{/* Gear dropdown menu */}
-					<div className="gear_wrap" ref={dropdownRef}>
-						<button
-							className="gear_btn"
-							type="button"
-							onClick={() => setDropdownOpen(!dropdownOpen)}
-						>
-							⚙
-						</button>
-
-						{dropdownOpen && (
-							<div className="dropdown">
-								<button
-									type="button"
-									className="dropdown_item"
-									onClick={() => handleDropdownAction("Profile")}
-								>
-									Profile
-								</button>
-
-								<button
-									type="button"
-									className="dropdown_item"
-									onClick={() => handleDropdownAction("Sign Out")}
-								>
-									Sign Out
-								</button>
-							</div>
-						)}
-					</div>
-				</div>
-			</nav>
+			<DashboardHeader />
+      <div className="recipient-notification-toolbar">
+    <RecipientNotificationBell
+      userLocation={userLocation}
+      onSelectNotification={() => navigate("/recipient-past-orders")}
+    />
+  </div>
 
 			{/* Main dashboard content */}
 			<main className="recipient-main">

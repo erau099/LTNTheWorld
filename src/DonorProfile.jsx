@@ -1,3 +1,4 @@
+import DashboardHeader from "./components/DashboardHeader";
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "./utils/auth";
@@ -442,56 +443,7 @@ export default function DonorProfile() {
 
   return (
     <div className="dp-page">
-      <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className="header_title">Hello, {user.firstName}</span>
-
-        <div className="header_links">
-          <div className="header_links">
-            <button className="headerbtn" onClick={() => navigate("/")}>
-              Home
-            </button>
-
-            <button
-              className="headerbtn"
-              onClick={() => navigate("/donor-dashboard")}
-            >
-              Dashboard
-            </button>
-
-            <button
-              className="headerbtn"
-              onClick={() => navigate("/donor-past-listings")}
-            >
-              Past Listings
-            </button>
-          </div>
-
-          <div className="gear_wrap" ref={dropdownRef}>
-            <button
-              className="gear_btn"
-              type="button"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              ⚙
-            </button>
-
-            {dropdownOpen && (
-              <div className="dropdown">
-                {DROPDOWN.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className="dropdown_item"
-                    onClick={() => handleAction(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+      <DashboardHeader />
 
       <div className="dp-card">
         <div className="dp-header">

@@ -1,3 +1,4 @@
+import DashboardHeader from "../components/DashboardHeader";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -122,44 +123,7 @@ function RecipientPastOrders() {
 
     return (
         <div className="orders-page">
-            <nav className="nav">
-                <span className="header_title">Love Thy Neighbor</span>
-
-                <div className="header_links">
-                    <Link to="/"><button className="headerbtn">Home</button></Link>
-                    <Link to="/recipient-dashboard"><button className="headerbtn">Dashboard</button></Link>
-                    <Link to="/receiver-profile"><button className="headerbtn">Profile</button></Link>
-
-                    <div className="gear_wrap" ref={dropdownRef}>
-                        <button
-                            className="gear_btn"
-                            type="button"
-                            onClick={() => setDropdownOpen(!dropdownOpen)}
-                        >
-                            ⚙
-                        </button>
-
-                        {dropdownOpen && (
-                            <div className="dropdown">
-                                <button
-                                    className="dropdown_item"
-                                    type="button"
-                                    onClick={() => navigate("/receiver-profile")}
-                                >
-                                    Profile
-                                </button>
-                                <button
-                                    className="dropdown_item"
-                                    type="button"
-                                    onClick={() => navigate("/")}
-                                >
-                                    Sign Out
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </nav>
+            <DashboardHeader />
 
             <main className="orders-container">
                 <h1 className="orders-title">Past Orders</h1>

@@ -5,6 +5,7 @@ import Login from "./Login.jsx"
 import Signup from "./Signup.jsx"
 import UploadFoodDetails from "./food-upload/UploadFoodDetails.jsx"
 import Home from "./Home.jsx"
+import Settings from "./Settings.jsx"
 import CDashboard from './CDashboard.jsx' // Imported to enable dashboard access after login
 import DonorProfile from "./DonorProfile.jsx";
 import ReceiverProfile from "./ReceiverProfile.jsx";
@@ -46,7 +47,8 @@ function App() {
         <Route path="/Dashboard" element={<CDashboard />} /> {/* Added path for the new demo Dashboard */}
         <Route path="/donor-profile" element={<DonorProfile />} />
         <Route path="/receiver-profile" element={<ReceiverProfile />} />
-        <Route path="/about" element={<About />} /> 
+        <Route path="/about" element={<About />} />
+        <Route path="/settings" element={<Settings />} /> 
         <Route path="/recipient-past-orders" element={<RecipientPastOrders />} />
         <Route path="/donor-past-listings" element={<DonorPastListings />} />
         <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
