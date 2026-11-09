@@ -1,7 +1,7 @@
-import DashboardHeader from "./components/DashboardHeader";
-import { useState, useEffect } from 'react'
-import { Link } from "react-router-dom";
-import './App.css'
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import './App.css';
 
 // Set to true to show the Archive menu, or false to hide/disable it for production
 const SHOW_ARCHIVE = true;
@@ -30,8 +30,13 @@ const steps = [
   {
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-        <path d="M24 8C17.4 8 12 13.4 12 20c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
-          fill="#d4edda" stroke="#2d7a3a" strokeWidth="2" strokeLinejoin="round"/>
+        <path
+          d="M24 8C17.4 8 12 13.4 12 20c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
+          fill="#d4edda"
+          stroke="#2d7a3a"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
         <circle cx="24" cy="20" r="4" fill="#2d7a3a" />
       </svg>
     ),
@@ -50,7 +55,7 @@ function Home() {
 
   useEffect(() => {
     fetch('/api/hello')
-      .then(res => res.text())
+      .then((res) => res.text())
       .then(setMessage)
       .catch(() => {});
   }, []);
@@ -58,8 +63,11 @@ function Home() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
-    setTimeout(() => setVisible(true), 100);
-    return () => window.removeEventListener("scroll", onScroll);
+    const timer = setTimeout(() => setVisible(true), 100);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
   }, []);
 
   return (
@@ -82,7 +90,7 @@ function Home() {
               <button 
                 type="button"
                 className="headerbtn" 
-                onClick={() => setArchiveOpen(prev => !prev)}
+                onClick={() => setArchiveOpen((prev) => !prev)}
               >
                 Archive ▾
               </button>
@@ -100,7 +108,7 @@ function Home() {
                     flexDirection: 'column',
                     padding: '8px 0',
                     minWidth: '200px',
-                    zIndex: 9999
+                    zIndex: 9999,
                   }}
                 >
                   <Link to="/donor-profile" style={{ padding: '8px 16px', color: '#333', textDecoration: 'none' }} onClick={() => setArchiveOpen(false)}>Donor Profile</Link>
@@ -134,11 +142,11 @@ function Home() {
 
       {/* Banner */}
       <section className='banner'>
-        <div className={`banner_bg ${visible ? "loaded" : ""}`}/>
+        <div className={`banner_bg ${visible ? "loaded" : ""}`} />
         <div className='banner_overlay'>
           <div className={`banner_content ${visible ? "visible" : ""}`}>
             <h1 className='banner_title'>
-              Share Extra Food<br/>
+              Share Extra Food<br />
               Help Your Community
             </h1>
             <div className='bannerbtn'>
