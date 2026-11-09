@@ -176,6 +176,7 @@
   font-size: 0.98rem !important;
   font-weight: 600 !important;
   color: #2b3930 !important;
+<<<<<<< HEAD
 }
 
 /* 3. Schedule (Date & Time) */
@@ -237,6 +238,22 @@
     color: #64748b !important;
     cursor: not-allowed !important;
     font-size: 0.75rem !important;
+=======
+}
+
+/* 3. Schedule (Date & Time) */
+.schedule-date {
+  font-size: 0.98rem !important;
+  font-weight: 600 !important;
+  color: #2b3930 !important;
+}
+
+.schedule-time {
+  font-size: 0.85rem !important;
+  color: #65756a !important;
+  font-weight: 500 !important;
+  margin-top: 2px;
+>>>>>>> d773c5282c7fb3ab27cb74425f25a2021dd019d4
 }
 
 /* 4. Status Badges */
