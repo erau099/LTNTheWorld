@@ -19,35 +19,68 @@ vi.mock('./Waivers/WaiverText.jsx', () => ({
 
 describe('DonorProfile Component', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
     vi.stubGlobal('alert', vi.fn());
+
+    // URL-based mock that safely handles calls from both DonorProfile and DashboardHeader
+    vi.stubGlobal('fetch', vi.fn((url, options = {}) => {
+      const urlStr = String(url);
+      const method = (options.method || 'GET').toUpperCase();
+
+      if (urlStr.includes('/api/users/me')) {
+        if (method === 'PATCH') {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              firstName: 'Robert',
+              lastName: 'Paulson',
+              email: 'robert@example.com',
+              dateOfBirth: '1990-05-15',
+              phoneNumber: '555-0199',
+            }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            firstName: 'Robert',
+            lastName: 'Paulson',
+            email: 'robert@example.com',
+            dateOfBirth: '1990-05-15',
+            phoneNumber: '555-0199',
+            role: 'donor',
+            waiver: { acceptedAt: '2026-01-10T10:00:00' },
+          }),
+        });
+      }
+
+      if (urlStr.includes('/api/addresses/me')) {
+        if (method === 'PUT') {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({}),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            streetAddress: '742 Evergreen Terrace',
+            zipCode: '90210',
+            city: 'Springfield',
+            state: 'California',
+            country: 'United States',
+          }),
+        });
+      }
+
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({}),
+      });
+    }));
   });
 
   it('loads user profile and address on initial render', async () => {
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          firstName: 'Robert',
-          lastName: 'Paulson',
-          email: 'robert@example.com',
-          dateOfBirth: '1990-05-15',
-          phoneNumber: '555-0199',
-          waiver: { acceptedAt: '2026-01-10T10:00:00' },
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          streetAddress: '742 Evergreen Terrace',
-          zipCode: '90210',
-          city: 'Springfield',
-          state: 'California',
-          country: 'United States',
-        }),
-      });
-
     render(
       <MemoryRouter>
         <DonorProfile />
@@ -64,17 +97,6 @@ describe('DonorProfile Component', () => {
 
   it('unlocks field for editing when clicking its pencil button', async () => {
     const user = userEvent.setup();
-
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ firstName: 'Robert', lastName: 'Paulson' }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({}),
-      });
 
     render(
       <MemoryRouter>
@@ -95,29 +117,6 @@ describe('DonorProfile Component', () => {
   it('submits profile PATCH and address PUT on save', async () => {
     const user = userEvent.setup();
 
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          firstName: 'Robert',
-          lastName: 'Paulson',
-          email: 'robert@example.com',
-          dateOfBirth: '1990-05-15',
-          phoneNumber: '555-0199',
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          streetAddress: '123 Fake St',
-          city: 'Sacramento',
-          zipCode: '95814',
-          state: 'California',
-          country: 'United States',
-        }),
-      });
-
     render(
       <MemoryRouter>
         <DonorProfile />
@@ -126,22 +125,9 @@ describe('DonorProfile Component', () => {
 
     await screen.findByDisplayValue('Robert');
 
-    // Mock save responses
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          firstName: 'Robert',
-          lastName: 'Paulson',
-          email: 'robert@example.com',
-          dateOfBirth: '1990-05-15',
-          phoneNumber: '555-0199',
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({}),
-      });
+    // Click edit pencil for First Name to activate canSave / editing state
+    const editFirstNameBtn = screen.getByRole('button', { name: /Edit firstName/i });
+    await user.click(editFirstNameBtn);
 
     const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
     await user.click(saveBtn);

@@ -32,6 +32,7 @@ const mockOrders = [
     time: '10:15 PM',
     status: 'completed',
     reviewed: false,
+    reviewEligible: true,
   },
   {
     id: 2,
@@ -41,6 +42,7 @@ const mockOrders = [
     time: '02:00 PM',
     status: 'claimed',
     reviewed: false,
+    reviewEligible: false,
   },
   {
     id: 3,
@@ -57,16 +59,37 @@ const mockOrders = [
 
 describe('RecipientPastOrders Component', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
     vi.stubGlobal('alert', vi.fn());
+
+    // URL-aware mock to handle DashboardHeader (/api/users/me) and orders (/api/recipient/orders)
+    vi.stubGlobal('fetch', vi.fn((url) => {
+      const urlStr = String(url);
+      if (urlStr.includes('/api/users/me')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ firstName: 'Taylor', role: 'recipient' }),
+        });
+      }
+      if (urlStr.includes('/api/recipient/orders')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => mockOrders,
+        });
+      }
+      if (urlStr.includes('/api/reviews')) {
+        return Promise.resolve({
+          ok: true,
+          text: async () => 'Review saved',
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({}),
+      });
+    }));
   });
 
   it('renders orders and respects review button states based on status', async () => {
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockOrders,
-    });
-
     render(
       <MemoryRouter>
         <RecipientPastOrders />
@@ -80,7 +103,7 @@ describe('RecipientPastOrders Component', () => {
     });
 
     const reviewButtons = screen.getAllByRole('button', { name: /^Review$/i });
-    // First order (completed, not reviewed) -> enabled
+    // First order (completed, reviewEligible) -> enabled
     expect(reviewButtons[0]).not.toBeDisabled();
     // Second order (claimed) -> disabled
     expect(reviewButtons[1]).toBeDisabled();
@@ -91,16 +114,6 @@ describe('RecipientPastOrders Component', () => {
 
   it('opens ReviewModal and submits POST /api/reviews', async () => {
     const user = userEvent.setup();
-
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockOrders,
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        text: async () => 'Review saved',
-      });
 
     render(
       <MemoryRouter>

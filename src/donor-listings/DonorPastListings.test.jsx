@@ -46,6 +46,20 @@ describe('DonorPastListings Component', () => {
       ok: true,
       json: async () => mockListings,
     });
+
+    global.fetch = vi.fn((url) => {
+      const urlStr = String(url);
+      if (urlStr.includes('/api/users/me')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ firstName: 'Jane', role: 'donor' }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({}),
+      });
+    });
   });
 
   it('renders listings loaded from the API', async () => {
@@ -76,11 +90,9 @@ describe('DonorPastListings Component', () => {
       expect(screen.getByText('Artisan Sourdough')).toBeInTheDocument();
     });
 
-    // Click "Completed" filter
     const completedFilterBtn = screen.getByRole('button', { name: /^Completed$/i });
     await user.click(completedFilterBtn);
 
-    // Completed item stays, active item disappears
     expect(screen.getByText('Artisan Sourdough')).toBeInTheDocument();
     expect(screen.queryByText('Fresh Apples')).not.toBeInTheDocument();
   });

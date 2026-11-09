@@ -70,18 +70,31 @@ describe('DonorDashboard Component', () => {
       ok: true,
       json: async () => mockFoodListings,
     });
+
+    global.fetch = vi.fn((url) => {
+      const urlStr = String(url);
+      if (urlStr.includes('/api/users/me')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ firstName: 'Sarah', role: 'donor' }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({}),
+      });
+    });
   });
 
-  it('renders listings and user greeting from AuthContext', async () => {
+  it('renders listings and user greeting from DashboardHeader', async () => {
     render(
       <MemoryRouter>
         <DonorDashboard />
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Hello, Sarah/i)).toBeInTheDocument();
-
     await waitFor(() => {
+      expect(screen.getByText(/Hello, Sarah/i)).toBeInTheDocument();
       expect(screen.getByText('Box of Bagels')).toBeInTheDocument();
       expect(screen.getByText('Vegetable Soup')).toBeInTheDocument();
     });

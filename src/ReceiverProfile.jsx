@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
+import React, { useState, useEffect } from "react";
+import DashboardHeader from "./components/DashboardHeader";
 import WaiverText from "./Waivers/WaiverText.jsx";
 import "./ReceiverProfile.css";
 
-const DROPDOWN = ["Profile", "Settings", "Sign Out"];
+function PencilIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 17.25V21h3.75L17.8 9.95l-3.75-3.75L3 17.25z" />
+      <path d="M20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+    </svg>
+  );
+}
 
 function EditableInput({
   name,
@@ -18,40 +24,36 @@ function EditableInput({
   canEdit = true,
 }) {
   return (
-    <div className="rp-input-group">
-      <div className="rp-input-wrapper">
-        <input
-          type={type}
-          name={name}
-          value={value ?? ""}
-          onChange={onChange}
-          placeholder={placeholder}
-          disabled={!editable}
-          className={`rp-input ${editable ? "rp-input-active" : ""}`}
-        />
-        {canEdit && (
-          <button
-            type="button"
-            className="rp-pencil-btn"
-            onClick={() => onToggleEdit(name)}
-            aria-label={ariaLabel ? `Edit ${ariaLabel}` : `Edit ${name}`}
-          >
-            ✏️
-          </button>
-        )}
-      </div>
+    <div className={`rp-inputWrap ${editable ? "is-editing" : ""}`}>
+      <input
+        type={type}
+        name={name}
+        value={value ?? ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={!editable || !canEdit}
+        className="rp-input"
+        aria-label={ariaLabel || name}
+        autoComplete="off"
+      />
+      {canEdit && (
+        <button
+          type="button"
+          className="rp-editBtn"
+          onClick={() => onToggleEdit(name)}
+          aria-label={editable ? `Stop editing ${name}` : `Edit ${name}`}
+          title={editable ? "Lock" : "Edit"}
+        >
+          <PencilIcon className="rp-pencil" />
+        </button>
+      )}
     </div>
   );
 }
 
 function ReceiverProfile() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-
-  const [scrolled, setScrolled] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showSignedWaiver, setShowSignedWaiver] = useState(false);
-  const dropdownRef = useRef(null);
+  const [user, setUser] = useState(null);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -73,26 +75,11 @@ function ReceiverProfile() {
   });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
     fetch("/api/users/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
+          setUser(data);
           setForm({
             firstName: data.firstName || "",
             lastName: data.lastName || "",
@@ -114,18 +101,6 @@ function ReceiverProfile() {
 
   const toggleEdit = (field) => {
     setEditing((prev) => ({ ...prev, [field]: !prev[field] }));
-  };
-
-  const handleAction = (item) => {
-    setDropdownOpen(false);
-    if (item === "Profile") {
-      navigate("/receiver-profile");
-    } else if (item === "Settings") {
-      navigate("/settings");
-    } else if (item === "Sign Out") {
-      logout();
-      navigate("/");
-    }
   };
 
   const handleSave = async (e) => {
@@ -169,53 +144,7 @@ function ReceiverProfile() {
 
   return (
     <div className="rp-page">
-      {/* Header synced across Receiver pages */}
-      <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className="header_title">Hello, {user?.firstName || "Friend"}</span>
-
-        <div className="header_links">
-          <button className="headerbtn" onClick={() => navigate("/")}>
-            Home
-          </button>
-          <button
-            className="headerbtn"
-            onClick={() => navigate("/recipient-dashboard")}
-          >
-            Dashboard
-          </button>
-          <button
-            className="headerbtn"
-            onClick={() => navigate("/recipient-past-orders")}
-          >
-            Orders
-          </button>
-
-          <div className="gear_wrap" ref={dropdownRef}>
-            <button
-              className="gear_btn"
-              type="button"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              ⚙
-            </button>
-
-            {dropdownOpen && (
-              <div className="dropdown">
-                {DROPDOWN.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className="dropdown_item"
-                    onClick={() => handleAction(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+      <DashboardHeader role="recipient" />
 
       {/* Main Profile Card */}
       <main className="rp-card">

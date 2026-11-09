@@ -1,16 +1,12 @@
 import DashboardHeader from "./components/DashboardHeader";
-import React, { useMemo, useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { logout } from "./utils/auth";
-import DonorNotificationBell from "./donor-dashboard/DonorNotificationBell";
+import React, { useMemo, useState, useEffect } from "react";
 import PickupCoordinationModal from "./donor-dashboard/PickupCoordinationModal";
 import WaiverText from "./Waivers/WaiverText.jsx";
 
 import "./index.css";
 import "./App.css";
+import "./CDashboard.css";
 import "./DonorProfile.css";
-
-const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
 
 const STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
@@ -119,16 +115,8 @@ function EditableSelect({
 }
 
 export default function DonorProfile() {
-  const navigate = useNavigate();
-
-  const [scrolled, setScrolled] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  const [user, setUser] = useState({ firstName: "User" });
+  const [user, setUser] = useState(null);
   const [showSignedWaiver, setShowSignedWaiver] = useState(false);
-
-  // Active listing for the coordination modal
   const [activeCoordinationFoodId, setActiveCoordinationFoodId] = useState(null);
 
   const [form, setForm] = useState({
@@ -160,23 +148,6 @@ export default function DonorProfile() {
   });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-
-    function handleClickOut(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOut);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOut);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-
-  useEffect(() => {
     fetch("/api/users/me", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("Unable to load profile");
@@ -192,11 +163,7 @@ export default function DonorProfile() {
           phone: data.phoneNumber || "",
         }));
 
-        setUser((prev) => ({
-          ...prev,
-          ...data,
-          firstName: data.firstName || "User",
-        }));
+        setUser(data);
       })
       .catch((error) => console.error("Error loading profile:", error));
   }, []);
@@ -221,16 +188,6 @@ export default function DonorProfile() {
       })
       .catch((error) => console.error("Error loading address:", error));
   }, []);
-
-  const handleAction = async (item) => {
-    if (item === "Sign Out") {
-      await logout();
-      navigate("/");
-    } else if (item === "Profile") {
-      navigate("/donor-profile");
-    }
-    setDropdownOpen(false);
-  };
 
   const handleSelectNotification = (notification) => {
     if (notification.foodId) {
@@ -340,10 +297,7 @@ export default function DonorProfile() {
         phone: updatedUser.phoneNumber || "",
       }));
 
-      setUser((prev) => ({
-        ...prev,
-        firstName: updatedUser.firstName || "User",
-      }));
+      setUser(updatedUser);
 
       if (hasAddress) {
         const addressResponse = await fetch("/api/addresses/me", {
@@ -387,47 +341,8 @@ export default function DonorProfile() {
 
   return (
     <div className="dp-page">
-      {/* Header synced with DonorDashboard & PastListings */}
-      <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <span className="header_title">Hello, {user.firstName}</span>
+      <DashboardHeader role="donor" onDonorNotification={handleSelectNotification} />
 
-        <div className="header_links">
-          <button className="headerbtn" onClick={() => navigate("/")}>Home</button>
-          <button className="headerbtn" onClick={() => navigate("/donor-dashboard")}>Dashboard</button>
-          <button className="headerbtn" onClick={() => navigate("/donor-past-listings")}>Past Listings</button>
-
-          {/* Notification Bell */}
-          <DonorNotificationBell onSelectNotification={handleSelectNotification} />
-
-          {/* Gear Dropdown */}
-          <div className="gear_wrap" ref={dropdownRef}>
-            <button
-              className="gear_btn"
-              type="button"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              ⚙
-            </button>
-
-            {dropdownOpen && (
-              <div className="dropdown">
-                {DROPDOWN.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className="dropdown_item"
-                    onClick={() => handleAction(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Profile Card */}
       <main className="dp-card">
         <div className="dp-header">
           <span className="dp-subtitle">Account Details</span>
@@ -559,11 +474,7 @@ export default function DonorProfile() {
             </div>
           </div>
 
-          <button
-            className="dp-saveBtn"
-            type="submit"
-            disabled={!canSave}
-          >
+          <button className="dp-saveBtn" type="submit" disabled={!canSave}>
             Save Changes
           </button>
         </form>
@@ -588,7 +499,6 @@ export default function DonorProfile() {
         </div>
       </main>
 
-      {/* Signed Waiver Modal */}
       {showSignedWaiver && (
         <div className="waiver_modal" onClick={() => setShowSignedWaiver(false)}>
           <div className="waiver_content" onClick={(e) => e.stopPropagation()}>
@@ -612,7 +522,6 @@ export default function DonorProfile() {
         </div>
       )}
 
-      {/* Pickup Coordination Modal */}
       {activeCoordinationFoodId && (
         <PickupCoordinationModal
           foodId={activeCoordinationFoodId}

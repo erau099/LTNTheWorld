@@ -8,7 +8,7 @@ import "../App.css";
 import "../CDashboard.css";
 
 // DT-311: One consistent signed-in navigation bar for donor and recipient pages.
-export default function DashboardHeader({ role: roleOverride, onDonorNotification }) {
+export default function DashboardHeader({ role: roleOverride, onDonorNotification, userLocation }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [account, setAccount] = useState(null);
@@ -18,12 +18,17 @@ export default function DashboardHeader({ role: roleOverride, onDonorNotificatio
 
   useEffect(() => {
     let active = true;
-    // A session cookie can remain valid after React state is reset on refresh.
     fetch("/api/users/me", { credentials: "include" })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => { if (active) setAccount(data); })
-      .catch(() => { if (active) setAccount(null); });
-    return () => { active = false; };
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (active) setAccount(data);
+      })
+      .catch(() => {
+        if (active) setAccount(null);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -42,9 +47,12 @@ export default function DashboardHeader({ role: roleOverride, onDonorNotificatio
   }, []);
 
   const pathname = location.pathname.toLowerCase();
-  const routeRole = pathname.includes("recipient") || pathname.includes("receiver")
-    ? "recipient"
-    : pathname.includes("donor") ? "donor" : null;
+  const routeRole =
+    pathname.includes("recipient") || pathname.includes("receiver")
+      ? "recipient"
+      : pathname.includes("donor")
+      ? "donor"
+      : null;
   const role = String(roleOverride || account?.role || routeRole || "").toLowerCase();
   const isRecipient = role === "recipient";
   const dashboardPath = isRecipient ? "/recipient-dashboard" : "/donor-dashboard";
@@ -62,25 +70,63 @@ export default function DashboardHeader({ role: roleOverride, onDonorNotificatio
     <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
       <span className="header_title">Hello, {displayName}</span>
       <div className="header_links">
-        <button type="button" className="headerbtn" onClick={() => navigate("/")}>Home</button>
-        <button type="button" className="headerbtn" onClick={() => navigate(dashboardPath)}>Dashboard</button>
-        <button type="button" className="headerbtn" onClick={() => navigate(historyPath)}>
-          {isRecipient ? "Past Orders" : "Past Listings"}
+        <button type="button" className="headerbtn" onClick={() => navigate("/")}>
+          Home
         </button>
-        <button type="button" className="headerbtn" onClick={() => navigate(profilePath)}>Profile</button>
+        <button type="button" className="headerbtn" onClick={() => navigate(dashboardPath)}>
+          Dashboard
+        </button>
+        <button type="button" className="headerbtn" onClick={() => navigate(historyPath)}>
+          {isRecipient ? "Orders" : "Past Listings"}
+        </button>
+        <button type="button" className="headerbtn" onClick={() => navigate(profilePath)}>
+          Profile
+        </button>
         {isRecipient ? (
-          <RecipientNotificationBell onSelectNotification={() => navigate(historyPath)} />
+          <RecipientNotificationBell
+            userLocation={userLocation}
+            onSelectNotification={() => navigate(historyPath)}
+          />
         ) : (
-          <DonorNotificationBell onSelectNotification={onDonorNotification || (() => navigate(historyPath))} />
+          <DonorNotificationBell
+            onSelectNotification={onDonorNotification || (() => navigate(historyPath))}
+          />
         )}
         <div className="gear_wrap" ref={dropdownRef}>
-          <button type="button" className="gear_btn" aria-label="Account settings" aria-expanded={dropdownOpen}
-            onClick={() => setDropdownOpen((open) => !open)}>⚙</button>
+          <button
+            type="button"
+            className="gear_btn"
+            aria-label="Account settings"
+            aria-expanded={dropdownOpen}
+            onClick={() => setDropdownOpen((open) => !open)}
+          >
+            ⚙
+          </button>
           {dropdownOpen && (
             <div className="dropdown">
-              <button type="button" className="dropdown_item" onClick={() => { setDropdownOpen(false); navigate(profilePath); }}>Profile</button>
-              <button type="button" className="dropdown_item" onClick={() => { setDropdownOpen(false); navigate("/settings"); }}>Settings</button>
-              <button type="button" className="dropdown_item" onClick={handleSignOut}>Sign Out</button>
+              <button
+                type="button"
+                className="dropdown_item"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  navigate(profilePath);
+                }}
+              >
+                Profile
+              </button>
+              <button
+                type="button"
+                className="dropdown_item"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  navigate("/settings");
+                }}
+              >
+                Settings
+              </button>
+              <button type="button" className="dropdown_item" onClick={handleSignOut}>
+                Sign Out
+              </button>
             </div>
           )}
         </div>

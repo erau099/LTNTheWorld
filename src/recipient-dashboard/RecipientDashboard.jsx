@@ -7,11 +7,9 @@ import "../index.css";
 import "../App.css";
 import "../CDashboard.css";
 import "./RecipientDashboard.css";
-import RecipientNotificationBell from "./RecipientNotificationBell";
 
 import { apiFetch } from "../api";
 import { ALLERGENS } from "../food-upload/foodDraft.js";
-
 
 // "Eggs" / "egg", and the older "Dairy" / "Diary" spellings of Milk, compare as the same allergen
 function normalizeAllergen(name) {
@@ -198,21 +196,10 @@ function RecipientDashboard() {
 		};
 	}, []);
 
-	// Handles the Profile and Sign Out buttons in the gear dropdown.
-	const handleDropdownAction = (item) => {
-		if (item === "Profile") {
-			navigate("/receiver-profile");
-		} else if (item === "Sign Out") {
-			navigate("/");
-		}
-
-		setDropdownOpen(false);
-	};
-
 	// Handles the cards to be able to be shown when clicked
 	const [selectListing, setSelectListing] = useState(false);
 	// Handles the filtering for the listings
-	const [selectFiltering, setSelectedFiltering] = useState("all")
+	const [selectFiltering, setSelectedFiltering] = useState("all");
 
 	// Search box and allergen filter, combined with the category tabs
 	const [searchText, setSearchText] = useState("");
@@ -277,8 +264,6 @@ function RecipientDashboard() {
 
 	// Checks the selected food listing against the recipient's saved allergies
 	const handleListingClick = async (item) => {
-		// DT-88: Recheck listing status when a recipient tries to open it.
-		// A listing may have been put on hold since the dashboard loaded.
 		if (!useMockFood) {
 			try {
 				const response = await fetch(`/api/food/${item.id}`);
@@ -324,21 +309,14 @@ function RecipientDashboard() {
 		setSelectListing(item);
 	};
 
-	// Gets the food condition from either backend data or current mock listings
 	const getFoodCondition = (item) => {
 		return item.tags || item.category || "Not specified";
 	};
 
 	return (
 		<div className="recipient-dashboard">
-			{/* Header navigation for recipient pages */}
-			<DashboardHeader />
-      <div className="recipient-notification-toolbar">
-    <RecipientNotificationBell
-      userLocation={userLocation}
-      onSelectNotification={() => navigate("/recipient-past-orders")}
-    />
-  </div>
+			{/* Unified signed-in header */}
+			<DashboardHeader role="recipient" userLocation={userLocation} />
 
 			{/* Main dashboard content */}
 			<main className="recipient-main">
