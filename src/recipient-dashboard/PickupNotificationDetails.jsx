@@ -1,6 +1,16 @@
 import {useState, useEffect} from 'react';
 import "./PickupNotificationDetails.css";
 
+function formatPickupTime(dateTime) {
+    if (!dateTime) return "N/A";
+    try {
+        const d = new Date(dateTime);
+        return isNaN(d.getTime()) ? String(dateTime) : d.toLocaleString([], { dateStyle: "short", timeStyle: "short" });
+    } catch {
+        return String(dateTime);
+    }
+}
+
 function PickupNotificationDetails({food, foodId, onClose, onStatusChange, notification}) {
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -55,7 +65,7 @@ function PickupNotificationDetails({food, foodId, onClose, onStatusChange, notif
                                 }
                             />
                             <div className="pickup-food-meta">
-                                <h3 className="pickup-food-title">{listing.name}</h3>
+                                <h3 className="pickup-food-title">{listing.foodItem || listing.name}</h3>
                                 <p className="pickup-food-description">
                                     {listing.description || "No description provided."}
                                 </p>
@@ -65,11 +75,11 @@ function PickupNotificationDetails({food, foodId, onClose, onStatusChange, notif
                         <div className="Pickup-details">
                             <div className="pickup-location">
                                 <h4>Pickup Location</h4>
-                                <p>{listing.pickupLocation ? `${listing.pickupLocation.address}, 
-                                ${listing.pickupLocation.city}, 
-                                ${listing.pickupLocation.state} 
-                                ${listing.pickupLocation.zip}` 
-                                : "No pickup location provided."}</p>
+                                <p>{listing.pickupLocation ? (
+                                    typeof listing.pickupLocation === 'object'
+                                        ? `${listing.pickupLocation.address || ''}, ${listing.pickupLocation.city || ''}, ${listing.pickupLocation.state || ''} ${listing.pickupLocation.zip || ''}`.replace(/^[\s,]+|[\s,]+$/g, '')
+                                        : listing.pickupLocation
+                                ) : (listing.address || "No pickup location provided.")}</p>
                         </div>
 
                         <div className="pickup-time">

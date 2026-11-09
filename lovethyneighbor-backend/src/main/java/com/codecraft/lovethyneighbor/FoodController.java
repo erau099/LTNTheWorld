@@ -223,7 +223,7 @@ public class FoodController {
             fixedDelayString = "PT${app.listings.expiry-check-minutes:5}M" 
         )
         @Transactional 
-        private void updatePendingToUnavailable() {
+        public void updatePendingToUnavailable() {
             LocalDateTime now = LocalDateTime.now();
             List<Food> listings = foodRepository.findByStatusIgnoreCaseAndPickupEndTimeBefore("pending", now);
         for (Food food : listings) {
@@ -305,25 +305,27 @@ public class FoodController {
         );
         notificationRepository.save(notification);
 
-        // DT - 79: notify the recipient with scheduled pickup location and time
-        Notification recipientPickup = new Notification(
-            food.getClaimedByUserId(),
-            food.getId(),
-            "PICKUP_WAITING",
-            "Pickup Waiting: " + food.getFoodItem(),
-            "Pickup located at: " + food.getAddress()
-            + "Scheduled at: " + food.getPickupTime() + " - " + food.getPickupEndTime()
-        );
-        notificationRepository.save(recipientPickup);
+        // DT-75 & DT-79: notify the recipient who requested this listing with pickup details
+        StringBuilder sb = new StringBuilder();
+        sb.append("Your request for '").append(food.getFoodItem()).append("' has been approved by the donor.");
+        if (food.getAddress() != null && !food.getAddress().isBlank()) {
+            sb.append(" Pickup location: ").append(food.getAddress()).append(".");
+        }
+        if (food.getPickupTime() != null) {
+            sb.append(" Scheduled: ").append(food.getPickupTime());
+            if (food.getPickupEndTime() != null) {
+                sb.append(" - ").append(food.getPickupEndTime());
+            }
+            sb.append(".");
+        }
+        sb.append(" Please check your orders for pickup details.");
 
-        // DT-75: notify the recipient who requested this listing.
         Notification recipientNotification = new Notification(
                 food.getClaimedByUserId(),
                 food.getId(),
                 "REQUEST_APPROVED",
                 "Request Approved: " + food.getFoodItem(),
-                "Your request for '" + food.getFoodItem()
-                        + "' has been approved by the donor. Please check your orders for pickup details."
+                sb.toString()
         );
         notificationRepository.save(recipientNotification);
 
