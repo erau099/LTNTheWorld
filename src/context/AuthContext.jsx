@@ -3,9 +3,25 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+    const demoMode = import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === "true";
+    const [user, setUser] = useState(() => {
+        if (!demoMode) return null;
+        try { return JSON.parse(localStorage.getItem("ltn_demo_user") || "null"); }
+        catch { return null; }
+    });
+
+    useEffect(() => {
+        if (!demoMode) return;
+        if (user) localStorage.setItem("ltn_demo_user", JSON.stringify(user));
+        else localStorage.removeItem("ltn_demo_user");
+    }, [user, demoMode]);
 
     const logout = async () => {
+        if (demoMode) {
+            setUser(null);
+            localStorage.removeItem("ltn_demo_user");
+            return;
+        }
         try {
             await fetch('/api/auth/logout', {
                 method: 'POST',

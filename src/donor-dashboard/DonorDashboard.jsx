@@ -1,6 +1,6 @@
+import DashboardHeader from "../components/DashboardHeader";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../api";
 import DonorNotificationBell from "./DonorNotificationBell";
 import PickupCoordinationModal from "./PickupCoordinationModal";
@@ -19,7 +19,7 @@ function formatPickup(item) {
 
 function DonorDashboard() {
     const navigate = useNavigate();
-	const { user, logout } = useAuth();
+	// Authentication and sign-out are handled by DashboardHeader.
 
 	// Tracks if the page is scrolled so the header can change style.
 	const [scrolled, setScrolled] = useState(false);
@@ -74,7 +74,7 @@ function DonorDashboard() {
 		if (item === "Profile") {
 			navigate("/donor-profile");
 		} else if (item === "Sign Out") {
-			await logout();
+			await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
 			navigate("/");
 		}
 
@@ -99,68 +99,12 @@ function DonorDashboard() {
 		setActiveCoordinationFood(updated);
 	};
 
-	const displayName = user?.firstName || user?.name || "Donor";
+	
 
 	return (
 		<div className="donor-dashboard">
 			{/* Header navigation for donor pages */}
-			<nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-				<span className="header_title">Hello, {displayName}</span>
-
-				<div className="header_links">
-					<button className="headerbtn" onClick={() => navigate("/")}>
-						Home
-					</button>
-
-					<button
-						className="headerbtn"
-						onClick={() => navigate("/donor-past-listings")}
-					>
-						Past Listings
-					</button>
-
-					<button
-						className="headerbtn"
-						onClick={() => navigate("/donor-profile")}
-					>
-						Profile
-					</button>
-
-					{/* Notification Bell */}
-					<DonorNotificationBell onSelectNotification={handleSelectNotification} />
-
-					{/* Gear dropdown menu */}
-					<div className="gear_wrap" ref={dropdownRef}>
-						<button
-							className="gear_btn"
-							type="button"
-							onClick={() => setDropdownOpen(!dropdownOpen)}
-						>
-							⚙
-						</button>
-
-						{dropdownOpen && (
-							<div className="dropdown">
-								<button
-									type="button"
-									className="dropdown_item"
-									onClick={() => handleDropdownAction("Profile")}
-								>
-									Profile
-								</button>
-
-								<button
-									type="button"
-									className="dropdown_item"
-									onClick={() => handleDropdownAction("Sign Out")}
-								>
-									Sign Out
-								</button>
-							</div>
-						)}
-					</div>
-				</div>
-			</nav>
+			<DashboardHeader onDonorNotification={handleSelectNotification} />
 
 			{/* Main dashboard content */}
 			<main className="donor-main">

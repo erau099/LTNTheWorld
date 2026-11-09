@@ -1,4 +1,3 @@
-
 export async function registerFirebaseSW() {
   if (!("serviceWorker" in navigator)) {
     console.warn("Service workers are not supported.");

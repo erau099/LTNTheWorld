@@ -1,4 +1,3 @@
-
 /* global importScripts, firebase, self */
 
 // Firebase compatibility SDK for service workers
