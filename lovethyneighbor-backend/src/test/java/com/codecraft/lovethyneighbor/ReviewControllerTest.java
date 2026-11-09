@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -50,7 +51,12 @@ class ReviewControllerTest {
 
         mockUserId = UUID.randomUUID();
         mockUser = new User();
+
         mockFood = new Food();
+        mockFood.setId(10L);
+        mockFood.setClaimedByUserId(mockUserId);
+        mockFood.setStatus("COMPLETED");
+        mockFood.setCompletedAt(LocalDateTime.now());
 
         mockReview = new Review();
         mockReview.setId(UUID.randomUUID());
@@ -108,6 +114,52 @@ class ReviewControllerTest {
             assertEquals("Review submitted successfully", response.get("message"));
             assertEquals(mockReview.getId().toString(), response.get("id"));
             verify(reviewRepository).save(any(Review.class));
+        }
+
+        @Test
+        @DisplayName("Should throw 403 FORBIDDEN when user did not claim the food item")
+        void shouldThrowForbiddenWhenUserNotClaimant() {
+            ReviewController.ReviewRequest request = new ReviewController.ReviewRequest();
+            request.setFoodId(10L);
+            request.setRating(4);
+
+            Food unassignedFood = new Food();
+            unassignedFood.setId(10L);
+            unassignedFood.setClaimedByUserId(UUID.randomUUID()); // different user
+            unassignedFood.setStatus("COMPLETED");
+
+            given(authentication.getName()).willReturn(mockUserId.toString());
+            given(entityManager.find(User.class, mockUserId)).willReturn(mockUser);
+            given(entityManager.find(Food.class, 10L)).willReturn(unassignedFood);
+
+            ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                    () -> reviewController.createReview(request, authentication));
+
+            assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
+            assertTrue(ex.getReason().contains("Only the recipient who claimed this pickup can leave a review"));
+        }
+
+        @Test
+        @DisplayName("Should throw 400 BAD_REQUEST when pickup is not COMPLETED")
+        void shouldThrowBadRequestWhenFoodNotCompleted() {
+            ReviewController.ReviewRequest request = new ReviewController.ReviewRequest();
+            request.setFoodId(10L);
+            request.setRating(4);
+
+            Food pendingFood = new Food();
+            pendingFood.setId(10L);
+            pendingFood.setClaimedByUserId(mockUserId);
+            pendingFood.setStatus("CLAIMED");
+
+            given(authentication.getName()).willReturn(mockUserId.toString());
+            given(entityManager.find(User.class, mockUserId)).willReturn(mockUser);
+            given(entityManager.find(Food.class, 10L)).willReturn(pendingFood);
+
+            ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                    () -> reviewController.createReview(request, authentication));
+
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+            assertTrue(ex.getReason().contains("Reviews can only be submitted for completed pickups"));
         }
 
         @Test
