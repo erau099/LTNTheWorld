@@ -2,6 +2,8 @@ package com.codecraft.lovethyneighbor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+@EnableScheduling 
 @RequestMapping("/api/food")
 @CrossOrigin(origins = "http://localhost:5173")
 public class FoodController {
@@ -163,7 +166,6 @@ public class FoodController {
                     .body("Invalid authentication identity.");
         }
         List<Food> foods = foodRepository.findByUser_IdOrderByCreatedAtDesc(userUuid);
-        updateExpiredFoodListings(foods);
 
         List<DonorListingResponse> responseList = foods.stream().map(food -> {
             String recipientName = "Unclaimed";
@@ -215,10 +217,15 @@ public class FoodController {
                 );
     }
 
-    // Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
-    private void updateExpiredFoodListings(List<Food> listings) {
-        LocalDateTime now = LocalDateTime.now();
-
+        // DT-98 - Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
+        @Scheduled(
+            initialDelayString = "PT30S",
+            fixedDelayString = "PT${app.listings.expiry-check-minutes:5}M" 
+        )
+        @Transactional 
+        private void updatePendingToUnavailable() {
+            LocalDateTime now = LocalDateTime.now();
+            List<Food> listings = foodRepository.findByStatusIgnoreCaseAndPickupEndTimeBefore("pending", now);
         for (Food food : listings) {
             if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && !food.getPickupEndTime().isAfter(now)) {
                 food.setStatus("UNAVAILABLE");
@@ -298,6 +305,17 @@ public class FoodController {
         );
         notificationRepository.save(notification);
 
+        // DT - 79: notify the recipient with scheduled pickup location and time
+        Notification recipientPickup = new Notification(
+            food.getClaimedByUserId(),
+            food.getId(),
+            "PICKUP_WAITING",
+            "Pickup Waiting: " + food.getFoodItem(),
+            "Pickup located at: " + food.getAddress()
+            + "Scheduled at: " + food.getPickupTime() + " - " + food.getPickupEndTime()
+        );
+        notificationRepository.save(recipientPickup);
+
         // DT-75: notify the recipient who requested this listing.
         Notification recipientNotification = new Notification(
                 food.getClaimedByUserId(),
@@ -311,7 +329,7 @@ public class FoodController {
 
         return ResponseEntity.ok(updated);
     }
-
+    
     // DT-85: Mark pickup as completed
     @PatchMapping("/{id}/complete-pickup")
     @Transactional
