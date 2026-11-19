@@ -26,12 +26,7 @@ function RecipientNotificationBell({ onSelectNotification, userLocation }) {
 		requestRef.current?.abort();
 		const controller = new AbortController();
 		requestRef.current = controller;
-		if (!localStorage.getItem("token")) {
-			setNotifications([]);
-			setError("Sign in to view your notifications.");
-			setLoading(false);
-			return;
-		}
+		
 		setLoading(true);
 		setError("");
 		try {
@@ -82,6 +77,20 @@ function RecipientNotificationBell({ onSelectNotification, userLocation }) {
 	// Update the displayed read state only after the server accepts the change.
 	async function markRead(notification) {
 		if (savingRef.current) return;
+
+		// Nearby food alerts are local and are not stored in the notification table.
+		if (notification?.localAlert) {
+			setNearbyAlerts((previous) => previous.map((item) =>
+				item.id === notification.id ? { ...item, read: true } : item
+			));
+
+			if (notification.foodId && onSelectNotification) {
+				setOpen(false);
+				onSelectNotification(notification);
+			}
+			return;
+		}
+
 		if (!notification || !notification.read) {
 			savingRef.current = true;
 			setSaving(true);
@@ -124,78 +133,78 @@ function RecipientNotificationBell({ onSelectNotification, userLocation }) {
 			checking = true;
 			try {
 				const params = new URLSearchParams({
-        		lat: String(userLocation.lat),
-        		lng: String(userLocation.lng),
-        		radiusMiles: "10",
-      		});
-			const response = await fetch(`/api/food?${params.toString()}`, {
-            	signal: controller.signal
-            });
-      		if (!response.ok) {
-        		throw new Error(`Food API error: ${response.status}`);
-      		}
-      		const food = await response.json();
+        			lat: String(userLocation.lat),
+        			lng: String(userLocation.lng),
+        			radiusMiles: "10",
+      			});
+				const response = await fetch(`/api/food?${params.toString()}`, {
+            		signal: controller.signal
+            	});
+      			if (!response.ok) {
+        			throw new Error(`Food API error: ${response.status}`);
+      			}
+      			const food = await response.json();
 
-      		if (!Array.isArray(food)) {
-        		throw new Error("Invalid food listings response");
-      		}
-      		if (cancelled) return;
-      		if (!nearbyInitialized.current) {
-        		food.forEach((food) => {
-          			seenFoodIds.current.add(food.id);
-        		});
-        		nearbyInitialized.current = true;
-        		return;
-      		}
-      	const newAlerts = [];
+      			if (!Array.isArray(food)) {
+        			throw new Error("Invalid food listings response");
+      			}
+      			if (cancelled) return;
+      			if (!nearbyInitialized.current) {
+        			food.forEach((food) => {
+          				seenFoodIds.current.add(food.id);
+        			});
+        			nearbyInitialized.current = true;
+        			return;
+      			}
+      			const newAlerts = [];
 
-      	// Compare current food against previously seen food
-      	food.forEach((food) => {
-        	if (
-          		food.status?.toUpperCase() === "ACTIVE" &&
-          		!seenFoodIds.current.has(food.id)
-        	) {
-          		seenFoodIds.current.add(food.id);
-          	newAlerts.push({
-            	id: `nearby-${food.id}`,
-            	foodId: food.id,
-            	type: "NEW_FOOD_NEARBY",
-            	title: "New Food Available Nearby!",
-            	message: `${food.foodItem} is now available within 10 miles of you.`,
-            	read: false,
-            	createdAt: new Date().toISOString(),
-            	localAlert: true,
-          	});
-        	}
-      	});
+      			// Compare current food against previously seen food
+      			food.forEach((food) => {
+        			if (
+          				food.status?.toUpperCase() === "ACTIVE" &&
+          				!seenFoodIds.current.has(food.id)
+        			) {
+          				seenFoodIds.current.add(food.id);
+          				newAlerts.push({
+            				id: `nearby-${food.id}`,
+            				foodId: food.id,
+            				type: "NEW_FOOD_NEARBY",
+            				title: "New Food Available Nearby!",
+            				message: `${food.foodItem} is now available within 10 miles of you.`,
+            				read: false,
+            				createdAt: new Date().toISOString(),
+            				localAlert: true,
+          				});
+        			}
+      			});
 
-     	// Display any new notifications
-    	if (newAlerts.length > 0) {
-    	    setNearbyAlerts((previous) => [
-    			...newAlerts,
-    			...previous,
-        	]);
-      	}
-    } catch (error) {
-    	if (!cancelled && error.name !== "AbortError") {
-        	console.error("Nearby food notification error:", error);
-    	}
-    } finally {
-    	checking = false;
-	}
-};
+     			// Display any new notifications
+    			if (newAlerts.length > 0) {
+    	    		setNearbyAlerts((previous) => [
+    					...newAlerts,
+    					...previous,
+        			]);
+      			}
+    		} catch (error) {
+    			if (!cancelled && error.name !== "AbortError") {
+        			console.error("Nearby food notification error:", error);
+    			}
+    		} finally {
+    			checking = false;
+			}
+		};
 
-	// Check immediately when the component loads
-	loadNearbyFood();
-	// Check again every 30 seconds
-	const interval = setInterval(loadNearbyFood, 30000);
-	// Stop checking when the component unmounts
-	return () => {
-		cancelled = true;
-    	clearInterval(interval);
-		controller.abort();
-	};
-}, [userLocation?.lat, userLocation?.lng]);
+		// Check immediately when the component loads
+		loadNearbyFood();
+		// Check again every 30 seconds
+		const interval = setInterval(loadNearbyFood, 30000);
+		// Stop checking when the component unmounts
+		return () => {
+			cancelled = true;
+    		clearInterval(interval);
+			controller.abort();
+		};
+	}, [userLocation?.lat, userLocation?.lng]);
 
 	return (
 		<div className="recipient-notification-bell" ref={wrapperRef}>
@@ -227,7 +236,11 @@ function RecipientNotificationBell({ onSelectNotification, userLocation }) {
 									<strong>{!notification.read && <span className="recipient-notification-dot" aria-label="Unread" />}{notification.title}</strong>
 									<span>{notification.message}</span>
 									{notification.createdAt && <time dateTime={notification.createdAt}>{new Date(notification.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</time>}
-									{notification.foodId && <span className="recipient-notification-link">View orders →</span>}
+									{notification.foodId && (
+										<span className="recipient-notification-link">
+											{notification.type === "NEW_FOOD_NEARBY" ? "View listing →" : "View orders →"}
+										</span>
+									)}
 								</button>
 							</li>
 						))}

@@ -12,7 +12,6 @@ describe('Sprint 9 Frontend Components', () => {
 
     describe('UploadFoodLocation (Story 326: Autocomplete & Saved Address Toggle)', () => {
         it('renders the address mode toggle buttons and privacy safeguard notice', () => {
-            // Mock draft state so location view is not redirected
             vi.spyOn(FoodDraftModule, 'useFoodDraft').mockReturnValue([
                 { foodItem: 'Canned Beans', description: 'Fresh beans', tags: ['Canned'], allergens: [], address: '', date: '2026-11-20', startTime: '10:00', endTime: '12:00' },
                 vi.fn()
@@ -64,9 +63,18 @@ describe('Sprint 9 Frontend Components', () => {
                 }
             ];
 
-            global.fetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockOrders
+            global.fetch = vi.fn((url) => {
+                const urlStr = String(url);
+                if (urlStr.includes('/api/users/me')) {
+                    return Promise.resolve({
+                        ok: true,
+                        json: async () => ({ firstName: 'User', role: 'recipient' }),
+                    });
+                }
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => mockOrders,
+                });
             });
 
             render(

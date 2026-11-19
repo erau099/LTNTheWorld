@@ -17,7 +17,7 @@ describe('AboutUs component', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Lighten The World')).toBeInTheDocument();
+    expect(screen.getByText('Love Thy Neighbor')).toBeInTheDocument();
     expect(screen.getByText('Our Story')).toBeInTheDocument();
     expect(screen.getByText('Our Goal')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument();

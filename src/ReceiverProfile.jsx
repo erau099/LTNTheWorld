@@ -1,14 +1,7 @@
+import React, { useState, useEffect } from "react";
 import DashboardHeader from "./components/DashboardHeader";
-import React, { useMemo, useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { logout } from "./utils/auth";
-import "./index.css";
-import "./App.css";
-import "./CDashboard.css";
-import "./ReceiverProfile.css";
 import WaiverText from "./Waivers/WaiverText.jsx";
-
-const DROPDOWN = ["Profile", "Swap View", "Sign Out"];
+import "./ReceiverProfile.css";
 
 function PencilIcon(props) {
   return (
@@ -21,29 +14,28 @@ function PencilIcon(props) {
 
 function EditableInput({
   name,
-  type = "text",
   value,
   onChange,
   placeholder,
   editable,
   onToggleEdit,
+  type = "text",
   ariaLabel,
   canEdit = true,
 }) {
   return (
     <div className={`rp-inputWrap ${editable ? "is-editing" : ""}`}>
       <input
-        className="rp-input"
         type={type}
         name={name}
-        value={value}
+        value={value ?? ""}
         onChange={onChange}
         placeholder={placeholder}
         disabled={!editable || !canEdit}
+        className="rp-input"
         aria-label={ariaLabel || name}
         autoComplete="off"
       />
-
       {canEdit && (
         <button
           type="button"
@@ -59,24 +51,15 @@ function EditableInput({
   );
 }
 
-export default function ReceiverProfile() {
-  const navigate = useNavigate();
-
-  const [scrolled, setScrolled] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  const [user, setUser] = useState({
-    firstName: "User",
-  });
-
+function ReceiverProfile() {
   const [showSignedWaiver, setShowSignedWaiver] = useState(false);
+  const [user, setUser] = useState(null);
 
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    password: "******",
+    password: "••••••••",
     dob: "",
     phone: "",
     allergies: "",
@@ -86,204 +69,88 @@ export default function ReceiverProfile() {
     firstName: false,
     lastName: false,
     email: false,
-    password: false,
     dob: false,
     phone: false,
     allergies: false,
   });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-
-    window.addEventListener("scroll", onScroll);
-
-    function handleClickOut(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOut);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOut);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/users/me", {
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Unable to load profile");
-        }
-
-        return response.json();
-      })
+    fetch("/api/users/me")
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        setForm((prev) => ({
-          ...prev,
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          dob: data.dateOfBirth || "",
-          phone: data.phoneNumber || "",
-          allergies: data.allergies || "",
-        }));
-
-        setUser((prev) => ({
-          ...prev,
-          firstName: data.firstName || "User",
-        }));
+        if (data) {
+          setUser(data);
+          setForm({
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            email: data.email || "",
+            password: "••••••••",
+            dob: data.dateOfBirth || data.dob || "",
+            phone: data.phoneNumber || data.phone || "",
+            allergies: data.allergies || "",
+          });
+        }
       })
-      .catch((error) => {
-        console.error("Error loading receiver profile:", error);
-      });
+      .catch((err) => console.error("Error loading profile:", err));
   }, []);
 
-  const handleAction = async (item) => {
-    if (item === "Sign Out") {
-      await logout();
-      navigate("/");
-    } else {
-      console.log(item);
-    }
-
-    setDropdownOpen(false);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const canSave = useMemo(() => {
-    return (
-      form.firstName.trim() !== "" &&
-      form.lastName.trim() !== "" &&
-      form.email.trim() !== "" &&
-      form.dob !== "" &&
-      form.phone.trim() !== ""
-    );
-  }, [form]);
+  const toggleEdit = (field) => {
+    setEditing((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  function toggleEdit(field) {
-    setEditing((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  }
-
-  async function handleSave(e) {
+  const handleSave = async (e) => {
     e.preventDefault();
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!form.firstName.trim()) {
-      alert("First name is required.");
-      return;
-    }
-
-    if (!form.lastName.trim()) {
-      alert("Last name is required.");
-      return;
-    }
-
-    if (!emailPattern.test(form.email.trim())) {
-      alert("Please enter a valid email address.");
-      return;
-    }
-
-    if (!form.dob) {
-      alert("Date of birth is required.");
-      return;
-    }
-
-    const selectedDob = new Date(`${form.dob}T00:00:00`);
-    const today = new Date();
-
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDob > today) {
-      alert("Date of birth cannot be in the future.");
-      return;
-    }
-
-    if (!form.phone.trim()) {
-      alert("Phone number is required.");
-      return;
-    }
-
     try {
-      const response = await fetch("/api/users/me", {
+      const res = await fetch("/api/users/me", {
         method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName: form.firstName.trim(),
-          lastName: form.lastName.trim(),
-          email: form.email.trim(),
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
           dateOfBirth: form.dob,
-          phoneNumber: form.phone.trim(),
+          phoneNumber: form.phone,
           allergies: form.allergies,
         }),
       });
 
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || "Unable to save profile");
+      if (!res.ok) {
+        throw new Error("Failed to update profile");
       }
 
-      const updatedUser = await response.json();
-
-      setForm((prev) => ({
-        ...prev,
-        firstName: updatedUser.firstName || "",
-        lastName: updatedUser.lastName || "",
-        email: updatedUser.email || "",
-        dob: updatedUser.dateOfBirth || "",
-        phone: updatedUser.phoneNumber || "",
-        allergies: updatedUser.allergies || "",
-      }));
-
-      setUser((prev) => ({
-        ...prev,
-        firstName: updatedUser.firstName || "User",
-      }));
-
-      setEditing((prev) => {
-        const next = { ...prev };
-
-        Object.keys(next).forEach((key) => {
-          next[key] = false;
-        });
-
-        return next;
+      setEditing({
+        firstName: false,
+        lastName: false,
+        email: false,
+        dob: false,
+        phone: false,
+        allergies: false,
       });
 
       alert("Profile updated successfully!");
     } catch (error) {
-      console.error("Error saving receiver profile:", error);
-      alert(error.message || "Unable to update profile.");
+      console.error("Error saving profile:", error);
+      alert(error.message || "Unable to update profile");
     }
-  }
+  };
+
+  const canSave = Object.values(editing).some(Boolean);
 
   return (
     <div className="rp-page">
-      <DashboardHeader />
+      <DashboardHeader role="recipient" />
 
-      <div className="rp-card">
+      {/* Main Profile Card */}
+      <main className="rp-card">
         <div className="rp-header">
-          <div className="rp-subtitle">Your Information</div>
-          <h1 className="rp-title">Profile</h1>
+          <span className="rp-subtitle">Account Details</span>
+          <h1 className="rp-title">Your Profile</h1>
         </div>
 
         <form className="rp-form" onSubmit={handleSave}>
@@ -360,30 +227,27 @@ export default function ReceiverProfile() {
               name="allergies"
               value={form.allergies}
               onChange={handleChange}
-              placeholder="Allergies: Peanut, Milk, Shellfish"
+              placeholder="Allergies (e.g. Peanut, Dairy, Shellfish)"
               editable={editing.allergies}
               onToggleEdit={toggleEdit}
               ariaLabel="Allergies"
             />
           </div>
 
-          <button
-            className="rp-saveBtn"
-            type="submit"
-            disabled={!canSave}
-          >
+          <button className="rp-saveBtn" type="submit" disabled={!canSave}>
             Save Changes
           </button>
         </form>
 
         <div className="waiver_signed_info">
-          <span className="waiver_signed_title">Waiver Signed</span>
-
-          <p className="waiver_signed_date">
-            {user?.waiver?.acceptedAt
-              ? new Date(user.waiver.acceptedAt).toLocaleString()
-              : "Waiver date unavailable"}
-          </p>
+          <div>
+            <span className="waiver_signed_title">Liability Waiver</span>
+            <p className="waiver_signed_date">
+              {user?.waiver?.acceptedAt
+                ? `Accepted on ${new Date(user.waiver.acceptedAt).toLocaleDateString()}`
+                : "Signed on file"}
+            </p>
+          </div>
 
           <button
             type="button"
@@ -393,15 +257,15 @@ export default function ReceiverProfile() {
             View Waiver
           </button>
         </div>
-      </div>
+      </main>
 
+      {/* Signed Waiver Modal */}
       {showSignedWaiver && (
-        <div className="waiver_modal">
-          <div className="waiver_content">
+        <div className="waiver_modal" onClick={() => setShowSignedWaiver(false)}>
+          <div className="waiver_content" onClick={(e) => e.stopPropagation()}>
             <h3>Signed Liability Waiver</h3>
-
             <p className="waiver_intro_text">
-              This waiver is shown for reference only.
+              This waiver is shown for reference and was signed during registration.
             </p>
 
             <div className="waiver_box">
@@ -421,3 +285,5 @@ export default function ReceiverProfile() {
     </div>
   );
 }
+
+export default ReceiverProfile;

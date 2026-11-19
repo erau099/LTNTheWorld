@@ -1,6 +1,7 @@
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -9,4 +10,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
     long countByUserIdAndIsReadFalse(UUID userId);
+
+    boolean existsByUserIdAndFoodIdAndType(
+        UUID userId,
+        Long foodId,
+        String type
+    );
 }

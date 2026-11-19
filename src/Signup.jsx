@@ -1,16 +1,15 @@
 import { useState } from "react";
 import "./Login.css";
-import { Link, useNavigate } from "react-router-dom"; // Added useNavigate for redirection
+import { Link, useNavigate } from "react-router-dom";
 import { createWaiverRecord } from "./utils/waiverService";
 import WaiverText from "./Waivers/WaiverText.jsx";
 
 function Signup() {
-    const navigate = useNavigate(); // Hook to programmatically navigate between pages
+    const navigate = useNavigate();
     const [showWaiver, setShowWaiver] = useState(false);
     const [canAcceptWaiver, setCanAcceptWaiver] = useState(false);
     const [waiverChecked, setWaiverChecked] = useState(false);
 
-    // Form data state to store user inputs locally
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -22,9 +21,8 @@ function Signup() {
         role: ""
     });
 
-    const [error, setError] = useState(""); // State to store and display error messages
+    const [error, setError] = useState("");
 
-    // Generic handler to update form state based on input names
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -32,7 +30,6 @@ function Signup() {
 
     const handleWaiverScroll = (e) => {
         const el = e.target;
-
         if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
             setCanAcceptWaiver(true);
         }
@@ -43,18 +40,15 @@ function Signup() {
         setShowWaiver(false);
     };
 
-    // Form submission logic to process signup request
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent default browser form refresh
-        setError(""); // Clear previous error messages
+        e.preventDefault();
+        setError("");
 
-        // Basic password confirmation check
         if (formData.password !== formData.retypePassword) {
             setError("Passwords do not match");
             return;
         }
 
-        // Check for required fields before proceeding
         if (
             !formData.email ||
             !formData.password ||
@@ -65,22 +59,18 @@ function Signup() {
             return;
         }
         
-        // Require the user to select either a donor or recipient role
         if (!formData.role) {
             setError("Please select a role");
             return;
         }
 
-        // Ensure user has accepted the waiver
         if (!waiverChecked) {
             setError("Please accept the liability waiver");
             return;
         }
 
-        // Create waiver acceptance data before saving the user account
         const waiver = createWaiverRecord();
 
-        // Send data to springboot as JSON to /api/auth/signup
         try {
             const response = await fetch('/api/auth/signup', {
                 method: 'POST',
@@ -90,15 +80,14 @@ function Signup() {
                     lastName: formData.lastName,
                     email: formData.email,
                     password: formData.password,
-                    dateOfBirth: formData.dob,       // must be "YYYY-MM-DD" format for Spring to parse
+                    dateOfBirth: formData.dob,
                     phoneNumber: formData.phoneNumber,
-                    role: formData.role,              // already lowercase from the <select>, don't uppercase it
+                    role: formData.role,
                     waiver
                 })
             });
 
             if (response.ok) {
-                // DT-332: the account can't sign in until the emailed link is clicked
                 navigate("/Login?signup=check-email");
             } else {
                 const message = await response.text();
@@ -111,52 +100,42 @@ function Signup() {
 
     return (
         <div className="login_page">
-
             <nav className="nav">
-                <span className="header_title">Love Thy Neighbor</span>
+                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <span className="header_title">Love Thy Neighbor</span>
+                </Link>
 
                 <div className="header_links">
                     <Link to="/Login">
-                        <button className="signupbtn">
-                            Login
-                        </button>
+                        <button className="signupbtn">Login</button>
                     </Link>
                 </div>
             </nav>
 
             <div className="login_banner">
                 <section className="login_card">
+                    <p className="login_label">Join the Community</p>
+                    <h2 className="login_header">Create Account</h2>
 
-                    <p className="login_label">
-                        Please Enter Your Details
-                    </p>
-
-                    <h2 className="login_header">
-                        Create Account
-                    </h2>
-
-                    {/* Display error messages at the top of the form */}
                     {error && (
                         <p
                             className="error_message"
                             style={{
-                                color: "red",
-                                textAlign: "center"
+                                color: "#9b1c1c",
+                                background: "#fde8e8",
+                                padding: "10px",
+                                borderRadius: "8px",
+                                fontSize: "0.9rem",
+                                textAlign: "center",
+                                margin: "0 0 16px 0"
                             }}
                         >
                             {error}
                         </p>
                     )}
 
-                    {/* Added onSubmit handler to form element */}
-                    <form
-                        className="login_info"
-                        onSubmit={handleSubmit}
-                    >
-
+                    <form className="login_info" onSubmit={handleSubmit}>
                         <div className="create_col">
-
-                            {/* Added value and onChange to make inputs controlled */}
                             <input
                                 type="text"
                                 name="firstName"
@@ -165,7 +144,6 @@ function Signup() {
                                 onChange={handleChange}
                                 required
                             />
-
                             <input
                                 type="text"
                                 name="lastName"
@@ -174,7 +152,6 @@ function Signup() {
                                 onChange={handleChange}
                                 required
                             />
-
                         </div>
 
                         <input
@@ -205,7 +182,6 @@ function Signup() {
                         />
 
                         <div className="create_col">
-
                             <input
                                 type="date"
                                 name="dob"
@@ -213,7 +189,6 @@ function Signup() {
                                 value={formData.dob}
                                 onChange={handleChange}
                             />
-
                             <input
                                 type="text"
                                 name="phoneNumber"
@@ -221,7 +196,6 @@ function Signup() {
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
                             />
-
                         </div>
 
                         <select
@@ -231,45 +205,32 @@ function Signup() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="">
-                                Select Role
-                            </option>
-
-                            <option value="donor">
-                                Donor
-                            </option>
-
-                            <option value="recipient">
-                                Recipient
-                            </option>
+                            <option value="">Select Role</option>
+                            <option value="donor">Donor</option>
+                            <option value="recipient">Recipient</option>
                         </select>
 
                         <div className="waiver_checkbox">
                             <label>
-
                                 <input
                                     type="checkbox"
                                     checked={waiverChecked}
                                     disabled={!canAcceptWaiver}
-                                    onChange={(e) =>
-                                        setWaiverChecked(e.target.checked)
-                                    }
+                                    onChange={(e) => setWaiverChecked(e.target.checked)}
                                 />
-
-                                {" "}
-                                I have read and agree to the{" "}
-
-                                <span
-                                    className="waiver_link"
-                                    onClick={() => setShowWaiver(true)}
-                                >
-                                    liability waiver
+                                <span>
+                                    I have read and agree to the{" "}
+                                    <span
+                                        className="waiver_link"
+                                        onClick={() => setShowWaiver(true)}
+                                    >
+                                        liability waiver
+                                    </span>
                                 </span>
-
                             </label>
 
                             <p className="waiver_helper_text">
-                                Please review the waiver before continuing with account creation.
+                                Please review the waiver before continuing.
                             </p>
                         </div>
 
@@ -282,34 +243,24 @@ function Signup() {
                                 Continue
                             </button>
                         </div>
-
                     </form>
 
                     <div className="center_cancel_btn">
                         <Link to="/">
-                            <button className="cancel_btn">
-                                Cancel
-                            </button>
+                            <button className="cancel_btn">Cancel</button>
                         </Link>
                     </div>
-
                 </section>
             </div>
 
             {showWaiver && (
-                <div className="waiver_modal">
-
-                    <div className="waiver_content">
-
-                        <h3>
-                            Liability Waiver
-                        </h3>
-
+                <div className="waiver_modal" onClick={() => setShowWaiver(false)}>
+                    <div className="waiver_content" onClick={(e) => e.stopPropagation()}>
+                        <h3>Liability Waiver</h3>
                         <p className="waiver_intro_text">
-                            Scroll through the waiver below before accepting.
+                            Scroll to the bottom of the waiver to enable acceptance.
                         </p>
 
-                        {/* Shared waiver text is reused anywhere the waiver needs to be displayed */}
                         <div
                             className="waiver_box"
                             onScroll={handleWaiverScroll}
@@ -318,21 +269,15 @@ function Signup() {
                         </div>
 
                         <button
-                            className={`submit_btn ${
-                                !canAcceptWaiver
-                                    ? "disabled_btn"
-                                    : ""
-                            }`}
+                            className="submit_btn"
                             disabled={!canAcceptWaiver}
                             onClick={handleWaiverAccept}
                         >
                             Accept
                         </button>
-
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

@@ -1,8 +1,7 @@
 import DashboardHeader from "../components/DashboardHeader";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
-import DonorNotificationBell from "./DonorNotificationBell";
 import PickupCoordinationModal from "./PickupCoordinationModal";
 
 import "../index.css";
@@ -10,187 +9,144 @@ import "../App.css";
 import "../CDashboard.css";
 import "./DonorDashboard.css";
 
-// Formats a listing's pickup window, e.g. "Pick up 10/12/2026 @ 4:00 PM - 5:00 PM"
 function formatPickup(item) {
-	const time = (t) => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-	const date = new Date(item.date + "T00:00:00").toLocaleDateString();
-	return `Pick up ${date} @ ${time(item.pickupTime)} - ${time(item.pickupEndTime)}`;
+  const time = (t) => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const date = new Date(item.date + "T00:00:00").toLocaleDateString();
+  return `Pick up ${date} @ ${time(item.pickupTime)} - ${time(item.pickupEndTime)}`;
 }
 
 function DonorDashboard() {
-    const navigate = useNavigate();
-	// Authentication and sign-out are handled by DashboardHeader.
+  const navigate = useNavigate();
 
-	// Tracks if the page is scrolled so the header can change style.
-	const [scrolled, setScrolled] = useState(false);
+  const [listings, setListings] = useState([]);
+  const [loadError, setLoadError] = useState("");
+  const [filter, setFilter] = useState("all");
 
-	// Controls the gear dropdown menu.
-	const [dropdownOpen, setDropdownOpen] = useState(false);
-	const dropdownRef = useRef(null);
+  const [activeCoordinationFood, setActiveCoordinationFood] = useState(null);
+  const [activeCoordinationFoodId, setActiveCoordinationFoodId] = useState(null);
 
-	// Listings posted by the logged-in donor, loaded from the backend.
-	const [listings, setListings] = useState([]);
-	const [loadError, setLoadError] = useState("");
-	const [filter, setFilter] = useState("all");
+  useEffect(() => {
+    apiFetch("/api/food/mine")
+      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then(setListings)
+      .catch(() => setLoadError("Could not load your listings."));
+  }, []);
 
-	// Active listing opened in the Pickup Coordination Modal
-	const [activeCoordinationFood, setActiveCoordinationFood] = useState(null);
-	const [activeCoordinationFoodId, setActiveCoordinationFoodId] = useState(null);
+  const visibleListings = listings.filter((item) => {
+    if (filter === "all") return true;
+    const s = (item.status || "").toLowerCase();
+    return s === filter.toLowerCase();
+  });
 
-	useEffect(() => {
-		apiFetch("/api/food/mine")
-			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-			.then(setListings)
-			.catch(() => setLoadError("Could not load your listings."));
-	}, []);
+  const handleSelectNotification = (notification) => {
+    if (notification.foodId) {
+      const match = listings.find((l) => l.id === notification.foodId);
+      if (match) {
+        setActiveCoordinationFood(match);
+        setActiveCoordinationFoodId(null);
+      } else {
+        setActiveCoordinationFood(null);
+        setActiveCoordinationFoodId(notification.foodId);
+      }
+    }
+  };
 
-	const visibleListings = listings.filter((item) => {
-		if (filter === "all") return true;
-		const s = (item.status || "").toLowerCase();
-		return s === filter.toLowerCase();
-	});
+  const handleStatusUpdated = (updated) => {
+    setListings((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+    setActiveCoordinationFood(updated);
+  };
 
-	// Scroll + dropdown
-	useEffect(() => {		
-		const onScroll = () => setScrolled(window.scrollY > 10);
+  return (
+    <div className="donor-dashboard">
+      <DashboardHeader role="donor" onDonorNotification={handleSelectNotification} />
 
-		function handleClickOut(e) {
-			if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-				setDropdownOpen(false);
-			}
-		}
+      <main className="donor-main">
+        <h2>Your Listings</h2>
+        {loadError && <p className="error-msg">{loadError}</p>}
 
-		window.addEventListener("scroll", onScroll);
-		document.addEventListener("mousedown", handleClickOut);
+        <div className="filter-row">
+          {["all", "active", "claimed", "scheduled", "completed", "expired"].map((status) => (
+            <button
+              key={status}
+              type="button"
+              className={`filter-button ${filter === status ? "active" : ""}`}
+              onClick={() => setFilter(status)}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </button>
+          ))}
+        </div>
 
-		return () => {
-			window.removeEventListener("scroll", onScroll);
-			document.removeEventListener("mousedown", handleClickOut);
-		};
-	}, []);
+        <div className="donor-content-row">
+          {visibleListings.length === 0 ? (
+            <p style={{ margin: "20px 0", color: "#666" }}>
+              No {filter === "all" ? "" : filter} listings found.
+            </p>
+          ) : (
+            visibleListings.map((item) => (
+              <div
+                key={item.id}
+                className="donor-food-card"
+                onClick={() => {
+                  setActiveCoordinationFood(item);
+                  setActiveCoordinationFoodId(null);
+                }}
+                style={{ cursor: "pointer" }}
+                title="Click to manage listing and pickup"
+              >
+                <div
+                  className="donor-food-image"
+                  style={
+                    item.photos?.length
+                      ? {
+                          backgroundImage: `url(${item.photos[0]})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }
+                      : undefined
+                  }
+                >
+                  <span className="category-tag">{item.tags?.split(",")[0]}</span>
+                </div>
 
-	// Handles the Profile and Sign Out buttons in the gear dropdown.
-	const handleDropdownAction = async (item) => {
-		if (item === "Profile") {
-			navigate("/donor-profile");
-		} else if (item === "Sign Out") {
-			await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-			navigate("/");
-		}
+                <div className="donor-food-info">
+                  <div>
+                    <p className="food-title">{item.foodItem}</p>
+                    <p className="pickup-time">{formatPickup(item)}</p>
+                  </div>
 
-		setDropdownOpen(false);
-	};
+                  <span className={`status-pill status-${(item.status || "active").toLowerCase()}`}>
+                    {item.status || "ACTIVE"}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
 
-	const handleSelectNotification = (notification) => {
-		if (notification.foodId) {
-			const match = listings.find((l) => l.id === notification.foodId);
-			if (match) {
-				setActiveCoordinationFood(match);
-				setActiveCoordinationFoodId(null);
-			} else {
-				setActiveCoordinationFood(null);
-				setActiveCoordinationFoodId(notification.foodId);
-			}
-		}
-	};
+          <button
+            className="add-listing-button"
+            onClick={() => navigate("/UploadFoodDetails")}
+            title="Add new listing"
+            type="button"
+          >
+            +
+          </button>
+        </div>
+      </main>
 
-	const handleStatusUpdated = (updated) => {
-		setListings((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
-		setActiveCoordinationFood(updated);
-	};
-
-	
-
-	return (
-		<div className="donor-dashboard">
-			{/* Header navigation for donor pages */}
-			<DashboardHeader onDonorNotification={handleSelectNotification} />
-
-			{/* Main dashboard content */}
-			<main className="donor-main">
-				<h2>Your Listings</h2>
-				{loadError && <p>{loadError}</p>}
-
-				{/* Filter buttons for listing status */}
-				<div className="filter-row">
-					{["all", "active", "claimed", "scheduled", "completed", "expired"].map((status) => (
-						<button
-							key={status}
-							className={`filter-button ${filter === status ? "active" : ""}`}
-							onClick={() => setFilter(status)}
-						>
-							{status.charAt(0).toUpperCase() + status.slice(1)}
-						</button>
-					))}
-				</div>
-
-				{/* Donor listing cards */}
-				<div className="donor-content-row">
-					{visibleListings.length === 0 ? (
-						<p style={{ margin: "20px 0", color: "#666" }}>
-							No {filter === "all" ? "" : filter} listings found.
-						</p>
-					) : (
-						visibleListings.map((item) => (
-							<div
-								key={item.id}
-								className="donor-food-card"
-								onClick={() => {
-									setActiveCoordinationFood(item);
-									setActiveCoordinationFoodId(null);
-								}}
-								style={{ cursor: "pointer" }}
-								title="Click to manage listing and pickup"
-							>
-								<div
-									className="donor-food-image"
-									style={item.photos?.length ? {
-										backgroundImage: `url(${item.photos[0]})`,
-										backgroundSize: "cover",
-										backgroundPosition: "center",
-									} : undefined}
-								>
-									<span className="category-tag">{item.tags?.split(",")[0]}</span>
-								</div>
-
-								<div className="donor-food-info">
-									<div>
-										<p className="food-title">{item.foodItem}</p>
-										<p className="pickup-time">{formatPickup(item)}</p>
-									</div>
-
-									<div className="rating" style={{ fontWeight: 700 }}>
-										{item.status}
-									</div>
-								</div>
-							</div>
-						))
-					)}
-
-					{/* Button placeholder for adding a new listing */}
-					<button className="add-listing-button" 
-						onClick={() => navigate("/UploadFoodDetails")}
-						title="Add new listing"
-					>
-						+
-					</button>
-				</div>
-			</main>
-
-			{/* Pickup Coordination Modal */}
-			{(activeCoordinationFood || activeCoordinationFoodId) && (
-				<PickupCoordinationModal
-					food={activeCoordinationFood}
-					foodId={activeCoordinationFoodId}
-					onClose={() => {
-						setActiveCoordinationFood(null);
-						setActiveCoordinationFoodId(null);
-					}}
-					onStatusUpdated={handleStatusUpdated}
-				/>
-			)}
-		</div>
-	);
+      {(activeCoordinationFood || activeCoordinationFoodId) && (
+        <PickupCoordinationModal
+          food={activeCoordinationFood}
+          foodId={activeCoordinationFoodId}
+          onClose={() => {
+            setActiveCoordinationFood(null);
+            setActiveCoordinationFoodId(null);
+          }}
+          onStatusUpdated={handleStatusUpdated}
+        />
+      )}
+    </div>
+  );
 }
 
 export default DonorDashboard;
