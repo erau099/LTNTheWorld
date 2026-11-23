@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,7 +8,6 @@ import WaiverText from "./Waivers/WaiverText.jsx";
 function Signup() {
     const navigate = useNavigate();
     const [showWaiver, setShowWaiver] = useState(false);
-    const [canAcceptWaiver, setCanAcceptWaiver] = useState(false);
     const [waiverChecked, setWaiverChecked] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -26,13 +26,6 @@ function Signup() {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleWaiverScroll = (e) => {
-        const el = e.target;
-        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
-            setCanAcceptWaiver(true);
-        }
     };
 
     const handleWaiverAccept = () => {
@@ -58,7 +51,7 @@ function Signup() {
             setError("Please fill in all required fields");
             return;
         }
-        
+
         if (!formData.role) {
             setError("Please select a role");
             return;
@@ -215,7 +208,7 @@ function Signup() {
                                 <input
                                     type="checkbox"
                                     checked={waiverChecked}
-                                    disabled={!canAcceptWaiver}
+                                    disabled={!waiverChecked}
                                     onChange={(e) => setWaiverChecked(e.target.checked)}
                                 />
                                 <span>
@@ -254,23 +247,34 @@ function Signup() {
             </div>
 
             {showWaiver && (
-                <div className="waiver_modal" onClick={() => setShowWaiver(false)}>
-                    <div className="waiver_content" onClick={(e) => e.stopPropagation()}>
+                <div
+                    className="waiver_modal"
+                    onClick={() => setShowWaiver(false)}
+                >
+                    <div
+                        className="waiver_content"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <h3>Liability Waiver</h3>
+
                         <p className="waiver_intro_text">
-                            Scroll to the bottom of the waiver to enable acceptance.
+                            Please review the liability waiver before accepting.
                         </p>
 
                         <div
                             className="waiver_box"
-                            onScroll={handleWaiverScroll}
+                            style={{
+                                maxHeight: "none",
+                                height: "auto",
+                                overflow: "visible"
+                            }}
                         >
                             <WaiverText />
                         </div>
 
                         <button
+                            type="button"
                             className="submit_btn"
-                            disabled={!canAcceptWaiver}
                             onClick={handleWaiverAccept}
                         >
                             Accept
