@@ -1,0 +1,45 @@
+
+> lovethyneighbor@0.0.0 test:run
+> vitest run
+
+
+ RUN  v5.1.0 C:/Users/rauet/Desktop/Coding/csc190/LTNTheWorld
+
+ ✓ src/__tests__/DeploymentReadinessFlows.test.jsx (13 tests) 6043ms
+   ✓ Deployment Readiness End-to-End UI & Failure-Mode Flows (13)
+     ✓ Auth lifecycle & failure modes (4)
+       ✓ Signup requires waiver acceptance, handles 400 & network errors, and navigates on 200 1251ms
+       ✓ ForgotPassword and ResetPassword handle 500, 400 invalid token, and 200 recovery 754ms
+       ✓ Login handles 403 unverified, 403 suspended ('Account is not active'), and 500/network errors 495ms
+     ✓ Donor upload, pickup coordination & delete failure modes (2)
+       ✓ Exercises 3-step donor food upload with saved-address 404, Nominatim outage, 403/500 faults, and 200 completion 1333ms
+     ✓ Recipient search, claim, report, and review failure modes (3)
+       ✓ RecipientDashboard recovers from 500 via Retry, filters search/allergens, reports listing, and handles claim 409/500 451ms
+     ✓ Admin login, session refresh, moderation & capacity modal failure modes (4)
+       ✓ AdminLogin handles 401, 403, network failure, and 200 admin authentication 593ms
+       ✓ AdminDashboard recovers from 500 on users/listings fetch and supports listing removal moderation 496ms
+ ✓ src/ReceiverProfile.test.jsx (1 test) 517ms
+   ✓ ReceiverProfile Component (1)
+     ✓ loads profile and allergies, and saves changes via PATCH 513ms
+ ✓ src/Login.test.jsx (2 tests) 559ms
+   ✓ Login Component (2)
+     ✓ displays error popup when login returns non-ok response 483ms
+ ✓ src/DonorProfile.test.jsx (3 tests) 287ms
+ ✓ src/donor-dashboard/DonorDashboard.test.jsx (4 tests) 272ms
+ ✓ src/donor-dashboard/PickupCoordinationModal.test.jsx (5 tests) 239ms
+ ✓ src/recipient-orders/RecipientPastOrders.test.jsx (2 tests) 227ms
+ ✓ src/donor-listings/DonorPastListings.test.jsx (2 tests) 167ms
+ ✓ src/__tests__/Sprint9Components.test.jsx (2 tests) 111ms
+ ✓ src/__tests__/AboutUs.test.jsx (2 tests) 90ms
+ ✓ src/admin/DynoUpgradeModal.test.jsx (2 tests) 76ms
+ ✓ src/admin/AdminProtectedRoute.test.jsx (2 tests) 48ms
+ ✓ src/__tests__/WaiverText.test.jsx (1 test) 20ms
+
+ Test Files  13 passed (13)
+      Tests  41 passed (41)
+   Start at  18:07:32
+   Duration  28.21s (environment 47%, tests 33%, setup 12%, import 7%, transform 1%)
+
+    Isolate  13 workers spawned · ~1.07s startup each (spawn + environment, per file)
+             at least ~12.88s faster with isolate: false — reuses workers across files instead of one per file
+

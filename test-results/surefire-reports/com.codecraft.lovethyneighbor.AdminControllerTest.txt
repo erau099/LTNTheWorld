@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.codecraft.lovethyneighbor.AdminControllerTest
+-------------------------------------------------------------------------------
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.127 s -- in com.codecraft.lovethyneighbor.AdminControllerTest
