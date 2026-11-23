@@ -16,8 +16,8 @@ function AdminReports() {
 
         // DT-50: Fetch existing reports and low-rated reviews.
         const [reportsResponse, reviewsResponse] = await Promise.all([
-          fetch("/api/admin/reports"),
-          fetch("/api/admin/reviews/negative"),
+          fetch("/api/admin/reports", { credentials: "include" }),
+          fetch("/api/admin/reviews/negative", { credentials: "include" }),
         ]);
 
         if (!reportsResponse.ok) {

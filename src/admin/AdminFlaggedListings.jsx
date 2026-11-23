@@ -10,7 +10,7 @@ function AdminFlaggedListings() {
   useEffect(() => {
     const fetchFlaggedListings = async () => {
       try {
-        const response = await fetch("/api/admin/reports");
+        const response = await fetch("/api/admin/reports", { credentials: "include" });
 
         if (!response.ok) {
           throw new Error(`Server returned ${response.status}`);
@@ -46,6 +46,7 @@ function AdminFlaggedListings() {
     try {
       const response = await fetch(`/api/admin/reports/${reportId}/status`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "RESOLVED" }),
       });

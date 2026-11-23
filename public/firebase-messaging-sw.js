@@ -1,4 +1,4 @@
-/* global importScripts, firebase, self */
+/* global importScripts, firebase */
 
 // Firebase compatibility SDK for service workers
 importScripts(
@@ -16,7 +16,7 @@ const firebaseConfig = {
   projectId: "ltn-the-world",
   storageBucket: "ltn-the-world.firebasestorage.app",
   messagingSenderId: "79168901500",
-  appId: "YOUR_APP_ID1:79168901500:web:688159928c0bc7d92194f9",
+  appId: "1:79168901500:web:688159928c0bc7d92194f9",
 };
 
 // Initialize Firebase
@@ -27,5 +27,10 @@ const messaging = firebase.messaging();
 
 // Handle background notifications
 messaging.onBackgroundMessage((payload) => {
-  console.log("[firebase-messaging-sw.js] Background message:", payload);
+  const title = payload?.notification?.title || payload?.data?.title || "Love Thy Neighbor";
+  const body = payload?.notification?.body || payload?.data?.body || "You have a new update.";
+  self.registration.showNotification(title, {
+    body,
+    icon: "/favicon.svg",
+  });
 });

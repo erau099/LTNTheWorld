@@ -4,6 +4,7 @@ package com.codecraft.lovethyneighbor;
 import com.codecraft.lovethyneighbor.security.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -21,7 +22,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/admin")
 public class AdminController {
 
@@ -48,6 +48,15 @@ public class AdminController {
     // DT-134: Use the existing signed JWT authentication.
     @Autowired
     private JwtService jwtService;
+
+    @Autowired(required = false)
+    private DynoCapacityService dynoCapacityService;
+
+    @Autowired(required = false)
+    private FcmPushService fcmPushService;
+
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request) {
@@ -94,7 +103,7 @@ public class AdminController {
         ResponseCookie authCookie = ResponseCookie.from(
                 "authToken", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieSecure)
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(60 * 30)
@@ -195,10 +204,21 @@ public class AdminController {
     public ResponseEntity<AdminStatsDTO> getStats() {
         long totalUsers = userRepository.count();
         long activeListings = foodRepository.countByStatusIgnoreCase("ACTIVE");
+        long pendingReports = reportRepository.countByStatusIgnoreCase("PENDING");
 
         return ResponseEntity.ok(
-                new AdminStatsDTO(totalUsers, activeListings, 0L)
+                new AdminStatsDTO(totalUsers, activeListings, pendingReports)
         );
+    }
+
+    @GetMapping("/system-health")
+    public ResponseEntity<DynoCapacityService.SystemHealthDTO> getSystemHealth() {
+        long totalUsers = userRepository.count();
+        long activeListings = foodRepository.countByStatusIgnoreCase("ACTIVE");
+        DynoCapacityService service = dynoCapacityService != null
+                ? dynoCapacityService
+                : new DynoCapacityService(550L, 80.0, 40L, 150L, 10, 15);
+        return ResponseEntity.ok(service.evaluateCapacity(totalUsers, activeListings));
     }
 
     @GetMapping("/food/active")
@@ -362,6 +382,9 @@ public class AdminController {
             );
 
             notificationRepository.save(notification);
+            if (fcmPushService != null) {
+                fcmPushService.sendToUser(food.getUserId(), notification.getTitle(), notification.getMessage());
+            }
         }
 
         return ResponseEntity.ok(savedFood);

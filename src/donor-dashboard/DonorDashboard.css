@@ -142,7 +142,7 @@
 .donor-food-image {
   height: 158px;
 
-  background-image: url("/src/assets/donut.jpg");
+  background-image: url("../assets/donut.jpg");
   background-size: cover;
   background-position: center;
 

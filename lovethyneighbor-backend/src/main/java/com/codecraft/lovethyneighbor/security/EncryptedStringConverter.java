@@ -25,12 +25,12 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
     // Actual key
     private final SecretKeySpec key;
 
-    // Fetch the key in .env file and decode it from Base64
-    public EncryptedStringConverter(@Value("${ENCRYPTION_KEY}") String base64Key) {
+    // Fetch the key from env / .env / fallback and decode it from Base64
+    public EncryptedStringConverter(@Value("${app.security.encryption-key:${ENCRYPTION_KEY:}}") String base64Key) {
         if (base64Key == null || base64Key.isBlank()) {
             throw new IllegalStateException("ENCRYPTION_KEY environment variable is not set");
         }
-        byte[] decodedKey = Base64.getDecoder().decode(base64Key);
+        byte[] decodedKey = Base64.getDecoder().decode(base64Key.trim());
         this.key = new SecretKeySpec(decodedKey, "AES");
     }
 

@@ -96,6 +96,15 @@ public class ReviewController {
             );
         }
 
+        // Prevent duplicate reviews by the same recipient for the same listing
+        boolean alreadyReviewed = reviewRepository.findByFoodId(food.getId()).stream()
+                .anyMatch(existing -> existing.getUser() != null && userId.equals(existing.getUser().getId()));
+        if (alreadyReviewed) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT, "You have already reviewed this pickup"
+            );
+        }
+
         // 3. Save review
         Review review = new Review();
         review.setUser(user);

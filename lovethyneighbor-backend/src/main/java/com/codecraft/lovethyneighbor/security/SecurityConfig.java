@@ -45,19 +45,39 @@ public class SecurityConfig {
                 // Allow all OPTIONS preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Public endpoints
+                // Public frontend static assets (bundled SPA + service worker)
+                .requestMatchers(HttpMethod.GET,
+                        "/",
+                        "/index.html",
+                        "/favicon.svg",
+                        "/firebase-messaging-sw.js",
+                        "/manifest.json",
+                        "/assets/**").permitAll()
+
+                // Public endpoints (require auth for account-mutating change-email)
+                .requestMatchers(HttpMethod.POST, "/api/auth/change-email").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/admin/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/admin/auth/login").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/hello").permitAll()
                 .requestMatchers("/error").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/reviews/food/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("RECIPIENT", "BOTH")
 
                 // Specific food routes (must be declared BEFORE general food routes)
+                .requestMatchers(HttpMethod.POST, "/api/food/seed-test-data").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/food").hasAnyRole("DONOR", "BOTH")
+                .requestMatchers(HttpMethod.DELETE, "/api/food/*").hasAnyRole("DONOR", "BOTH")
+                .requestMatchers(HttpMethod.PATCH, "/api/food/*/confirm-pickup").hasAnyRole("DONOR", "BOTH")
+                .requestMatchers(HttpMethod.POST, "/api/food/*/request").hasAnyRole("RECIPIENT", "BOTH")
                 .requestMatchers("/api/food/mine").hasAnyRole("DONOR", "BOTH")
 
                 // General public food endpoints
                 .requestMatchers(HttpMethod.GET, "/api/food", "/api/food/**").permitAll()
+
+                // Order mutation boundaries
+                .requestMatchers(HttpMethod.PATCH, "/api/orders/food/*/decline-request").hasAnyRole("DONOR", "BOTH")
+                .requestMatchers(HttpMethod.POST, "/api/orders/*").hasAnyRole("RECIPIENT", "BOTH")
 
                 // Role-restricted routes
                 .requestMatchers("/api/donor/**").hasAnyRole("DONOR", "BOTH")
@@ -79,7 +99,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:5173", "https://ltn-the-world.vercel.app", "https://*.vercel.app"));
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",
+                "https://ltn-the-world.vercel.app",
+                "https://*.vercel.app",
+                "https://*.herokuapp.com"
+        ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         config.setAllowCredentials(true);

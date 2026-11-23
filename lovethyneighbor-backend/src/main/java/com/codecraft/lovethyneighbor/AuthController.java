@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -20,9 +21,9 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -43,9 +44,12 @@ public class AuthController {
     // DT-332: how long a signup verification link stays valid
     static final int VERIFICATION_LINK_HOURS = 24;
 
-    // Where verification links point (the React app)
+    // Where verification and password reset links point (the React app)
     @Value("${app.frontend-url:http://localhost:5173}")
-    private String frontendUrl;
+    private String frontendUrl = "http://localhost:5173";
+
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -79,7 +83,7 @@ public class AuthController {
                     "authToken",
                     token)
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(cookieSecure)
                     .sameSite("Lax")
                     .path("/")
                     .maxAge(60 * 60 * 24)
@@ -112,7 +116,7 @@ public class AuthController {
                 "authToken",
                 "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieSecure)
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(0)
@@ -143,6 +147,15 @@ public class AuthController {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Invalid role");
+        }
+
+        if (request.getFirstName() == null || request.getFirstName().isBlank()
+                || request.getLastName() == null || request.getLastName().isBlank()
+                || request.getEmail() == null || request.getEmail().isBlank()
+                || request.getPassword() == null || request.getPassword().isBlank()
+                || request.getDateOfBirth() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("First name, last name, email, password, and date of birth are required.");
         }
 
         User newUser = new User(
@@ -234,12 +247,16 @@ public class AuthController {
 
             userRepository.save(user);
 
-            String resetLink = "http://localhost:5173/#/reset-password?token="
+            String resetLink = frontendBaseUrl() + "/#/reset-password?token="
                     + rawToken;
 
-            emailService.sendPasswordResetEmail(
-                    user.getEmail(),
-                    resetLink);
+            try {
+                emailService.sendPasswordResetEmail(
+                        user.getEmail(),
+                        resetLink);
+            } catch (Exception e) {
+                log.warn("Could not send password reset email to user {}: {}", user.getId(), e.getMessage());
+            }
         }
 
         return ResponseEntity.ok(
@@ -306,37 +323,74 @@ public class AuthController {
 
         userRepository.save(user);
 
-        emailService.sendPasswordResetNotification(
-                user.getEmail());
+        try {
+            emailService.sendPasswordResetNotification(
+                    user.getEmail());
+        } catch (Exception e) {
+            log.warn("Could not send password reset confirmation email to user {}: {}", user.getId(), e.getMessage());
+        }
 
         return ResponseEntity.ok("success");
     }
 
     @PostMapping("/change-email")
     public ResponseEntity<?> changeEmail(
-            @RequestBody ChangeEmailRequest request) {
+            @RequestBody ChangeEmailRequest request,
+            Authentication authentication) {
 
-        Optional<User> userOpt = userRepository.findByEmail(request.getCurrentEmail());
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("You must be logged in to change your email.");
+        }
+
+        UUID authenticatedUserId;
+        try {
+            authenticatedUserId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid authentication identity.");
+        }
+
+        if (request == null || request.getNewEmail() == null
+                || !request.getNewEmail().trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid email address");
+        }
+
+        Optional<User> userOpt = userRepository.findById(authenticatedUserId);
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("User not found");
         }
 
-        if (userRepository.findByEmail(request.getNewEmail()).isPresent()) {
+        User user = userOpt.get();
+        if (request.getCurrentEmail() != null
+                && !request.getCurrentEmail().isBlank()
+                && !user.getEmail().equalsIgnoreCase(request.getCurrentEmail().trim())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You can only change the email address on your own account.");
+        }
+
+        String normalizedNewEmail = request.getNewEmail().trim();
+        Optional<User> existing = userRepository.findByEmail(normalizedNewEmail);
+        if (existing.isPresent() && !existing.get().getId().equals(user.getId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Email already in use");
         }
 
-        User user = userOpt.get();
         String oldEmail = user.getEmail();
 
-        user.setEmail(request.getNewEmail());
+        user.setEmail(normalizedNewEmail);
         userRepository.save(user);
 
-        emailService.sendEmailChangeNotification(
-                oldEmail,
-                request.getNewEmail());
+        try {
+            emailService.sendEmailChangeNotification(
+                    oldEmail,
+                    normalizedNewEmail);
+        } catch (Exception e) {
+            log.warn("Could not send email change notification for user {}: {}", user.getId(), e.getMessage());
+        }
 
         return ResponseEntity.ok("success");
     }
@@ -349,9 +403,14 @@ public class AuthController {
         return rawToken;
     }
 
+    private String frontendBaseUrl() {
+        String base = (frontendUrl == null || frontendUrl.isBlank()) ? "http://localhost:5173" : frontendUrl;
+        return base.replaceAll("/+$", "");
+    }
+
     // A failed email shouldn't fail signup: the account is saved and the user can resend from the login page
     private void sendVerificationEmail(User user, String rawToken) {
-        String link = frontendUrl + "/#/verify-email?token=" + rawToken;
+        String link = frontendBaseUrl() + "/#/verify-email?token=" + rawToken;
         try {
             emailService.sendSignupConfirmation(user.getEmail(), user.getFirstName(), link);
         } catch (Exception e) {

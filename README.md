@@ -9,8 +9,8 @@ Lighten The World is a completely web based food donation and receiving app, see
 * Programming Language: JavaScript, HTML, CSS
 * Framework: REACT
 ### Backend
-* Programming Language: Java, MySQL
-* Framework: Springboot
+* Programming Language: Java 17, PostgreSQL
+* Framework: Spring Boot 4
 
 
 ## 🌟 Core Features
@@ -37,8 +37,8 @@ Lighten The World is a completely web based food donation and receiving app, see
 * Browse available food listings
 * Filter by category, location, time
 * View listings history
-* Add, edit, or delete listings
-* Leave a review
+* Add or remove unclaimed listings (listings with incorrect details are removed and reposted to avoid miscommunication)
+* Submit moderation reports & leave reviews
 
 ## 📝 Jira
 
@@ -63,7 +63,29 @@ npm test          # Watch mode
 ### Automated CI
 Automated testing runs on every push and pull request to `main` and `dev` via GitHub Actions (`.github/workflows/ci.yml`).
 
-## 🚀 Deployment
+## 🚀 Deployment (Single-Dyno Heroku Full-Stack)
+The `heroku-deploy` build bundles the Vite React frontend (`dist/`) directly into the Spring Boot JAR (`BOOT-INF/classes/static`) so both frontend and backend run on **one always-on Heroku Basic dyno** (`$7/mo`) + Heroku Postgres Essential-0 (`$5/mo`).
+
+1. **Heroku Buildpacks (in order):**
+   * `heroku/nodejs` (runs `npm ci` and `heroku-postbuild` -> `npm run build`)
+   * `heroku/java` (builds root `pom.xml` -> embeds `dist/` into `lovethyneighbor-backend/target/lovethyneighbor-0.0.1-SNAPSHOT.jar`)
+   * Ensure `NPM_CONFIG_PRODUCTION` is **not** set to `true` so Vite (`devDependencies`) is available during the build.
+2. **Required Heroku Config Vars:**
+   * `ENCRYPTION_KEY`, `JWT_SECRET` (override dev defaults!)
+   * `FRONTEND_URL` (your Heroku app URL, e.g. `https://<app>.herokuapp.com`)
+   * `COOKIE_SECURE=true`
+   * `MAIL_USERNAME`, `MAIL_PASSWORD`
+   * `VITE_FIREBASE_*` keys from `.env.example`
+   * Optional initial admin bootstrap: `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD`
+   * Optional server-side FCM push delivery: `FIREBASE_SERVICE_ACCOUNT_JSON`
+3. **Capacity Monitoring:**
+   * Admins automatically receive an in-dashboard advisory popup a few seconds after logging in if the 512 MB dyno approaches memory, concurrency, or active listing thresholds, recommending an upgrade to **Heroku Standard-2X (1 GB RAM)**.
+4. **Load & Memory Simulation:**
+   ```bash
+   npm run build
+   ./lovethyneighbor-backend/mvnw -f pom.xml -DskipTests clean package
+   npm run test:heroku-load
+   ```
 
 ## 👨‍💻 Developer Instructions
 

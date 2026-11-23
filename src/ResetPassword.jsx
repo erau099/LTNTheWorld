@@ -66,7 +66,7 @@ function ResetPassword() {
             } else {
                 setError(text || "Unable to reset password.");
             }
-        } catch (err) {
+        } catch {
             setError("Could not connect to the server.");
         }
 

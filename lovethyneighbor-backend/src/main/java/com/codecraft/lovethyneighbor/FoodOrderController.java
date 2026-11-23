@@ -20,6 +20,9 @@ public class FoodOrderController {
     private final NotificationRepository notificationRepository;
     private final FoodClaimService foodClaimService;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private FcmPushService fcmPushService;
+
     public FoodOrderController(
             FoodOrderRepository foodOrderRepository,
             FoodRepository foodRepository,
@@ -34,6 +37,7 @@ public class FoodOrderController {
 
     // Recipient Past Orders: retrieve the logged-in user's orders
     @GetMapping("/mine")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getMyOrders(Authentication authentication) {
 
         if (authentication == null) {
@@ -51,6 +55,7 @@ public class FoodOrderController {
 
         List<FoodOrder> orders = 
             foodOrderRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId);
+        orders.forEach(FoodOrder::getDonorName);
         return ResponseEntity.ok(orders);
     }
 
@@ -121,7 +126,7 @@ public class FoodOrderController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
         }
 
-        var optionalFood = foodRepository.findById(id);
+        var optionalFood = FoodRepository.findByIdForMutation(foodRepository, id);
         if (optionalFood.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
         }
@@ -163,6 +168,9 @@ public class FoodOrderController {
                         + "' was declined by the donor. You can browse other available food listings."
         );
         notificationRepository.save(notification);
+        if (fcmPushService != null) {
+            fcmPushService.sendToUser(recipientId, notification.getTitle(), notification.getMessage());
+        }
 
         return ResponseEntity.ok(updated);
     }

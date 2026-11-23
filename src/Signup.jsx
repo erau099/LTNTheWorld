@@ -53,7 +53,8 @@ function Signup() {
             !formData.email ||
             !formData.password ||
             !formData.firstName ||
-            !formData.lastName
+            !formData.lastName ||
+            !formData.dob
         ) {
             setError("Please fill in all required fields");
             return;
@@ -93,7 +94,7 @@ function Signup() {
                 const message = await response.text();
                 setError(message);
             }
-        } catch (err) {
+        } catch {
             setError("Failed to connect to the server.");
         }
     };
@@ -188,6 +189,7 @@ function Signup() {
                                 placeholder="DOB: MM/DD/YYYY"
                                 value={formData.dob}
                                 onChange={handleChange}
+                                required
                             />
                             <input
                                 type="text"

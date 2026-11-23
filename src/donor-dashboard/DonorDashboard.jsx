@@ -56,6 +56,12 @@ function DonorDashboard() {
     setActiveCoordinationFood(updated);
   };
 
+  const handleListingDeleted = (deletedId) => {
+    setListings((prev) => prev.filter((l) => l.id !== deletedId));
+    setActiveCoordinationFood(null);
+    setActiveCoordinationFoodId(null);
+  };
+
   return (
     <div className="donor-dashboard">
       <DashboardHeader role="donor" onDonorNotification={handleSelectNotification} />
@@ -143,6 +149,7 @@ function DonorDashboard() {
             setActiveCoordinationFoodId(null);
           }}
           onStatusUpdated={handleStatusUpdated}
+          onListingDeleted={handleListingDeleted}
         />
       )}
     </div>

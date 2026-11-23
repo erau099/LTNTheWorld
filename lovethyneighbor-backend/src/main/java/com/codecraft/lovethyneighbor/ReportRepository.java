@@ -9,4 +9,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByReportTypeIgnoreCase(String reportType);
 
     List<Report> findByStatusIgnoreCase(String status);
+
+    long countByStatusIgnoreCase(String status);
 }

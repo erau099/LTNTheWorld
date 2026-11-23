@@ -1,6 +1,7 @@
 package com.codecraft.lovethyneighbor;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,7 @@ public class RecipientOrderController {
     }
 
     @GetMapping("/orders")
+    @Transactional(readOnly = true)
     public List<RecipientOrderResponse> getRecipientOrders(Authentication authentication) {
         UUID recipientId = UUID.fromString(authentication.getName());
 

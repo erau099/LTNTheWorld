@@ -1,9 +1,8 @@
 package com.codecraft.lovethyneighbor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@EnableScheduling 
 @RequestMapping("/api/food")
-@CrossOrigin(origins = "http://localhost:5173")
 public class FoodController {
 
     static final int MAX_PHOTOS = 3;
@@ -34,6 +31,15 @@ public class FoodController {
 
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private FcmPushService fcmPushService;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private FoodOrderRepository foodOrderRepository;
+
+    @Value("${app.dev.seed-enabled:false}")
+    private boolean seedEnabled;
 
     public FoodController(FoodRepository foodRepository, NotificationRepository notificationRepository,
             ReviewRepository reviewRepository, FoodClaimService foodClaimService) {
@@ -69,6 +75,16 @@ public class FoodController {
             return ResponseEntity.badRequest().body(error);
         }
 
+        // The JWT subject is the user's UUID, so the donor can't post as someone else
+        UUID donorId = UUID.fromString(authentication.getName());
+        if (entityManager != null) {
+            User donor = entityManager.find(User.class, donorId);
+            if (donor != null && Boolean.FALSE.equals(donor.getCanPostListings())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Your ability to post listings has been restricted by an administrator.");
+            }
+        }
+
         Food food = new Food();
         food.setFoodItem(request.getFoodItem().trim());
         food.setDescription(request.getDescription().trim());
@@ -79,9 +95,7 @@ public class FoodController {
         food.setPickupTime(request.getDate().atTime(request.getStartTime()));
         food.setPickupEndTime(request.getDate().atTime(request.getEndTime()));
         food.setPhotos(request.getPhotos() == null ? new ArrayList<>() : new ArrayList<>(request.getPhotos()));
-
-        // The JWT subject is the user's UUID, so the donor can't post as someone else
-        food.setUserId(UUID.fromString(authentication.getName()));
+        food.setUserId(donorId);
 
         // Geocode coordinates upon saving (Story 325)
         geocodingService.geocode(food.getAddress()).ifPresent(coords -> {
@@ -207,31 +221,38 @@ public class FoodController {
         return ResponseEntity.ok(responseList);
     }
 
-    // Retrieve a specific food listing
+    // Retrieve a specific food listing (Story 108 Sub-task 3: progressive address disclosure)
     @GetMapping("/{id}")
-    public ResponseEntity<?> getFoodById(@PathVariable Long id) {
+    public ResponseEntity<?> getFoodById(@PathVariable Long id, Authentication authentication) {
+        UUID callerId = null;
+        if (authentication != null && authentication.getName() != null) {
+            try {
+                callerId = UUID.fromString(authentication.getName());
+            } catch (IllegalArgumentException ignored) {
+                callerId = null;
+            }
+        }
+        final UUID resolvedCallerId = callerId;
+
         return foodRepository.findById(id)
-                .map(ResponseEntity::ok)
+                .map(food -> {
+                    String approx = extractApproximateLocation(food.getAddress());
+                    food.setApproximateLocation(approx);
+
+                    boolean isOwner = resolvedCallerId != null && resolvedCallerId.equals(food.getUserId());
+                    boolean isApprovedClaimant = resolvedCallerId != null
+                            && resolvedCallerId.equals(food.getClaimedByUserId())
+                            && ("SCHEDULED".equalsIgnoreCase(food.getStatus())
+                                || "COMPLETED".equalsIgnoreCase(food.getStatus()));
+
+                    if (!isOwner && !isApprovedClaimant) {
+                        food.setAddress(approx);
+                    }
+                    return ResponseEntity.ok(food);
+                })
                 .orElseGet(() ->
                     ResponseEntity.notFound().build()
                 );
-    }
-
-        // DT-98 - Donor Dashboard: set expired food listings to UNAVAILABLE once pickup end time has past
-        @Scheduled(
-            initialDelayString = "PT30S",
-            fixedDelayString = "PT${app.listings.expiry-check-minutes:5}M" 
-        )
-        @Transactional 
-        public void updatePendingToUnavailable() {
-            LocalDateTime now = LocalDateTime.now();
-            List<Food> listings = foodRepository.findByStatusIgnoreCaseAndPickupEndTimeBefore("pending", now);
-        for (Food food : listings) {
-            if ("pending".equalsIgnoreCase(food.getStatus()) && food.getPickupEndTime() != null && !food.getPickupEndTime().isAfter(now)) {
-                food.setStatus("UNAVAILABLE");
-                foodRepository.save(food);
-            }
-        }
     }
 
     // DT-73 & DT-96: Recipient requests food listing, moving it to CLAIMED and notifying the donor
@@ -271,7 +292,7 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
         }
 
-        Optional<Food> foodOpt = foodRepository.findById(id);
+        Optional<Food> foodOpt = FoodRepository.findByIdForMutation(foodRepository, id);
         if (foodOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
         }
@@ -329,6 +350,11 @@ public class FoodController {
         );
         notificationRepository.save(recipientNotification);
 
+        if (fcmPushService != null) {
+            fcmPushService.sendToUser(food.getUserId(), notification.getTitle(), notification.getMessage());
+            fcmPushService.sendToUser(food.getClaimedByUserId(), recipientNotification.getTitle(), recipientNotification.getMessage());
+        }
+
         return ResponseEntity.ok(updated);
     }
     
@@ -347,7 +373,7 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
         }
 
-        Optional<Food> foodOpt = foodRepository.findById(id);
+        Optional<Food> foodOpt = FoodRepository.findByIdForMutation(foodRepository, id);
         if (foodOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
         }
@@ -396,28 +422,74 @@ public class FoodController {
         );
         notificationRepository.save(recipientNotification);
 
+        if (fcmPushService != null) {
+            fcmPushService.sendToUser(food.getUserId(), notification.getTitle(), notification.getMessage());
+            fcmPushService.sendToUser(food.getClaimedByUserId(), recipientNotification.getTitle(), recipientNotification.getMessage());
+        }
+
         return ResponseEntity.ok(updated);
     }
 
-    // Dev/Test helper: seed placeholder listings across various distances
+    // Donor Delete Listing: allows a donor to remove their unclaimed listing (recreate if corrections are needed)
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteFoodListing(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You must be logged in.");
+        }
+
+        UUID donorId;
+        try {
+            donorId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication identity.");
+        }
+
+        Optional<Food> foodOpt = FoodRepository.findByIdForMutation(foodRepository, id);
+        if (foodOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Food listing not found.");
+        }
+
+        Food food = foodOpt.get();
+        if (food.getUserId() == null || !food.getUserId().equals(donorId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the listing donor can remove this listing.");
+        }
+
+        String status = food.getStatus();
+        if (food.getClaimedByUserId() != null
+                || "CLAIMED".equalsIgnoreCase(status)
+                || "SCHEDULED".equalsIgnoreCase(status)
+                || "COMPLETED".equalsIgnoreCase(status)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Claimed, scheduled, or completed listings cannot be removed.");
+        }
+
+        if (foodOrderRepository != null) {
+            foodOrderRepository.deleteByFoodId(food.getId());
+            foodOrderRepository.flush();
+        }
+        foodRepository.delete(food);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Dev/Test helper: seed placeholder listings across various distances (disabled in production)
     @PostMapping("/seed-test-data")
     @Transactional
     public ResponseEntity<?> seedDistanceTestData(Authentication authentication) {
-        UUID donorId = null;
-        if (authentication != null && authentication.getName() != null) {
-            try {
-                donorId = UUID.fromString(authentication.getName());
-            } catch (Exception ignored) {}
+        if (!seedEnabled) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Seed test data endpoint is disabled in this environment.");
         }
-        if (donorId == null) {
-            List<User> users = entityManager.createQuery("SELECT u FROM User u", User.class)
-                    .setMaxResults(1)
-                    .getResultList();
-            if (users.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("No registered users exist in the database. Please create an account first.");
-            }
-            donorId = users.get(0).getId();
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Administrator authentication required.");
+        }
+        UUID donorId;
+        try {
+            donorId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid authentication identity.");
         }
 
         LocalDate tomorrow = LocalDate.now().plusDays(1);

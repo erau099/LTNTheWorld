@@ -10,7 +10,7 @@ function AdminUserProfileModal({ userId, onClose, onUserUpdated }) {
   useEffect(() => {
     if (!userId) return;
     setLoading(true);
-    fetch(`/api/admin/users/${userId}/activity`)
+    fetch(`/api/admin/users/${userId}/activity`, { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -35,6 +35,7 @@ function AdminUserProfileModal({ userId, onClose, onUserUpdated }) {
     try {
       const res = await fetch(`/api/admin/users/${user.id}/status`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
       });
@@ -59,6 +60,7 @@ function AdminUserProfileModal({ userId, onClose, onUserUpdated }) {
     try {
       const res = await fetch(`/api/admin/users/${user.id}/restrictions`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ canPostListings: nextCanPost }),
       });

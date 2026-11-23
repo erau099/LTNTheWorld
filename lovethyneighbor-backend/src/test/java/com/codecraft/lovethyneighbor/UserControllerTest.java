@@ -60,11 +60,12 @@ class UserControllerTest {
     class GetUserByIdTests {
 
         @Test
-        @DisplayName("Should return 200 and user when ID exists")
+        @DisplayName("Should return 200 and user when ID exists and caller is self")
         void shouldReturnUserWhenExists() {
+            given(authentication.getName()).willReturn(userId.toString());
             given(userRepository.findById(userId)).willReturn(Optional.of(testUser));
 
-            ResponseEntity<?> response = userController.getUserById(userId);
+            ResponseEntity<?> response = userController.getUserById(userId, authentication);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals(testUser, response.getBody());
@@ -73,12 +74,25 @@ class UserControllerTest {
         @Test
         @DisplayName("Should return 404 when ID does not exist")
         void shouldReturnNotFoundWhenMissing() {
+            given(authentication.getName()).willReturn(userId.toString());
             given(userRepository.findById(userId)).willReturn(Optional.empty());
 
-            ResponseEntity<?> response = userController.getUserById(userId);
+            ResponseEntity<?> response = userController.getUserById(userId, authentication);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
             assertNull(response.getBody());
+        }
+
+        @Test
+        @DisplayName("Should return 403 when non-admin accesses another user's record")
+        void shouldReturnForbiddenWhenAccessingOtherUser() {
+            UUID otherUserId = UUID.randomUUID();
+            given(authentication.getName()).willReturn(otherUserId.toString());
+
+            ResponseEntity<?> response = userController.getUserById(userId, authentication);
+
+            assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+            verify(userRepository, never()).findById(any());
         }
     }
 

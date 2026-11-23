@@ -16,8 +16,8 @@ function AdminFlaggedUsers() {
       try {
         // DT-50: Retrieve reports and existing user account statuses.
         const [reportsResponse, usersResponse] = await Promise.all([
-          fetch("/api/admin/reports"),
-          fetch("/api/admin/users"),
+          fetch("/api/admin/reports", { credentials: "include" }),
+          fetch("/api/admin/users", { credentials: "include" }),
         ]);
 
         if (!reportsResponse.ok) {
@@ -91,6 +91,7 @@ function AdminFlaggedUsers() {
         `/api/admin/users/${report.reportedUserId}/status`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -142,6 +143,7 @@ function AdminFlaggedUsers() {
         `/api/admin/reports/${reportId}/status`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

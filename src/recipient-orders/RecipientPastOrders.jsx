@@ -169,7 +169,15 @@ function RecipientPastOrders() {
             <p className="no-orders error-msg">{error}</p>
           ) : filteredOrders.length > 0 ? (
             filteredOrders.map((order) => {
-              const directionsDestination = order.directionsUrl || (order.address ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.address)}` : null);
+              const isApprovedOrCompleted = ["scheduled", "completed"].includes((order.status || "").toLowerCase());
+              const hasUnlockedAddress = Boolean(
+                order.address && !order.address.toLowerCase().startsWith("locked")
+              );
+              const directionsDestination = order.directionsUrl || (
+                isApprovedOrCompleted && hasUnlockedAddress
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.address)}`
+                  : null
+              );
 
               return (
                 <div className="orders-row" key={order.id}>

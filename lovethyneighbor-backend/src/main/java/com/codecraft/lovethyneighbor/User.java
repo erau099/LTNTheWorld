@@ -24,6 +24,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String password;
 
@@ -46,9 +47,11 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private java.time.LocalDateTime createdAt;
 
+    @JsonIgnore
     @Column(name = "reset_token_hash")
     private String resetTokenHash;
 
+    @JsonIgnore
     @Column(name = "reset_token_expiration")
     private LocalDateTime resetTokenExpiration;
 
@@ -58,9 +61,11 @@ public class User {
     private Boolean emailVerified;
 
     // SHA-256 of the token emailed at signup; cleared once the link is used
+    @JsonIgnore
     @Column(name = "verification_token_hash")
     private String verificationTokenHash;
 
+    @JsonIgnore
     @Column(name = "verification_token_expiration")
     private LocalDateTime verificationTokenExpiration;
 

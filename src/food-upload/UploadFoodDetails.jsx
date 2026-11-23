@@ -15,14 +15,6 @@ import {
 function UploadFoodDetails() {
     const navigate = useNavigate();
 
-    //Form data for the food details form
-    const [formData, setFormData] = useState({
-        listingTitle: "",
-        description: "",
-        tag: "",
-        allergens: "",
-    });
-    
     const { user } = useAuth();
 
     // Check whether an administrator has restricted posting.

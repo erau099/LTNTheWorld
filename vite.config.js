@@ -6,18 +6,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'https://ltn-backend-api-a5616004dfe6.herokuapp.com/'
+      '/api': {
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8080',
+        changeOrigin: true,
+      }
     }
   },
   test: {
     globals: true,
     environment: 'jsdom',
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    maxWorkers: 1,
     setupFiles: './src/setupTests.js',
     css: true,
   },

@@ -11,6 +11,7 @@ function AdminHeader() {
   };
 
   const handleLogout = async () => {
+    sessionStorage.removeItem("ltn_dyno_upgrade_dismissed");
     await logout();
     navigate("/");
   };

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,10 +20,13 @@ import java.util.Optional;
 public class NominatimGeocodingService implements GeocodingService {
 
     private static final Logger logger = LoggerFactory.getLogger(NominatimGeocodingService.class);
-    private static final String NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
+    private static final String DEFAULT_NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
     private static final String USER_AGENT = "LoveThyNeighbor/1.0 (contact@lovethyneighbor.org)";
 
     private final RestTemplate restTemplate;
+
+    @Value("${app.geocoding.url:" + DEFAULT_NOMINATIM_URL + "}")
+    private String nominatimUrl = DEFAULT_NOMINATIM_URL;
 
     public NominatimGeocodingService() {
         this(new RestTemplate());
@@ -40,7 +44,8 @@ public class NominatimGeocodingService implements GeocodingService {
         }
 
         try {
-            URI uri = UriComponentsBuilder.fromUriString(NOMINATIM_URL)
+            String targetUrl = (nominatimUrl == null || nominatimUrl.isBlank()) ? DEFAULT_NOMINATIM_URL : nominatimUrl;
+            URI uri = UriComponentsBuilder.fromUriString(targetUrl)
                     .queryParam("q", address.trim())
                     .queryParam("format", "json")
                     .queryParam("limit", 1)
