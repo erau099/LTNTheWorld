@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.933 s -- in com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest

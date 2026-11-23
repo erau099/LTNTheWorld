@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.codecraft.lovethyneighbor.AdminSecurityTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.193 s -- in com.codecraft.lovethyneighbor.AdminSecurityTest

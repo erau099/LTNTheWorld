@@ -1,0 +1,443 @@
+Command exited with code 0.
+
+Command output:
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO]                                                                    [jar]
+[INFO] lovethyneighbor-root                                               [pom]
+[INFO] 
+[INFO] -------------------< com.codecraft:lovethyneighbor >--------------------
+[INFO] Building  0.0.1-SNAPSHOT                                           [1/2]
+[INFO]   from lovethyneighbor-backend\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ lovethyneighbor ---
+[INFO] Deleting C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ lovethyneighbor ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 8 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:copy-resources (copy-frontend-dist) @ lovethyneighbor ---
+[INFO] Copying 10 resources from ..\dist to target\classes\static
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ lovethyneighbor ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 52 source files with javac [debug parameters release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ lovethyneighbor ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ lovethyneighbor ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 34 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ lovethyneighbor ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.codecraft.lovethyneighbor.AdminBootstrapRunnerTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\rauet\.m2\repository\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+18:51:46.228 [main] INFO com.codecraft.lovethyneighbor.AdminBootstrapRunner -- Bootstrapped initial ADMIN account for admin@ltn.org
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.858 s -- in com.codecraft.lovethyneighbor.AdminBootstrapRunnerTest
+[INFO] Running com.codecraft.lovethyneighbor.AdminControllerTest
+18:51:47.020 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.021 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.023 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 2 ms
+18:51:47.176 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.177 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.177 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.250 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.250 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.251 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.277 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.277 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.277 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.330 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.330 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.331 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.346 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.346 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.346 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.372 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.372 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.372 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.411 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.411 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.411 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.427 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.427 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.427 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.442 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.442 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.442 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+18:51:47.464 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+18:51:47.465 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+18:51:47.465 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.228 s -- in com.codecraft.lovethyneighbor.AdminControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.AdminSecurityTest
+18:51:47.512 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.AdminSecurityTest]: AdminSecurityTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:51:47.654 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.AdminSecurityTest
+18:51:47.684 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.AdminSecurityTest]: AdminSecurityTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:51:47.685 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.AdminSecurityTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-11-22T18:51:47.988-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.AdminSecurityTest    : Starting AdminSecurityTest using Java 25.0.1 with PID 12008 (started by rauet in C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend)
+2026-11-22T18:51:47.991-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.AdminSecurityTest    : No active profile set, falling back to 1 default profile: "default"
+2026-11-22T18:51:48.622-08:00  INFO 12008 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-22T18:51:48.698-08:00  INFO 12008 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 67 ms. Found 8 JPA repository interfaces.
+2026-11-22T18:51:49.136-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-22T18:51:49.200-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
+2026-11-22T18:51:49.515-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-22T18:51:49.544-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-22T18:51:49.701-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-11-22T18:51:49.703-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-22T18:51:49.729-08:00  WARN 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-22T18:51:49.763-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-22T18:51:50.713-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-22T18:51:50.775-08:00  INFO 12008 --- [lovethyneighbor] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-22T18:51:50.851-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-22T18:51:51.539-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.FcmPushService       : Firebase Admin credentials not configured; server-side FCM push dispatch is disabled.
+2026-11-22T18:51:51.744-08:00  WARN 12008 --- [lovethyneighbor] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-22T18:51:51.844-08:00  WARN 12008 --- [lovethyneighbor] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: f0f0418e-afb7-41d6-bcd2-d672f110e882
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-11-22T18:51:51.854-08:00  INFO 12008 --- [lovethyneighbor] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-11-22T18:51:52.080-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-11-22T18:51:52.346-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.AdminSecurityTest    : Started AdminSecurityTest in 4.597 seconds (process running for 7.737)
+2026-11-22T18:51:52.359-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:52.359-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:52.360-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:52.650-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:52.650-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:52.651-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:52.677-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:52.678-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:52.678-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:52.713-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:52.713-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:52.713-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:52.735-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:52.735-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:52.735-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.320 s -- in com.codecraft.lovethyneighbor.AdminSecurityTest
+[INFO] Running com.codecraft.lovethyneighbor.AuthControllerTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.096 s -- in com.codecraft.lovethyneighbor.AuthControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+2026-11-22T18:51:52.900-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest]: DatabaseAndConcurrencyFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:52.902-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+2026-11-22T18:51:52.903-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest]: DatabaseAndConcurrencyFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:52.904-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+2026-11-22T18:51:53.127-08:00  WARN 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000502: The [user] property of the [com.codecraft.lovethyneighbor.Food] entity was modified, but it won't be updated because the property is immutable.
+2026-11-22T18:51:53.232-08:00  WARN 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000502: The [user] property of the [com.codecraft.lovethyneighbor.Food] entity was modified, but it won't be updated because the property is immutable.
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.337 s -- in com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+[INFO] Running com.codecraft.lovethyneighbor.DistanceCalculationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in com.codecraft.lovethyneighbor.DistanceCalculationTest
+[INFO] Running com.codecraft.lovethyneighbor.DynoCapacityServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.codecraft.lovethyneighbor.DynoCapacityServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.EmailVerificationTest
+2026-11-22T18:51:53.261-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.261-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.261-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.272-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.272-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.272-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.281-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.281-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.281-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.293-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.293-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.293-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.302-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.302-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.302-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.311-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.312-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.312-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.317-08:00  WARN 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.AuthController       : Could not send verification email to user null: SMTP down
+2026-11-22T18:51:53.323-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.323-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.323-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 s -- in com.codecraft.lovethyneighbor.EmailVerificationTest
+[INFO] Running com.codecraft.lovethyneighbor.FoodClaimServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.080 s -- in com.codecraft.lovethyneighbor.FoodClaimServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.FoodControllerTest
+[INFO] Running Validation logic (FoodController.validate)
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in Validation logic (FoodController.validate)
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.304 s -- in com.codecraft.lovethyneighbor.FoodControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.FoodLifecycleTest
+2026-11-22T18:51:53.718-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.718-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.719-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.727-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.727-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.727-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.737-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.737-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.738-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.748-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.748-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.748-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in com.codecraft.lovethyneighbor.FoodLifecycleTest
+[INFO] Running com.codecraft.lovethyneighbor.FoodOrderControllerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in com.codecraft.lovethyneighbor.FoodOrderControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.FoodRequestValidationTests
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.codecraft.lovethyneighbor.FoodRequestValidationTests
+[INFO] Running com.codecraft.lovethyneighbor.GeocodingServiceTest
+2026-11-22T18:51:53.886-08:00  WARN 12008 --- [lovethyneighbor] [           main] c.c.l.NominatimGeocodingService          : Geocoding failed gracefully for address '6000 J St, Sacramento, CA': Connection timed out
+2026-11-22T18:51:53.892-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.l.NominatimGeocodingService          : Nominatim returned no coordinates for address: Nonexistent Unknown Place 99999
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.117 s -- in com.codecraft.lovethyneighbor.GeocodingServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.ListingExpiryServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.codecraft.lovethyneighbor.ListingExpiryServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.LovethyneighborApplicationTests
+2026-11-22T18:51:53.901-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.LovethyneighborApplicationTests]: LovethyneighborApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:53.902-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.LovethyneighborApplicationTests
+2026-11-22T18:51:53.903-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.LovethyneighborApplicationTests]: LovethyneighborApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:53.904-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.LovethyneighborApplicationTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.codecraft.lovethyneighbor.LovethyneighborApplicationTests
+[INFO] Running com.codecraft.lovethyneighbor.NotificationControllerTest
+2026-11-22T18:51:53.914-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.914-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.914-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.923-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.923-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.924-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:53.931-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.931-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.931-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:53.939-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:53.939-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:53.939-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in com.codecraft.lovethyneighbor.NotificationControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.PickupReminderServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in com.codecraft.lovethyneighbor.PickupReminderServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.RecipientApprovalNotificationTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in com.codecraft.lovethyneighbor.RecipientApprovalNotificationTest
+[INFO] Running com.codecraft.lovethyneighbor.RecipientDeclineNotificationTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in com.codecraft.lovethyneighbor.RecipientDeclineNotificationTest
+[INFO] Running com.codecraft.lovethyneighbor.RecipientOrderControllerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.codecraft.lovethyneighbor.RecipientOrderControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.RecipientOrderSecurityAndReviewTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in com.codecraft.lovethyneighbor.RecipientOrderSecurityAndReviewTest
+[INFO] Running com.codecraft.lovethyneighbor.RecipientStatusNotificationTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in com.codecraft.lovethyneighbor.RecipientStatusNotificationTest
+[INFO] Running com.codecraft.lovethyneighbor.ReportControllerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in com.codecraft.lovethyneighbor.ReportControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.ReviewControllerTest
+[INFO] Running GET /api/reviews/food/{foodId}
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in GET /api/reviews/food/{foodId}
+[INFO] Running POST /api/reviews
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in POST /api/reviews
+[INFO] Running GET /api/reviews/my-reviews
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in GET /api/reviews/my-reviews
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in com.codecraft.lovethyneighbor.ReviewControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.ReviewRepositoryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in com.codecraft.lovethyneighbor.ReviewRepositoryTest
+[INFO] Running com.codecraft.lovethyneighbor.SecretPrecedenceTest
+2026-11-22T18:51:54.089-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.SecretPrecedenceTest]: SecretPrecedenceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:54.091-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.SecretPrecedenceTest
+2026-11-22T18:51:54.093-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.SecretPrecedenceTest]: SecretPrecedenceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:54.094-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.SecretPrecedenceTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-11-22T18:51:54.130-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.l.SecretPrecedenceTest               : Starting SecretPrecedenceTest using Java 25.0.1 with PID 12008 (started by rauet in C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend)
+2026-11-22T18:51:54.130-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.l.SecretPrecedenceTest               : No active profile set, falling back to 1 default profile: "default"
+2026-11-22T18:51:54.329-08:00  INFO 12008 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-22T18:51:54.352-08:00  INFO 12008 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 22 ms. Found 8 JPA repository interfaces.
+2026-11-22T18:51:54.448-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-22T18:51:54.477-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-22T18:51:54.480-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-11-22T18:51:54.483-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:testdb user=SA
+2026-11-22T18:51:54.483-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-11-22T18:51:54.484-08:00  WARN 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-22T18:51:54.485-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-22T18:51:54.594-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-22T18:51:54.615-08:00  INFO 12008 --- [lovethyneighbor] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-22T18:51:54.704-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.FcmPushService       : Firebase Admin credentials not configured; server-side FCM push dispatch is disabled.
+2026-11-22T18:51:54.737-08:00  WARN 12008 --- [lovethyneighbor] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-22T18:51:54.758-08:00  WARN 12008 --- [lovethyneighbor] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 1aea4588-90c4-442a-81bd-986151cce4dc
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-11-22T18:51:54.760-08:00  INFO 12008 --- [lovethyneighbor] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-11-22T18:51:54.783-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-11-22T18:51:54.857-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.l.SecretPrecedenceTest               : Started SecretPrecedenceTest in 0.757 seconds (process running for 10.248)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.789 s -- in com.codecraft.lovethyneighbor.SecretPrecedenceTest
+[INFO] Running com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverterTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.codecraft.lovethyneighbor.security.EncryptedLocalDateConverterTest
+[INFO] Running com.codecraft.lovethyneighbor.security.EncryptedStringConverterTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in com.codecraft.lovethyneighbor.security.EncryptedStringConverterTest
+[INFO] Running com.codecraft.lovethyneighbor.security.JwtAuthFilterTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.287 s -- in com.codecraft.lovethyneighbor.security.JwtAuthFilterTest
+[INFO] Running com.codecraft.lovethyneighbor.security.JwtServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.codecraft.lovethyneighbor.security.JwtServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+2026-11-22T18:51:55.192-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest]: SecurityAndBoundaryFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:55.196-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+2026-11-22T18:51:55.196-08:00  INFO 12008 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest]: SecurityAndBoundaryFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:51:55.197-08:00  INFO 12008 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-11-22T18:51:55.227-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.l.SecurityAndBoundaryFaultTest       : Starting SecurityAndBoundaryFaultTest using Java 25.0.1 with PID 12008 (started by rauet in C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend)
+2026-11-22T18:51:55.227-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.l.SecurityAndBoundaryFaultTest       : No active profile set, falling back to 1 default profile: "default"
+2026-11-22T18:51:55.448-08:00  INFO 12008 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-22T18:51:55.476-08:00  INFO 12008 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 24 ms. Found 8 JPA repository interfaces.
+2026-11-22T18:51:55.688-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-22T18:51:55.740-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-22T18:51:55.742-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-11-22T18:51:55.744-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:testdb user=SA
+2026-11-22T18:51:55.745-08:00  INFO 12008 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-11-22T18:51:55.745-08:00  WARN 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-22T18:51:55.746-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:testdb]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: TESTDB/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-22T18:51:55.844-08:00  INFO 12008 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-22T18:51:55.862-08:00  INFO 12008 --- [lovethyneighbor] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-22T18:51:56.013-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.FcmPushService       : Firebase Admin credentials not configured; server-side FCM push dispatch is disabled.
+2026-11-22T18:51:56.049-08:00  WARN 12008 --- [lovethyneighbor] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-22T18:51:56.082-08:00  WARN 12008 --- [lovethyneighbor] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: d38cc61a-4c16-482e-b228-9bafd72cf85e
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-11-22T18:51:56.084-08:00  INFO 12008 --- [lovethyneighbor] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-11-22T18:51:56.115-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-11-22T18:51:56.215-08:00  INFO 12008 --- [lovethyneighbor] [           main] c.c.l.SecurityAndBoundaryFaultTest       : Started SecurityAndBoundaryFaultTest in 1.013 seconds (process running for 11.607)
+2026-11-22T18:51:56.223-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:56.223-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:56.224-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:56.676-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:56.677-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:56.677-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:57.174-08:00  WARN 12008 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.AuthController       : Could not send password reset confirmation email to user deec2610-50e6-4c56-b4bf-01fe62467052: SMTP unavailable
+2026-11-22T18:51:57.238-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:57.238-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:57.239-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:51:57.831-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:57.831-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:57.832-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:58.276-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:58.276-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:58.277-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:59.047-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:59.047-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:59.048-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:59.494-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:59.494-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:59.495-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:51:59.931-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:51:59.931-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:51:59.931-08:00  INFO 12008 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.164 s -- in com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+[INFO] Running com.codecraft.lovethyneighbor.UserControllerTest
+[INFO] Running Allergies Endpoints
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in Allergies Endpoints
+[INFO] Running GET /api/users/me
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in GET /api/users/me
+[INFO] Running PATCH /api/users/me
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in PATCH /api/users/me
+[INFO] Running GET /api/users/{id}
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in GET /api/users/{id}
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in com.codecraft.lovethyneighbor.UserControllerTest
+[INFO] Running com.codecraft.lovethyneighbor.UserTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.codecraft.lovethyneighbor.UserTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 195, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ lovethyneighbor ---
+[INFO] Building jar: C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend\target\lovethyneighbor-0.0.1-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.6:repackage (repackage) @ lovethyneighbor ---
+[INFO] Replacing main artifact C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend\target\lovethyneighbor-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend\target\lovethyneighbor-0.0.1-SNAPSHOT.jar.original
+[INFO] 
+[INFO] -----------------< com.codecraft:lovethyneighbor-root >-----------------
+[INFO] Building lovethyneighbor-root 0.0.1-SNAPSHOT                       [2/2]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ lovethyneighbor-root ---
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for lovethyneighbor-root 0.0.1-SNAPSHOT:
+[INFO] 
+[INFO]  ................................................... SUCCESS [ 23.465 s]
+[INFO] lovethyneighbor-root ............................... SUCCESS [  0.058 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  23.790 s
+[INFO] Finished at: 2026-11-22T18:52:01-08:00
+[INFO] ------------------------------------------------------------------------

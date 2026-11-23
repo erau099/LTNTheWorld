@@ -1,0 +1,32 @@
+PS C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld> heroku pg:info -a ltn-backend-api
+=== DATABASE_URL
+Plan:                  essential-0
+Status:                Available
+Connections:           0/20
+PG Version:            18.4
+Data Size:             8.6 MB / 1 GB (0.84%) (In compliance)
+Tables:                9/4000 (In compliance)
+Continuous Protection: On
+Add-on:                postgresql-cubic-67756
+
+PS C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld> heroku pg:psql -a ltn-backend-api -c "SELECT table_name ...; SELECT ... FROM food_photos;"
+--> Connecting to postgresql-cubic-67756
+       table_name        
+-------------------------
+ addresses
+ fcm_tokens
+ food
+ food_order
+ food_photos
+ logins
+ notifications
+ reports
+ reviews
+(9 JPA-managed application tables)
+
+ table_name  | column_name | data_type 
+-------------+-------------+-----------
+ food_photos | food_id     | bigint
+ food_photos | photo       | text
+ food_photos | position    | integer
+(3 rows)

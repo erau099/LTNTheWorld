@@ -1,0 +1,17 @@
+
+> lovethyneighbor@0.0.0 test:heroku-load
+> node scripts/heroku-load-test.mjs
+
+=== Heroku Basic Dyno Full-Stack Simulation ===
+Target JAR: C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend\target\lovethyneighbor-0.0.1-SNAPSHOT.jar
+Server booted in 6247 ms | Baseline JVM memory: { pid: 10616, rssMb: 366.7, privateMb: 413 }
+Static frontend verified (/, /assets/index-DcVhiCBH.js, /assets/index-BLp_5sU8.css, /firebase-messaging-sw.js)
+Provisioned 6 donors, 14 recipients, 30 photo listings (20 active, 10 completed+reviewed) | Memory: { pid: 10616, rssMb: 344.7, privateMb: 408.8 }
+
+=== Simulation Summary ===
+Duration: 25.2 s | Concurrent virtual users: 20
+Total requests: 2309 (91.5 req/s) | 5xx/network errors: 0
+Status breakdown: { '200': 2309 }
+Latency (ms): avg=17.0, p50=4.9, p95=64.6, max=518.2
+Memory (MB): baseline=366.7 RSS | peak=397.5 RSS (private=442.8) | final=370.1 RSS | Basic dyno limit=512 MB
+PASS: Zero 5xx/OOM/JDBC errors and memory stayed within Heroku Basic 512 MB budget.

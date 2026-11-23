@@ -1,0 +1,182 @@
+Command exited with code 0.
+
+Command output:
+Initializing isolated PostgreSQL 18 cluster on 127.0.0.1:55432...
+PostgreSQL 18 ready on 127.0.0.1:55432 (database: ltn_test). Running fault tests...
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.codecraft:lovethyneighbor >--------------------
+[INFO] Building  0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ lovethyneighbor ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 8 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:copy-resources (copy-frontend-dist) @ lovethyneighbor ---
+[INFO] Copying 10 resources from ..\dist to target\classes\static
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ lovethyneighbor ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ lovethyneighbor ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ lovethyneighbor ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ lovethyneighbor ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+18:50:45.583 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest]: DatabaseAndConcurrencyFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:50:45.843 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+18:50:45.920 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest]: DatabaseAndConcurrencyFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:50:45.921 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-11-22T18:50:46.237-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.l.DatabaseAndConcurrencyFaultTest    : Starting DatabaseAndConcurrencyFaultTest using Java 25.0.1 with PID 14836 (started by rauet in C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend)
+2026-11-22T18:50:46.240-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.l.DatabaseAndConcurrencyFaultTest    : No active profile set, falling back to 1 default profile: "default"
+2026-11-22T18:50:46.954-08:00  INFO 14836 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-22T18:50:47.025-08:00  INFO 14836 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 62 ms. Found 8 JPA repository interfaces.
+2026-11-22T18:50:47.533-08:00  INFO 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-22T18:50:47.585-08:00  INFO 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
+2026-11-22T18:50:48.096-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-22T18:50:48.134-08:00  INFO 14836 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-22T18:50:48.247-08:00  INFO 14836 --- [lovethyneighbor] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6669cba
+2026-11-22T18:50:48.248-08:00  INFO 14836 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-22T18:50:48.276-08:00  WARN 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-22T18:50:48.298-08:00  INFO 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://127.0.0.1:55432/ltn_test]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.6
+	Default catalog/schema: ltn_test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-22T18:50:49.298-08:00  INFO 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-22T18:50:49.388-08:00  INFO 14836 --- [lovethyneighbor] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-22T18:50:49.473-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-22T18:50:50.170-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.FcmPushService       : Firebase Admin credentials not configured; server-side FCM push dispatch is disabled.
+2026-11-22T18:50:50.379-08:00  WARN 14836 --- [lovethyneighbor] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-22T18:50:50.531-08:00  WARN 14836 --- [lovethyneighbor] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: c281059e-4541-457d-a7a0-b6cf51692f65
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-11-22T18:50:50.539-08:00  INFO 14836 --- [lovethyneighbor] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-11-22T18:50:50.701-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-11-22T18:50:51.029-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.l.DatabaseAndConcurrencyFaultTest    : Started DatabaseAndConcurrencyFaultTest in 5.046 seconds (process running for 6.2)
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\rauet\.m2\repository\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-11-22T18:50:51.698-08:00  WARN 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000502: The [user] property of the [com.codecraft.lovethyneighbor.Food] entity was modified, but it won't be updated because the property is immutable.
+2026-11-22T18:50:51.882-08:00  WARN 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000502: The [user] property of the [com.codecraft.lovethyneighbor.Food] entity was modified, but it won't be updated because the property is immutable.
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.473 s -- in com.codecraft.lovethyneighbor.DatabaseAndConcurrencyFaultTest
+[INFO] Running com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+2026-11-22T18:50:51.899-08:00  INFO 14836 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest]: SecurityAndBoundaryFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:50:51.902-08:00  INFO 14836 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+2026-11-22T18:50:51.903-08:00  INFO 14836 --- [lovethyneighbor] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest]: SecurityAndBoundaryFaultTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-22T18:50:51.905-08:00  INFO 14836 --- [lovethyneighbor] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.codecraft.lovethyneighbor.LovethyneighborApplication for test class com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.6)
+
+2026-11-22T18:50:51.948-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.l.SecurityAndBoundaryFaultTest       : Starting SecurityAndBoundaryFaultTest using Java 25.0.1 with PID 14836 (started by rauet in C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld\lovethyneighbor-backend)
+2026-11-22T18:50:51.948-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.l.SecurityAndBoundaryFaultTest       : No active profile set, falling back to 1 default profile: "default"
+2026-11-22T18:50:52.115-08:00  INFO 14836 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-22T18:50:52.135-08:00  INFO 14836 --- [lovethyneighbor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 17 ms. Found 8 JPA repository interfaces.
+2026-11-22T18:50:52.464-08:00  INFO 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-22T18:50:52.513-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-22T18:50:52.515-08:00  INFO 14836 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-11-22T18:50:52.560-08:00  INFO 14836 --- [lovethyneighbor] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@38e10ff0
+2026-11-22T18:50:52.560-08:00  INFO 14836 --- [lovethyneighbor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-11-22T18:50:52.568-08:00  WARN 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-22T18:50:52.577-08:00  INFO 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://127.0.0.1:55432/ltn_test]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.6
+	Default catalog/schema: ltn_test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-22T18:50:52.723-08:00  INFO 14836 --- [lovethyneighbor] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-22T18:50:52.915-08:00  INFO 14836 --- [lovethyneighbor] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-22T18:50:53.208-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.FcmPushService       : Firebase Admin credentials not configured; server-side FCM push dispatch is disabled.
+2026-11-22T18:50:53.342-08:00  WARN 14836 --- [lovethyneighbor] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-22T18:50:53.460-08:00  WARN 14836 --- [lovethyneighbor] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 42f18348-20db-4881-9476-21f2c4799f4b
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-11-22T18:50:53.466-08:00  INFO 14836 --- [lovethyneighbor] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-11-22T18:50:53.574-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-11-22T18:50:53.867-08:00  INFO 14836 --- [lovethyneighbor] [           main] c.c.l.SecurityAndBoundaryFaultTest       : Started SecurityAndBoundaryFaultTest in 1.958 seconds (process running for 9.039)
+2026-11-22T18:50:53.908-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:53.909-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:53.912-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 3 ms
+2026-11-22T18:50:54.806-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:54.806-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:54.807-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:50:55.317-08:00  WARN 14836 --- [lovethyneighbor] [           main] c.c.lovethyneighbor.AuthController       : Could not send password reset confirmation email to user 169227fb-ea76-43e4-915c-05f71b35b2be: SMTP unavailable
+2026-11-22T18:50:55.382-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:55.383-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:55.383-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-22T18:50:56.067-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:56.067-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:56.068-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:50:56.521-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:56.521-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:56.522-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:50:57.242-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:57.242-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:57.243-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:50:57.694-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:57.694-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:57.695-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-22T18:50:58.137-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-22T18:50:58.137-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-22T18:50:58.137-08:00  INFO 14836 --- [lovethyneighbor] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.676 s -- in com.codecraft.lovethyneighbor.SecurityAndBoundaryFaultTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  16.412 s
+[INFO] Finished at: 2026-11-22T18:50:58-08:00
+[INFO] ------------------------------------------------------------------------

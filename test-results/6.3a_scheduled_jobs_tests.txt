@@ -1,0 +1,22 @@
+PS C:\Users\rauet\Desktop\Coding\csc190\LTNTheWorld> .\lovethyneighbor-backend\mvnw.cmd -f lovethyneighbor-backend\pom.xml test "-Dtest=ListingExpiryServiceTest,PickupReminderServiceTest,FoodClaimServiceTest"
+
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.codecraft.lovethyneighbor.FoodClaimServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.927 s -- in com.codecraft.lovethyneighbor.FoodClaimServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.ListingExpiryServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in com.codecraft.lovethyneighbor.ListingExpiryServiceTest
+[INFO] Running com.codecraft.lovethyneighbor.PickupReminderServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in com.codecraft.lovethyneighbor.PickupReminderServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.181 s
+[INFO] Finished at: 2026-11-22T18:45:14-08:00
+[INFO] ------------------------------------------------------------------------
