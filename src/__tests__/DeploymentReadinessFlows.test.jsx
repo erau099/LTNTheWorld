@@ -43,7 +43,7 @@ describe("Deployment Readiness End-to-End UI & Failure-Mode Flows", () => {
   // 1. AUTH FLOWS: SIGNUP, VERIFY, FORGOT/RESET, LOGIN + FAILURE MODES
   // =========================================================================
   describe("Auth lifecycle & failure modes", () => {
-    it("Signup requires waiver scroll, handles 400 & network errors, and navigates on 200", async () => {
+    it("Signup requires waiver acceptance, handles 400 & network errors, and navigates on 200", async () => {
       const user = userEvent.setup();
       global.fetch
         .mockResolvedValueOnce({ ok: false, status: 400, text: async () => "User already exists" })
@@ -68,17 +68,13 @@ describe("Deployment Readiness End-to-End UI & Failure-Mode Flows", () => {
       await user.type(screen.getByPlaceholderText("Phone Number"), "555-123-4567");
       await user.selectOptions(screen.getByRole("combobox"), "donor");
 
-      // Open liability waiver modal and scroll to bottom to enable Accept
+      // Continue stays disabled until the user opens the liability waiver modal and clicks Accept
+      expect(screen.getByRole("button", { name: /Continue/i })).toBeDisabled();
       await user.click(screen.getByText(/liability waiver/i));
       const acceptBtn = screen.getByRole("button", { name: /^Accept$/i });
-      expect(acceptBtn).toBeDisabled();
-      const waiverBox = document.querySelector(".waiver_box");
-      Object.defineProperty(waiverBox, "scrollHeight", { value: 200, configurable: true });
-      Object.defineProperty(waiverBox, "clientHeight", { value: 200, configurable: true });
-      Object.defineProperty(waiverBox, "scrollTop", { value: 10, configurable: true });
-      fireEvent.scroll(waiverBox);
       expect(acceptBtn).not.toBeDisabled();
       await user.click(acceptBtn);
+      expect(screen.getByRole("button", { name: /Continue/i })).not.toBeDisabled();
 
       // 1st attempt: 400 duplicate email
       await user.click(screen.getByRole("button", { name: /Continue/i }));
