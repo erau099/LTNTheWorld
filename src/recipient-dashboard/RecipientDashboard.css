@@ -104,7 +104,7 @@
 .food-image {
   height: 158px;
 
-  background-image: url("/src/assets/donut.jpg");
+  background-image: url("../assets/donut.jpg");
   background-size: cover;
   background-position: center;
 
@@ -175,7 +175,7 @@
   height: 350px;
   width: 500px;
 
-  background-image: url("/src/assets/donut.jpg");
+  background-image: url("../assets/donut.jpg");
   background-size: cover;
   background-position: center;
   position: relative;
@@ -363,4 +363,46 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.recipient-dashboard .food-popup-report-btn {
+  border: 1px solid #f5c2c7;
+  background: #fff5f5;
+  color: #9b1c1c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.recipient-dashboard .food-popup-report-form {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recipient-dashboard .food-popup-report-form select,
+.recipient-dashboard .food-popup-report-form textarea {
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.recipient-dashboard .food-popup-report-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.recipient-dashboard .food-popup-report-feedback {
+  margin-top: 10px;
+  color: #166534;
+  font-size: 0.9rem;
+  font-weight: 600;
 }

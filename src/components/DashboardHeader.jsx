@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DonorNotificationBell from "../donor-dashboard/DonorNotificationBell";
 import RecipientNotificationBell from "../recipient-dashboard/RecipientNotificationBell";
-import { logout } from "../utils/auth";
+import { logout as legacyLogout } from "../utils/auth";
+import { useAuth } from "../context/AuthContext";
 import "../index.css";
 import "../App.css";
 import "../CDashboard.css";
@@ -11,6 +12,7 @@ import "../CDashboard.css";
 export default function DashboardHeader({ role: roleOverride, onDonorNotification, userLocation }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const auth = useAuth();
   const [account, setAccount] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -62,7 +64,11 @@ export default function DashboardHeader({ role: roleOverride, onDonorNotificatio
 
   const handleSignOut = async () => {
     setDropdownOpen(false);
-    await logout();
+    if (auth?.logout) {
+      await auth.logout();
+    } else {
+      await legacyLogout();
+    }
     navigate("/");
   };
 

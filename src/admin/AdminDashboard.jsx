@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./AdminDashboard.css";
 import AdminHeader from "./AdminHeader";
 import AdminUserManagement from "./AdminUserManagement";
 import AdminFoodListings from "./AdminFoodListings";
+import DynoUpgradeModal from "./DynoUpgradeModal";
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("users"); // 'users' or 'food'
@@ -14,7 +15,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     let isMounted = true;
-    fetch("/api/admin/stats")
+    fetch("/api/admin/stats", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((stats) => {
         if (isMounted && stats) {
@@ -35,19 +36,19 @@ function AdminDashboard() {
     };
   }, []);
 
-  const handleUserCountChange = (count) => {
+  const handleUserCountChange = useCallback((count) => {
     setDashboardStats((prev) => ({
       ...prev,
       totalUsers: count,
     }));
-  };
+  }, []);
 
-  const handleListingCountChange = (count) => {
+  const handleListingCountChange = useCallback((count) => {
     setDashboardStats((prev) => ({
       ...prev,
       activeListings: count,
     }));
-  };
+  }, []);
 
   return (
     <div className="admin-dashboard">
@@ -118,6 +119,8 @@ function AdminDashboard() {
           <AdminFoodListings onListingCountChange={handleListingCountChange} />
         )}
       </main>
+
+      <DynoUpgradeModal />
     </div>
   );
 }

@@ -7,9 +7,7 @@ function Review() {
 
   useEffect(() => {
     fetch('/api/reviews/my-reviews', {
-      headers: {
-        credentials: "include",
-      },
+      credentials: 'include',
     })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)

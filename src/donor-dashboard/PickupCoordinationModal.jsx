@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./PickupCoordinationModal.css";
 
-function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
+function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated, onListingDeleted }) {
   const [listing, setListing] = useState(food || null);
   const [loading, setLoading] = useState(!food && !!foodId);
   const [error, setError] = useState(null);
@@ -11,7 +11,7 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
   useEffect(() => {
     if (!listing && foodId) {
       setLoading(true);
-      fetch(`/api/food/${foodId}`)
+      fetch(`/api/food/${foodId}`, { credentials: "include" })
         .then((res) => {
           if (!res.ok) throw new Error("Failed to load food details");
           return res.json();
@@ -37,6 +37,7 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
       const token = localStorage.getItem("token");
       const res = await fetch(`/api/food/${listing.id}/confirm-pickup`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -69,6 +70,7 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
       const token = localStorage.getItem("token");
       const res = await fetch(`/api/orders/food/${listing.id}/decline-request`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
@@ -96,6 +98,7 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
       const token = localStorage.getItem("token");
       const res = await fetch(`/api/food/${listing.id}/complete-pickup`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -113,6 +116,37 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
     } catch (err) {
       console.error(err);
       setError(err.message || "Unable to complete pickup.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const canRemoveListing = ["ACTIVE", "EXPIRED", "UNAVAILABLE", "ON_HOLD"].includes(currentStatus);
+
+  const handleDeleteListing = async () => {
+    if (!listing || actionLoading) return;
+    if (!window.confirm("Remove this listing? To make changes, you can post a new listing after removing it.")) {
+      return;
+    }
+    setActionLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/food/${listing.id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || "Failed to remove listing");
+      }
+      if (onListingDeleted) onListingDeleted(listing.id);
+      if (onClose) onClose();
+    } catch (err) {
+      setError(err.message || "Unable to remove listing.");
     } finally {
       setActionLoading(false);
     }
@@ -229,6 +263,17 @@ function PickupCoordinationModal({ food, foodId, onClose, onStatusUpdated }) {
                 >
                   Close
                 </button>
+
+                {canRemoveListing && (
+                  <button
+                    type="button"
+                    className="pickup-action-btn pickup-btn-delete"
+                    onClick={handleDeleteListing}
+                    disabled={actionLoading}
+                  >
+                    {actionLoading ? "Removing..." : "Remove Listing"}
+                  </button>
+                )}
 
                 {currentStatus === "CLAIMED" && (
                   <button

@@ -17,7 +17,24 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<?> getUserById(@PathVariable UUID id, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        boolean isAdmin = authentication.getAuthorities() != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equalsIgnoreCase(a.getAuthority()));
+        boolean isSelf;
+        try {
+            isSelf = id.equals(UUID.fromString(authentication.getName()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).build();
+        }
+
+        if (!isSelf && !isAdmin) {
+            return ResponseEntity.status(403).body("Access denied.");
+        }
+
         Optional<User> user = userRepository.findById(id);
 
         if (user.isPresent()) {

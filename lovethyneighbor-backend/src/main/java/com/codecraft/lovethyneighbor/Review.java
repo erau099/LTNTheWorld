@@ -3,6 +3,7 @@ package com.codecraft.lovethyneighbor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,10 +16,16 @@ public class Review {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({
+            "email", "phoneNumber", "dateOfBirth", "allergies",
+            "password", "resetTokenHash", "resetTokenExpiration",
+            "verificationTokenHash", "verificationTokenExpiration"
+    })
     private User user;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "food_id")
+    @JsonIgnoreProperties({"address", "photos", "user", "claimedByUserId"})
     private Food food;
 
     @Column(nullable = false)
@@ -27,8 +34,15 @@ public class Review {
     @Column(length = 1000)
     private String comment;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
     public UUID getId() {
         return id;

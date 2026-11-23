@@ -1,7 +1,6 @@
 import DashboardHeader from "../components/DashboardHeader";
 
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import "../index.css";
 import "../App.css";
@@ -18,18 +17,9 @@ function normalizeAllergen(name) {
 }
 
 function RecipientDashboard() {
-	const navigate = useNavigate();
-
-	// Tracks if the page is scrolled so the header can change style.
-	const [scrolled, setScrolled] = useState(false);
-
-	// Controls the gear dropdown menu.
-	const [dropdownOpen, setDropdownOpen] = useState(false);
-	const dropdownRef = useRef(null);
-
 	// Set VITE_USE_MOCK_FOOD=true in a local .env.local to test without PostgreSQL.
 	// Mock mode is explicit; API failures never masquerade as successful data.
-	const useMockFood = import.meta.env.VITE_USE_MOCK_FOOD === "false";
+	const useMockFood = import.meta.env.VITE_USE_MOCK_FOOD === "true";
 	const [listings, setListings] = useState([]);
 	const [listingsLoading, setListingsLoading] = useState(true);
 	const [listingsError, setListingsError] = useState("");
@@ -178,26 +168,53 @@ function RecipientDashboard() {
 		}
 	};
 
-	useEffect(() => {
-		const onScroll = () => setScrolled(window.scrollY > 10);
-
-		function handleClickOut(e) {
-			if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-				setDropdownOpen(false);
-			}
-		}
-
-		window.addEventListener("scroll", onScroll);
-		document.addEventListener("mousedown", handleClickOut);
-
-		return () => {
-			window.removeEventListener("scroll", onScroll);
-			document.removeEventListener("mousedown", handleClickOut);
-		};
-	}, []);
-
 	// Handles the cards to be able to be shown when clicked
 	const [selectListing, setSelectListing] = useState(false);
+	const [reportOpen, setReportOpen] = useState(false);
+	const [reportReason, setReportReason] = useState("");
+	const [reportDescription, setReportDescription] = useState("");
+	const [reportSubmitting, setReportSubmitting] = useState(false);
+	const [reportFeedback, setReportFeedback] = useState("");
+
+	const closeListingModal = () => {
+		setSelectListing(false);
+		setReportOpen(false);
+		setReportReason("");
+		setReportDescription("");
+		setReportFeedback("");
+	};
+
+	const handleSubmitReport = async (e) => {
+		e.preventDefault();
+		if (!selectListing?.id || !reportReason.trim()) return;
+		setReportSubmitting(true);
+		setReportFeedback("");
+		try {
+			const res = await apiFetch("/api/reports", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					reportType: "LISTING",
+					foodListingId: selectListing.id,
+					reason: reportReason.trim(),
+					description: reportDescription.trim() || undefined,
+				}),
+			});
+			if (res.ok) {
+				setReportFeedback("Report submitted for administrator review.");
+				setReportOpen(false);
+				setReportReason("");
+				setReportDescription("");
+			} else {
+				const msg = await res.text();
+				setReportFeedback(msg || "Unable to submit report.");
+			}
+		} catch {
+			setReportFeedback("Could not reach the server to submit report.");
+		} finally {
+			setReportSubmitting(false);
+		}
+	};
 	// Handles the filtering for the listings
 	const [selectFiltering, setSelectedFiltering] = useState("all");
 
@@ -266,7 +283,7 @@ function RecipientDashboard() {
 	const handleListingClick = async (item) => {
 		if (!useMockFood) {
 			try {
-				const response = await fetch(`/api/food/${item.id}`);
+				const response = await fetch(`/api/food/${item.id}`, { credentials: "include" });
 				if (response.ok) {
 					const latestListing = await response.json();
 
@@ -436,7 +453,7 @@ function RecipientDashboard() {
 					{selectListing && (
 						<div
 							className="food_card_popup"
-							onClick={() => setSelectListing(false)}
+							onClick={closeListingModal}
 						>
 							<div
 								className="food_popup_background"
@@ -457,7 +474,7 @@ function RecipientDashboard() {
 										type="button"
 										className="food-popup-close"
 										aria-label="Close food details"
-										onClick={() => setSelectListing(false)}
+										onClick={closeListingModal}
 									>
 										×
 									</button>
@@ -559,16 +576,62 @@ function RecipientDashboard() {
 											)}
 										</div>
 									</div>
+
+									{reportFeedback && (
+										<p className="food-popup-report-feedback" role="status">
+											{reportFeedback}
+										</p>
+									)}
+
+									{reportOpen && (
+										<form className="food-popup-report-form" onSubmit={handleSubmitReport}>
+											<label htmlFor="report-reason">Reason for report</label>
+											<select
+												id="report-reason"
+												value={reportReason}
+												onChange={(e) => setReportReason(e.target.value)}
+												required
+											>
+												<option value="">Select a reason...</option>
+												<option value="Expired or unsafe food">Expired or unsafe food</option>
+												<option value="Misleading description or photos">Misleading description or photos</option>
+												<option value="Inappropriate content">Inappropriate content</option>
+												<option value="Spam or duplicate listing">Spam or duplicate listing</option>
+											</select>
+											<textarea
+												rows={2}
+												placeholder="Optional details for moderators..."
+												value={reportDescription}
+												onChange={(e) => setReportDescription(e.target.value)}
+											/>
+											<div className="food-popup-report-buttons">
+												<button type="button" onClick={() => setReportOpen(false)}>Cancel</button>
+												<button type="submit" disabled={reportSubmitting || !reportReason}>
+													{reportSubmitting ? "Submitting..." : "Submit Report"}
+												</button>
+											</div>
+										</form>
+									)}
 								</div>
 
 								<div className="food-popup-actions">
 									<button
 										type="button"
 										className="food-popup-back"
-										onClick={() => setSelectListing(false)}
+										onClick={closeListingModal}
 									>
 										Back to listings
 									</button>
+
+									{!useMockFood && (
+										<button
+											type="button"
+											className="food-popup-report-btn"
+											onClick={() => setReportOpen((prev) => !prev)}
+										>
+											Report Listing
+										</button>
+									)}
 
 									<button
 										type="button"

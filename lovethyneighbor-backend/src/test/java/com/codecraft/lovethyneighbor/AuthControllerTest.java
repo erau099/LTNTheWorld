@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -228,5 +229,23 @@ class AuthControllerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertTrue(response.getBody().toString().contains("Verification link has expired"));
+    }
+
+    @Test
+    @DisplayName("Forgot Password - Uses configured frontendUrl without duplicate slashes")
+    void testForgotPasswordUsesConfiguredFrontendUrl() {
+        ReflectionTestUtils.setField(authController, "frontendUrl", "https://ltn-the-world.vercel.app/");
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail("jane@example.com");
+
+        given(userRepository.findByEmail("jane@example.com")).willReturn(Optional.of(sampleUser));
+
+        ResponseEntity<?> response = authController.forgotPassword(request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(emailService).sendPasswordResetEmail(
+                eq("jane@example.com"),
+                argThat(link -> link.startsWith("https://ltn-the-world.vercel.app/#/reset-password?token="))
+        );
     }
 }

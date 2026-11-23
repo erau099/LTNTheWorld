@@ -11,27 +11,32 @@ function formatPickupTime(dateTime) {
     }
 }
 
-function PickupNotificationDetails({food, foodId, onClose, onStatusChange, notification}) {
-    const [listing, setListing] = useState(null);
-    const [loading, setLoading] = useState(true);
+function PickupNotificationDetails({food, foodId, onClose}) {
+    const [listing, setListing] = useState(food || null);
+    const [loading, setLoading] = useState(!food && Boolean(foodId));
     const [error, setError] = useState(null);
-    const [actionLoading, setActionLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState(null);
 
     useEffect(() => {
         if (!listing && foodId) {
-            setLoading(true);
-            fetch(`/api/food/${foodId}`)
+            let active = true;
+            fetch(`/api/food/${foodId}`, { credentials: "include" })
                 .then((res) => {
                     if (!res.ok) throw new Error("Failed to fetch food details");
                     return res.json();
                 })
-                .then((data) => setListing(data))
+                .then((data) => {
+                    if (active) setListing(data);
+                })
                 .catch((err) => {
                     console.error(err);
-                    setError("Failed to load food listing details.");
+                    if (active) setError("Failed to load food listing details.");
                 })
-                .finally(() => setLoading(false));
+                .finally(() => {
+                    if (active) setLoading(false);
+                });
+            return () => {
+                active = false;
+            };
         }
     }, [foodId, listing]);
 
@@ -49,7 +54,6 @@ function PickupNotificationDetails({food, foodId, onClose, onStatusChange, notif
 
                 <div className="pickup-modal-body">
                     {error && <div className="pickup-error-msg" role="alert">{error}</div>}
-                    {successMessage && <div className="pickup-success-msg" role="alert">{successMessage}</div>}
                 
                     {loading ? (
                         <div>Loading details...</div>

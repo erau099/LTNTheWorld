@@ -24,11 +24,11 @@ public class EncryptedLocalDateConverter implements AttributeConverter<LocalDate
 
     private final SecretKeySpec key;
 
-    public EncryptedLocalDateConverter(@Value("${ENCRYPTION_KEY}") String base64Key) {
+    public EncryptedLocalDateConverter(@Value("${app.security.encryption-key:${ENCRYPTION_KEY:}}") String base64Key) {
         if (base64Key == null || base64Key.isBlank()) {
             throw new IllegalStateException("ENCRYPTION_KEY environment variable is not set");
         }
-        byte[] decodedKey = Base64.getDecoder().decode(base64Key);
+        byte[] decodedKey = Base64.getDecoder().decode(base64Key.trim());
         this.key = new SecretKeySpec(decodedKey, "AES");
     }
 

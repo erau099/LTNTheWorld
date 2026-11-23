@@ -33,7 +33,7 @@ function ForgotPassword() {
             } else {
                 setError(text || "Unable to send reset link.");
             }
-        } catch (err) {
+        } catch {
             setError("Could not connect to the server.");
         }
 

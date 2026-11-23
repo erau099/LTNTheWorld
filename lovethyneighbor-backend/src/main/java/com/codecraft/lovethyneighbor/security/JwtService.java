@@ -19,8 +19,11 @@ public class JwtService {
 
     private final SecretKey signingKey;
 
-    public JwtService(@Value("${JWT_SECRET}") String base64Secret) {
-        byte[] decodedKey = Base64.getDecoder().decode(base64Secret);
+    public JwtService(@Value("${app.security.jwt-secret:${JWT_SECRET:}}") String base64Secret) {
+        if (base64Secret == null || base64Secret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET environment variable is not set");
+        }
+        byte[] decodedKey = Base64.getDecoder().decode(base64Secret.trim());
         this.signingKey = Keys.hmacShaKeyFor(decodedKey);
     }
 

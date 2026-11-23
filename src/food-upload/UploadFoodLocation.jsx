@@ -21,6 +21,22 @@ function UploadFoodLocation() {
     const autocompleteRef = useRef(null);
     const debounceTimerRef = useRef(null);
 
+    // Close autocomplete on click outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (autocompleteRef.current && !autocompleteRef.current.contains(e.target)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, []);
+
     // Details must be filled in first
     if (detailsError(draft)) {
         return <Navigate to="/UploadFoodDetails" replace />;
@@ -118,17 +134,6 @@ function UploadFoodLocation() {
         setShowSuggestions(false);
         setError("");
     };
-
-    // Close autocomplete on click outside
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (autocompleteRef.current && !autocompleteRef.current.contains(e.target)) {
-                setShowSuggestions(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

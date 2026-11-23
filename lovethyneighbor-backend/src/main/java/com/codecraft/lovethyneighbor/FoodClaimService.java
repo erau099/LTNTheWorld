@@ -25,6 +25,9 @@ public class FoodClaimService {
     private final Duration cooldown;
     private final Clock clock;
 
+    @Autowired(required = false)
+    private FcmPushService fcmPushService;
+
     @Autowired
     public FoodClaimService(
             FoodRepository foodRepository,
@@ -64,7 +67,7 @@ public class FoodClaimService {
 
     @Transactional
     public Claim claim(Long foodId, UUID recipientId) {
-        Food food = foodRepository.findById(foodId)
+        Food food = FoodRepository.findByIdForMutation(foodRepository, foodId)
                 .orElseThrow(() -> new ClaimException(HttpStatus.NOT_FOUND, "Food listing not found."));
 
         // DT-88: Explain when a listing is temporarily on hold.
@@ -114,13 +117,16 @@ public class FoodClaimService {
         Food savedFood = foodRepository.save(food);
 
         // Notify donor (DT-73)
-        notificationRepository.save(new Notification(
+        Notification donorNotif = notificationRepository.save(new Notification(
                 food.getUserId(),
                 food.getId(),
                 "REQUEST_RECEIVED",
                 "New Request for " + food.getFoodItem(),
                 "A recipient has requested your listing '" + food.getFoodItem() + "'. Click to coordinate pickup."
         ));
+        if (fcmPushService != null) {
+            fcmPushService.sendToUser(food.getUserId(), donorNotif.getTitle(), donorNotif.getMessage());
+        }
 
         return new Claim(savedFood, savedOrder);
     }

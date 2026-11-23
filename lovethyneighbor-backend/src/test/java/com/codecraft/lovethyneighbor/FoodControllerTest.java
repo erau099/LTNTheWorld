@@ -217,7 +217,7 @@ class FoodControllerTest {
         given(foodRepository.findById(50L)).willReturn(Optional.of(sampleFood));
 
         // Act
-        ResponseEntity<?> response = foodController.getFoodById(50L);
+        ResponseEntity<?> response = foodController.getFoodById(50L, null);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -231,7 +231,7 @@ class FoodControllerTest {
         given(foodRepository.findById(999L)).willReturn(Optional.empty());
 
         // Act
-        ResponseEntity<?> response = foodController.getFoodById(999L);
+        ResponseEntity<?> response = foodController.getFoodById(999L, null);
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -298,5 +298,104 @@ class FoodControllerTest {
         assertNotNull(responseList);
         assertEquals("Unclaimed", responseList.get(0).getRecipientName());
         assertNull(responseList.get(0).getReviewRating());
+    }
+
+    // ==========================================
+    // GET /api/food/{id} (Progressive Address Disclosure)
+    // ==========================================
+
+    @Test
+    @DisplayName("GET /api/food/{id} - Masks street address for unauthenticated callers")
+    void shouldMaskAddressForUnauthenticatedCaller() {
+        sampleFood.setAddress("123 Secret St, Sacramento, CA 95819");
+        sampleFood.setStatus("ACTIVE");
+        given(foodRepository.findById(50L)).willReturn(Optional.of(sampleFood));
+
+        ResponseEntity<?> response = foodController.getFoodById(50L, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Food body = (Food) response.getBody();
+        assertNotNull(body);
+        assertEquals("Sacramento, CA 95819", body.getAddress());
+        assertEquals("Sacramento, CA 95819", body.getApproximateLocation());
+    }
+
+    @Test
+    @DisplayName("GET /api/food/{id} - Reveals full street address to SCHEDULED claimant")
+    void shouldRevealAddressToScheduledClaimant() {
+        sampleFood.setAddress("123 Secret St, Sacramento, CA 95819");
+        sampleFood.setStatus("SCHEDULED");
+        given(authentication.getName()).willReturn(recipientId.toString());
+        given(foodRepository.findById(50L)).willReturn(Optional.of(sampleFood));
+
+        ResponseEntity<?> response = foodController.getFoodById(50L, authentication);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Food body = (Food) response.getBody();
+        assertNotNull(body);
+        assertEquals("123 Secret St, Sacramento, CA 95819", body.getAddress());
+        assertEquals("Sacramento, CA 95819", body.getApproximateLocation());
+    }
+
+    @Test
+    @DisplayName("GET /api/food/{id} - Masks street address for CLAIMED (unapproved) claimant")
+    void shouldMaskAddressForUnapprovedClaimant() {
+        sampleFood.setAddress("123 Secret St, Sacramento, CA 95819");
+        sampleFood.setStatus("CLAIMED");
+        given(authentication.getName()).willReturn(recipientId.toString());
+        given(foodRepository.findById(50L)).willReturn(Optional.of(sampleFood));
+
+        ResponseEntity<?> response = foodController.getFoodById(50L, authentication);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Food body = (Food) response.getBody();
+        assertNotNull(body);
+        assertEquals("Sacramento, CA 95819", body.getAddress());
+    }
+
+    // ==========================================
+    // DELETE /api/food/{id} (Donor Remove Unclaimed Listing)
+    // ==========================================
+
+    @Test
+    @DisplayName("DELETE /api/food/{id} - Donor can remove own unclaimed ACTIVE listing")
+    void donorCanDeleteOwnUnclaimedListing() {
+        sampleFood.setStatus("ACTIVE");
+        sampleFood.setClaimedByUserId(null);
+        given(authentication.getName()).willReturn(donorId.toString());
+        given(foodRepository.findById(50L)).willReturn(Optional.of(sampleFood));
+
+        ResponseEntity<?> response = foodController.deleteFoodListing(50L, authentication);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(foodRepository).delete(sampleFood);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/food/{id} - Rejects deletion of claimed listing with 409")
+    void donorCannotDeleteClaimedListing() {
+        sampleFood.setStatus("CLAIMED");
+        sampleFood.setClaimedByUserId(recipientId);
+        given(authentication.getName()).willReturn(donorId.toString());
+        given(foodRepository.findById(50L)).willReturn(Optional.of(sampleFood));
+
+        ResponseEntity<?> response = foodController.deleteFoodListing(50L, authentication);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        verify(foodRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/food/{id} - Rejects deletion by non-owner with 403")
+    void nonOwnerCannotDeleteListing() {
+        sampleFood.setStatus("ACTIVE");
+        sampleFood.setClaimedByUserId(null);
+        given(authentication.getName()).willReturn(recipientId.toString());
+        given(foodRepository.findById(50L)).willReturn(Optional.of(sampleFood));
+
+        ResponseEntity<?> response = foodController.deleteFoodListing(50L, authentication);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(foodRepository, never()).delete(any());
     }
 }

@@ -23,6 +23,7 @@ function AdminLogin() {
     try {
       const response = await fetch("/api/admin/auth/login", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
@@ -30,6 +31,7 @@ function AdminLogin() {
       if (response.ok) {
         const result = await response.json();
         if (result.status === "success" && result.role === "ADMIN") {
+          sessionStorage.removeItem("ltn_dyno_upgrade_dismissed");
           setUser({ name: result.name, role: result.role, username });
           setSuccessMessage("✅ Authenticated successfully! Redirecting to Admin Dashboard...");
           const destination = location.state?.from?.pathname || "/admin-dashboard";

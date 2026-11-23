@@ -30,9 +30,17 @@ function DonorNotificationBell({ onSelectNotification }) {
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) {
+        fetchNotifications();
+      }
+    });
     const interval = setInterval(fetchNotifications, 30000); // 30s background sync
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [fetchNotifications]);
 
   useEffect(() => {

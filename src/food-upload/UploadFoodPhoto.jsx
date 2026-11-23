@@ -72,7 +72,8 @@ function UploadFoodPhoto() {
                 clearFoodDraft();
                 navigate("/FoodSubmission", { state: { listing } });
             } else if (response.status === 403) {
-                setError("Only donor accounts can post food listings.");
+                const message = await response.text().catch(() => "");
+                setError(message || "Only donor accounts can post food listings.");
             } else {
                 const message = await response.text();
                 setError(message || "Could not post your listing. Please try again.");

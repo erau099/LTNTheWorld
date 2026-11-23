@@ -14,6 +14,9 @@ public class PickupReminderService {
     private final FoodRepository foodRepository;
     private final NotificationRepository notificationRepository;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private FcmPushService fcmPushService;
+
     public PickupReminderService(
             FoodRepository foodRepository,
             NotificationRepository notificationRepository) {
@@ -28,9 +31,18 @@ public class PickupReminderService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime reminderLimit = now.plusMinutes(30);
 
-        List<Food> foods = foodRepository.findAll();
+        List<Food> foods = foodRepository.findByClaimedByUserIdIsNotNullAndPickupTimeBetween(now, reminderLimit);
 
         for (Food food : foods) {
+
+            String status = food.getStatus();
+            if ("COMPLETED".equalsIgnoreCase(status)
+                    || "EXPIRED".equalsIgnoreCase(status)
+                    || "UNAVAILABLE".equalsIgnoreCase(status)
+                    || "ARCHIVED".equalsIgnoreCase(status)
+                    || "REMOVED_BY_ADMIN".equalsIgnoreCase(status)) {
+                continue;
+            }
 
             if (food.getPickupTime() == null) {
                 continue;
@@ -86,6 +98,9 @@ public class PickupReminderService {
         );
 
         notificationRepository.save(notification);
+        if (fcmPushService != null) {
+            fcmPushService.sendToUser(recipientId, notification.getTitle(), notification.getMessage());
+        }
     }
 
     private void createDonorReminder(Food food) {
@@ -121,6 +136,9 @@ public class PickupReminderService {
         );
 
         notificationRepository.save(notification);
+        if (fcmPushService != null) {
+            fcmPushService.sendToUser(donorId, notification.getTitle(), notification.getMessage());
+        }
     }
 
     private String formatPickupTime(LocalDateTime pickupTime) {

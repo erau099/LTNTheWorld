@@ -109,4 +109,33 @@ describe('PickupCoordinationModal Component', () => {
     expect(screen.getByRole('button', { name: /Mark Pickup as Completed/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Confirm Pickup Schedule/i })).not.toBeInTheDocument();
   });
+
+  it('calls DELETE /api/food/{id} when donor removes an unclaimed ACTIVE listing', async () => {
+    const user = userEvent.setup();
+    const mockOnDeleted = vi.fn();
+    const mockOnClose = vi.fn();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    global.fetch.mockResolvedValueOnce({ ok: true });
+
+    render(
+      <PickupCoordinationModal
+        food={{ ...claimedFood, status: 'ACTIVE' }}
+        onClose={mockOnClose}
+        onStatusUpdated={vi.fn()}
+        onListingDeleted={mockOnDeleted}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: /Remove Listing/i }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/food/42',
+        expect.objectContaining({ method: 'DELETE', credentials: 'include' })
+      );
+      expect(mockOnDeleted).toHaveBeenCalledWith(42);
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
 });

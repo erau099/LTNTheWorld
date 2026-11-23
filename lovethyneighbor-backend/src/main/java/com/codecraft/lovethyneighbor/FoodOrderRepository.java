@@ -22,4 +22,7 @@ public interface FoodOrderRepository extends JpaRepository<FoodOrder, Long> {
     // A recipient's order(s) for one listing, used to keep order status in step with the pickup
     List<FoodOrder> findByFoodIdAndRecipientId(Long foodId, UUID recipientId);
 
+    // Remove historical cancelled orders before deleting an unclaimed food listing
+    void deleteByFoodId(Long foodId);
+
 }

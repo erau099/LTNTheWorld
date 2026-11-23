@@ -75,7 +75,7 @@ function ReceiverProfile() {
   });
 
   useEffect(() => {
-    fetch("/api/users/me")
+    fetch("/api/users/me", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
@@ -109,6 +109,7 @@ function ReceiverProfile() {
     try {
       const res = await fetch("/api/users/me", {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: form.firstName,

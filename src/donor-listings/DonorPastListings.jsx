@@ -48,6 +48,12 @@ function DonorPastListings() {
     setActiveCoordinationFood(updated);
   };
 
+  const handleListingDeleted = (deletedId) => {
+    setListings((prev) => prev.filter((l) => l.id !== deletedId));
+    setActiveCoordinationFood(null);
+    setActiveCoordinationFoodId(null);
+  };
+
   const filteredListings = listings.filter((listing) => {
     const matchesStatus =
       selectFiltering === "all" ||
@@ -158,6 +164,17 @@ function DonorPastListings() {
                     >
                       ★ {listing.reviewRating}/5 View
                     </button>
+                  ) : ["ACTIVE", "EXPIRED", "UNAVAILABLE", "ON_HOLD"].includes((listing.status || "ACTIVE").toUpperCase()) ? (
+                    <button
+                      className="view-review-btn"
+                      type="button"
+                      onClick={() => {
+                        setActiveCoordinationFood(listing);
+                        setActiveCoordinationFoodId(null);
+                      }}
+                    >
+                      Manage
+                    </button>
                   ) : (
                     <span className="no-review-label">—</span>
                   )}
@@ -208,6 +225,7 @@ function DonorPastListings() {
             setActiveCoordinationFoodId(null);
           }}
           onStatusUpdated={handleStatusUpdated}
+          onListingDeleted={handleListingDeleted}
         />
       )}
     </div>

@@ -120,21 +120,26 @@ function RecipientNotificationBell({ onSelectNotification, userLocation }) {
 
 	const visibleNotifications = showHistory ? allNotfications : allNotfications.slice(0, 5);
 
+	const userLat = userLocation?.lat;
+	const userLng = userLocation?.lng;
+
 	useEffect(() => {
-		if (!userLocation) return;
+		if (userLat == null || userLng == null) return;
 		const controller = new AbortController();
 		let checking = false;
 		let cancelled = false;
 		seenFoodIds.current = new Set();
 		nearbyInitialized.current = false;
-		setNearbyAlerts([]);
+		Promise.resolve().then(() => {
+			if (!cancelled) setNearbyAlerts([]);
+		});
 		const loadNearbyFood = async() => {
 			if (checking || cancelled) return;
 			checking = true;
 			try {
 				const params = new URLSearchParams({
-        			lat: String(userLocation.lat),
-        			lng: String(userLocation.lng),
+        			lat: String(userLat),
+        			lng: String(userLng),
         			radiusMiles: "10",
       			});
 				const response = await fetch(`/api/food?${params.toString()}`, {
@@ -204,7 +209,7 @@ function RecipientNotificationBell({ onSelectNotification, userLocation }) {
     		clearInterval(interval);
 			controller.abort();
 		};
-	}, [userLocation?.lat, userLocation?.lng]);
+	}, [userLat, userLng]);
 
 	return (
 		<div className="recipient-notification-bell" ref={wrapperRef}>

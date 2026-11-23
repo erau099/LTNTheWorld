@@ -15,7 +15,7 @@ function AdminFoodListings({ onListingCountChange }) {
     setError(null);
 
     try {
-      const response = await fetch("/api/admin/food/active");
+      const response = await fetch("/api/admin/food/active", { credentials: "include" });
 
       if (!response.ok) {
         throw new Error(`Server returned HTTP ${response.status}`);
@@ -66,6 +66,7 @@ function AdminFoodListings({ onListingCountChange }) {
         `/api/admin/food/${selectedListing.id}/status`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             status: "REMOVED_BY_ADMIN",

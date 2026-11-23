@@ -15,7 +15,7 @@ function AdminUserManagement({ onUserCountChange }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/users");
+      const response = await fetch("/api/admin/users", { credentials: "include" });
       if (!response.ok) {
         throw new Error(`Server returned HTTP ${response.status}`);
       }
@@ -51,6 +51,7 @@ function AdminUserManagement({ onUserCountChange }) {
     try {
       const response = await fetch(`/api/admin/users/${userId}/status`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
       });
@@ -90,6 +91,7 @@ function AdminUserManagement({ onUserCountChange }) {
     try {
       const response = await fetch(`/api/admin/users/${userId}/restrictions`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ canPostListings: nextCanPost }),
       });
